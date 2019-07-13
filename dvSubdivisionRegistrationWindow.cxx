@@ -1,0 +1,1021 @@
+#ifndef dvSubdivisionRegistrationWindow_cxx
+#define dvSubdivisionRegistrationWindow_cxx
+
+// Qt
+#include <QMessageBox>
+
+// VTK
+#include <vtkRenderWindow.h>
+#include <vtkImageMapToWindowLevelColors.h>
+#include <vtkCamera.h>
+#include <vtkTextProperty.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkMatrix4x4.h>
+#include <vtkDataSetMapper.h>
+#include <vtkTransformFilter.h>
+#include <vtkProbeFilter.h>
+
+// VNL
+#include <vnl/vnl_cross.h>
+#include <vnl/vnl_quaternion.h>
+
+// Standard
+#include <iostream>
+#include <thread>
+
+// Custom
+#include <dvGetVTKTransformationMatrixFromITKImage.h>
+#include <dvGetPointsFromITKImage.h>
+#include <dvSubdivisionRegistrationWindow.h>
+
+namespace dv
+{
+
+/***************
+ * CONSTRUCTOR *
+ ***************/
+
+SubdivisionRegistrationWindow
+::SubdivisionRegistrationWindow()
+{
+  this->renderer = vtkSmartPointer< vtkRenderer >::New();
+  this->renderer->SetBackground(1.0, 1.0, 1.0);
+};
+
+/*********
+ * SETUP *
+ *********/
+
+void
+SubdivisionRegistrationWindow
+::SetupImageData(const std::string &fileName)
+{
+
+  // Error Checking
+
+  if (this->ImageDataHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupImageData() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  this->itkReader = TImageReader::New();
+  this->itkReader->SetFileName( fileName );
+
+  this->itkReader->Update();
+
+  this->itk2vtk = TITK2VTK::New();
+  this->itk2vtk->SetInput( this->itkReader->GetOutput() );
+  this->itk2vtk->Update();
+
+  // Set Flag
+
+  this->ImageDataHasBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupImageInformation()
+{
+  // Error Checking
+
+  if (this->ImageInformationHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupImageInformation() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  const auto fMat = vtkSmartPointer<vtkMatrix4x4>::New();
+  const auto bMat = vtkSmartPointer<vtkMatrix4x4>::New();
+
+  GetVTKTransformationMatrixFromITKImage<TImage>( this->itkReader->GetOutput(), fMat);
+
+  this->fTrans = vtkSmartPointer<vtkTransform>::New();
+
+  this->fTrans->SetMatrix(  fMat );
+
+  GetPointsFromITKImage<TImage>( this->itkReader->GetOutput(),
+                                 this->origin,
+                                 this->point1,
+                                 this->point2 );
+  // Set Flag
+
+  this->ImageInformationHasBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupImageVolume()
+{
+
+  // Error Checking
+
+  if (this->ImageVolumeHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupImageVolume() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  const auto volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+  volumeMapper->SetInputData( this->itk2vtk->GetOutput() );
+ 
+  this->volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+ 
+  this->volumeActor = vtkSmartPointer<vtkVolume>::New();
+  this->volumeActor->SetMapper(volumeMapper);
+  this->volumeActor->SetProperty(volumeProperty);
+ 
+  this->volumeActor->SetUserMatrix(this->fTrans->GetMatrix());
+  this->volumeActor->SetPosition(-this->fTrans->GetMatrix()->GetElement(0,3),
+                                 -this->fTrans->GetMatrix()->GetElement(1,3),
+                                 -this->fTrans->GetMatrix()->GetElement(2,3));
+
+  this->renderer->AddActor( this->volumeActor );
+
+  // Set Flag
+
+  this->ImageVolumeHasBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupImagePlane(vtkRenderWindowInteractor* interactor)
+{
+
+  // Error Checking
+
+  if (this->ImagePlaneHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupImagePlanes() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  this->planeWidget = vtkSmartPointer<vtkPlaneWidget>::New();
+
+  this->planeWidget->SetInteractor(interactor);
+  this->planeWidget->SetOrigin(this->origin.GetVnlVector().data_block());
+  this->planeWidget->SetPoint1(this->point1.GetVnlVector().data_block());
+  this->planeWidget->SetPoint2(this->point2.GetVnlVector().data_block());
+  this->planeWidget->On();
+
+  // Define a model for the "image". Its geometry matches the implicit
+  // sphere used to clip the isosurface
+  this->planeSource = vtkSmartPointer<vtkPlaneSource>::New();
+  this->planeSource->SetOrigin(origin.GetVnlVector().data_block());
+  this->planeSource->SetPoint1(point1.GetVnlVector().data_block());
+  this->planeSource->SetPoint2(point2.GetVnlVector().data_block());
+  this->planeSource->SetResolution(this->PlaneSourceResolution, this->PlaneSourceResolution);
+
+  // This callback will update the plane source, keeping its position in sync
+  // with the widget.
+  this->callback = vtkSmartPointer<PlaneWidgetCallback>::New();
+  this->callback->window = this;
+  this->planeWidget->AddObserver( vtkCommand::InteractionEvent, this->callback );
+
+  // vtkProbeFilter will sample the values of the image data at the polydata positions.
+  const auto probe = vtkSmartPointer<vtkProbeFilter>::New();
+  probe->SetInputConnection( planeSource->GetOutputPort() );
+  probe->SetSourceData( this->itk2vtk->GetOutput() );
+  probe->Update();
+
+  // Define a suitable grayscale lut
+  const auto bwLut = vtkSmartPointer<vtkLookupTable>::New();
+  bwLut->SetTableRange(-1024, 2048);
+  bwLut->SetSaturationRange(0, 0);
+  bwLut->SetHueRange(0, 0);
+  bwLut->SetValueRange (.2, 1);
+  bwLut->Build();
+
+  // Create a mapper for the sampled image data.
+  const auto imageSliceMapper = vtkSmartPointer<vtkDataSetMapper>::New();
+  imageSliceMapper->SetInputConnection( probe->GetOutputPort());
+  imageSliceMapper->SetScalarRange(-1024, 2048);
+  imageSliceMapper->SetLookupTable(bwLut);
+
+  this->imageActor = vtkSmartPointer<vtkActor>::New();
+  this->imageActor->SetMapper(imageSliceMapper);
+
+  renderer->AddActor( this->imageActor );
+
+  // Set Flag
+
+  this->ImagePlaneHasBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupReslicePlanesSA(size_t n)
+{
+
+  // Error Checking
+
+  if (this->ReslicePlanesSAHaveBeenSetup)
+    {
+    std::cerr << "WARNING: SetupReslicePlanesSA() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  if (!this->ImagePlaneHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupImagePlanes() has not been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  this->reslicePlanesSA.resize(n);
+  this->resliceMappersSA.resize(n);
+  this->resliceActorsSA.resize(n);
+
+  // Short Axis
+  for (size_t i = 0; i < n; ++i)
+    {
+    this->reslicePlanesSA[i] = vtkPlaneSource::New();
+    this->resliceMappersSA[i] = vtkPolyDataMapper::New();
+    this->resliceActorsSA[i] = vtkActor::New();
+
+    this->resliceMappersSA[i]->SetInputConnection( this->reslicePlanesSA[i]->GetOutputPort() );
+    this->resliceActorsSA[i]->SetMapper( this->resliceMappersSA[i] );
+    this->resliceActorsSA[i]->GetProperty()->SetColor( 0.0, 0.0, 0.0 );
+    this->resliceActorsSA[i]->GetProperty()->SetOpacity( this->reslicePlaneOpacity );
+
+    this->renderer->AddActor( this->resliceActorsSA[i] );
+    }
+
+  // Set Flag
+
+  this->ReslicePlanesSAHaveBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupReslicePlanesLA(size_t n)
+{
+
+  // Error Checking
+
+  if (this->ReslicePlanesLAHaveBeenSetup)
+    {
+    std::cerr << "WARNING: SetupReslicePlanesLA() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  if (!this->ImagePlaneHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupImagePlanes() has not been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  this->reslicePlanesLA.resize(n);
+  this->resliceMappersLA.resize(n);
+  this->resliceActorsLA.resize(n);
+
+  for (size_t i = 0; i < n; ++i)
+    {
+    this->reslicePlanesLA[i] = vtkPlaneSource::New();
+    this->resliceMappersLA[i] = vtkPolyDataMapper::New();
+    this->resliceActorsLA[i] = vtkActor::New();
+
+    this->resliceMappersLA[i]->SetInputConnection( this->reslicePlanesLA[i]->GetOutputPort() );
+    this->resliceActorsLA[i]->SetMapper( this->resliceMappersLA[i] );
+    this->resliceActorsLA[i]->GetProperty()->SetColor( 0.0, 0.0, 0.0 );
+    this->resliceActorsLA[i]->GetProperty()->SetOpacity( this->reslicePlaneOpacity );
+
+    this->renderer->AddActor( this->resliceActorsLA[i] );
+    }
+
+  // Set Flag
+
+  this->ReslicePlanesLAHaveBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupCandidates(std::string fileName)
+{
+
+  // Error Checking
+
+  if (this->CandidatesHaveBeenSetup)
+    {
+    std::cerr << "WARNING: SetupCandidates() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+  this->candidateReader = TVTKMeshReader::New();
+  this->candidateMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->candidateActor  = vtkSmartPointer<vtkActor>::New();
+
+  this->candidateReader->SetFileName( fileName.c_str() );
+  this->candidateReader->Update();
+  this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
+  this->candidateActor->SetMapper( this->candidateMapper );
+
+  // Set Flag
+
+  this->CandidatesHaveBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupModel(const std::string fileName)
+{
+
+  // Error Checking
+
+  if (this->ModelHasBeenSetup)
+    {
+    std::cerr << "WARNING: SetupModel() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  this->modelReader = TVTKMeshReader::New();
+
+  this->modelEdges    = vtkSmartPointer<vtkExtractEdges>::New();
+  this->modelTubes    = vtkSmartPointer<vtkTubeFilter>::New();
+  this->modelVertices = vtkSmartPointer<vtkGlyph3D>::New();
+
+  this->modelLoop = vtkSmartPointer<vtkLoopSubdivisionFilter>::New();
+
+  this->modelTubes->SetRadius( this->WireframeEdgeRadius );
+  this->modelTubes->SetNumberOfSides( this->WireframeNumberOfSides );
+
+  this->modelVertexGlyph = vtkSmartPointer<vtkSphereSource>::New();
+  this->modelVertexGlyph->SetRadius( this->WireframeVertexRadius );
+  this->modelVertices->SetSourceConnection(this->modelVertexGlyph->GetOutputPort());
+
+  this->modelWireMapper     = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->modelVerticesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->modelLoopMapper     = vtkSmartPointer<vtkPolyDataMapper>::New();
+
+  this->modelWireActor     = vtkSmartPointer<vtkActor>::New();
+  this->modelVerticesActor = vtkSmartPointer<vtkActor>::New();
+  this->modelLoopActor     = vtkSmartPointer<vtkActor>::New();
+  this->modelAssembly      = vtkSmartPointer<vtkAssembly>::New();
+
+  this->modelReader->SetFileName( fileName.c_str() );
+
+  this->modelEdges->SetInputConnection(      this->modelReader->GetOutputPort() );
+  this->modelTubes->SetInputConnection(      this->modelEdges->GetOutputPort()  );
+  this->modelWireMapper->SetInputConnection( this->modelTubes->GetOutputPort()  );
+  this->modelWireActor->SetMapper(           this->modelWireMapper              );
+
+  this->modelWireActor->GetProperty()->SetColor( this->WireframeColor );
+
+  this->modelVertices->SetInputConnection(           this->modelReader->GetOutputPort() );
+  this->modelVerticesMapper->SetInputConnection(     this->modelVertices->GetOutputPort() );
+  this->modelVerticesActor->SetMapper(               this->modelVerticesMapper );
+  this->modelVerticesActor->GetProperty()->SetColor( this->WireframeColor );
+
+  this->modelLoop->SetInputConnection( this->modelReader->GetOutputPort() );
+  this->modelLoop->SetNumberOfSubdivisions( this->NumberOfSubdivisions );
+  this->modelLoop->Update();
+  this->modelLoopMapper->SetInputConnection( this->modelLoop->GetOutputPort() );
+  this->modelLoopActor->SetMapper( this->modelLoopMapper );
+  this->modelLoopActor->GetProperty()->SetColor( 1.0, 0.8, 0.8 );
+  this->modelLoopActor->GetProperty()->LightingOff();
+
+  this->modelAssembly->AddPart( this->modelLoopActor );
+  this->modelAssembly->AddPart( this->modelWireActor );
+  this->modelAssembly->AddPart( this->modelVerticesActor );
+
+  this->phaseAnnotation = vtkSmartPointer<vtkTextActor>::New();
+  this->phaseAnnotation->SetInput( "" );
+  this->phaseAnnotation->SetPosition2( 40, 40 );
+  this->phaseAnnotation->GetTextProperty()->SetFontSize( 24 );
+  this->phaseAnnotation->GetTextProperty()->SetColor( 0.0, 0.0, 0.0 );
+  this->renderer->AddActor2D( this->phaseAnnotation );
+
+  this->modelColorbarMapper = vtkSmartPointer<vtkPolyDataMapper2D>::New();
+  this->modelColorbarActor = vtkSmartPointer<vtkScalarBarActor>::New();
+  this->modelColorbarActor->SetMapper( this->modelColorbarMapper );
+  this->modelColorbarActor->SetNumberOfLabels(this->NumberOfColorbarLabels);
+  this->modelColorbarActor->GetTitleTextProperty()->SetColor(0.0, 0.0, 0.0);
+  this->modelColorbarActor->GetLabelTextProperty()->SetColor(0.0, 0.0, 0.0);
+  this->modelColorbarActor->GetTitleTextProperty()->ShadowOff();
+  this->modelColorbarActor->GetLabelTextProperty()->ItalicOff();
+  this->modelColorbarActor->GetTitleTextProperty()->BoldOff();
+  this->modelColorbarActor->SetLabelFormat("%.2f");
+
+  // Set Flag
+
+  this->ModelHasBeenSetup = true;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetupResiduals(const std::string fileName)
+{
+
+  // Error Checking
+
+  if (this->ResidualsHaveBeenSetup)
+    {
+    std::cerr << "WARNING: SetupResiduals() has already been called.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  // Logic
+
+  this->modelResidualsReader = TVTKResidualsReader::New();
+  this->modelResidualsTubes  = vtkSmartPointer<vtkTubeFilter>::New();
+  this->modelResidualsMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->modelResidualsActor  = vtkSmartPointer<vtkActor>::New();
+
+  this->modelResidualsReader->SetFileName( fileName.c_str() );
+  this->modelResidualsTubes->SetRadius( this->ResidualsEdgeRadius );
+  this->modelResidualsTubes->SetNumberOfSides( this->ResidualsNumberOfSides );
+  this->modelResidualsTubes->CappingOn();
+  this->modelResidualsTubes->SetInputConnection( this->modelResidualsReader->GetOutputPort() );
+  this->modelResidualsMapper->SetInputConnection( this->modelResidualsTubes->GetOutputPort() );
+  this->modelResidualsActor->SetMapper( this->modelResidualsMapper );
+  this->modelResidualsActor->GetProperty()->SetColor( this->ResidualsColor );
+  this->modelResidualsReader->Update();
+
+  this->modelResidualsVertices    = vtkSmartPointer<vtkGlyph3D>::New();
+  this->modelResidualsVertexGlyph = vtkSmartPointer<vtkSphereSource>::New();
+
+  this->modelResidualsVertexGlyph->SetRadius(
+    this->ResidualsVertexRadius );
+
+  this->modelResidualsVertices->SetSourceConnection(
+    this->modelResidualsVertexGlyph->GetOutputPort() );
+
+  this->modelResidualsVerticesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->modelResidualsVerticesActor  = vtkSmartPointer<vtkActor>::New();
+
+  this->modelResidualsVertices->SetInputConnection(
+    this->modelResidualsReader->GetOutputPort() );
+  this->modelResidualsVerticesMapper->SetInputConnection(
+    this->modelResidualsVertices->GetOutputPort() );
+  this->modelResidualsVerticesActor->SetMapper( this->modelResidualsVerticesMapper );
+  this->modelResidualsVerticesActor->GetProperty()->SetColor( this->ResidualsColor );
+
+  this->modelAssembly->AddPart( this->modelResidualsActor );
+  this->modelAssembly->AddPart( this->modelResidualsVerticesActor );
+
+  // Set Flag
+
+  this->ResidualsHaveBeenSetup = true;
+
+}
+
+/**************
+ * VISIBILITY *
+ **************/
+
+void
+SubdivisionRegistrationWindow
+::SetImageVolumeVisible(const bool &visible)
+{
+
+  if (nullptr == this->volumeActor)
+    {
+    std::cerr << "WARNING: Image volume is null.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  if (visible)
+    {
+    this->renderer->AddActor( this->volumeActor );
+    }
+  else
+    {
+    this->renderer->RemoveActor( this->volumeActor );
+    }
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetImagePlanesVisible(const bool &visible)
+{
+
+  if (nullptr == this->planeWidget)
+    {
+    std::cerr << "Warning: planeWidget is null...returning." << std::endl;
+    return;
+    }
+
+  this->planeWidget->SetEnabled(visible);
+  visible ? this->renderer->AddActor( this->imageActor ) : this->renderer->RemoveActor( this->imageActor );
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetReslicePlanesVisible(const bool &visible)
+{
+  
+  for (const auto &p : this->resliceActorsSA)
+    {
+    if (nullptr == p)
+      {
+      std::cerr << "WARNING: SA reslice plane is null.\n"
+                << "Returning." << std::endl;
+      return;
+      }
+    }
+
+  for (const auto &p : this->resliceActorsSA)
+    {
+    visible ? this->renderer->AddActor( p ) : this->renderer->RemoveActor( p );
+    }
+
+  for (const auto &p : this->resliceActorsLA)
+    {
+    if (nullptr == p)
+      {
+      std::cerr << "WARNING: LA reslice plane is null.\n"
+                << "Returning." << std::endl;
+      return;
+      }
+    }
+
+  for (const auto &p : this->resliceActorsLA)
+    {
+    visible ? this->renderer->AddActor( p ) : this->renderer->RemoveActor( p );
+    }
+}
+
+void
+SubdivisionRegistrationWindow
+::SetCandidatesVisible(const bool &visible)
+{
+
+  if (nullptr == this->candidateActor)
+    {
+    std::cerr << "WARNING: Candidate actor is null.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  if (visible)
+    {
+    this->renderer->AddActor( this->candidateActor );
+    }
+  else
+    {
+    this->renderer->RemoveActor( this->candidateActor );
+    }
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetModelVisible(const bool &visible)
+{
+
+  if (nullptr == this->modelAssembly)
+    {
+    std::cerr << "WARNING: Model assembly is null.\n"
+              << "Returning." << std::endl;
+    return;
+    }
+
+  if (visible)
+    {
+    this->renderer->AddActor( this->modelAssembly );
+    }
+  else
+    {
+    this->renderer->RemoveActor( this->modelAssembly );
+    }
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetModelWiresVisible(const bool &visible)
+{
+
+  if (nullptr == this->modelAssembly ||
+      nullptr == this->modelWireActor ||
+      nullptr == this->modelVerticesActor)
+    {
+    return;
+    }
+
+  if (visible)
+    {
+    this->modelAssembly->AddPart( this->modelWireActor );
+    this->modelAssembly->AddPart( this->modelVerticesActor );
+    }
+  else
+    {
+    this->modelAssembly->RemovePart( this->modelWireActor );
+    this->modelAssembly->RemovePart( this->modelVerticesActor );
+    }
+}
+
+void
+SubdivisionRegistrationWindow
+::SetModelSurfaceVisible(const bool &visible)
+{
+
+  if (nullptr == this->modelAssembly ||
+      nullptr == this->modelLoopActor)
+    {
+    return;
+    }
+
+  if (visible)
+    {
+    this->modelAssembly->AddPart( this->modelLoopActor );
+    }
+  else
+    {
+    this->modelAssembly->RemovePart( this->modelLoopActor );
+    }
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetColorbarVisible(const bool &visible)
+{
+
+  if (nullptr == this->modelColorbarActor)
+    {
+    return;
+    }
+
+  if (visible)
+    {
+    this->modelColorbarActor->SetLookupTable( this->modelLUT );
+    this->renderer->AddActor2D( this->modelColorbarActor );
+    }
+  else
+    {
+    this->renderer->RemoveActor2D( this->modelColorbarActor );
+    }
+
+}
+
+void
+SubdivisionRegistrationWindow
+::SetResidualsVisible(const bool &visible)
+{
+
+  if (nullptr == this->modelAssembly ||
+      nullptr == this->modelResidualsActor)
+    {
+    return;
+    }
+
+  if (visible)
+    {
+    this->modelAssembly->AddPart( this->modelResidualsActor );
+    this->modelAssembly->AddPart( this->modelResidualsVerticesActor );
+    }
+  else
+    {
+    this->modelAssembly->RemovePart( this->modelResidualsActor );
+    this->modelAssembly->RemovePart( this->modelResidualsVerticesActor );
+    }
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateLookupTable()
+{
+  if (!this->ModelHasBeenSetup)
+    {
+    return;
+    }
+
+  if (nullptr == this->modelLUT)
+    {
+    this->modelLUT = vtkSmartPointer<vtkLookupTable>::New();
+    }
+
+  ///////////////////////////////////////////////
+  // Build Lookup Table From Transfer Function //
+  ///////////////////////////////////////////////
+
+  const auto ctf = this->CalculateMeshTransferFunction();
+
+  const size_t N = 256; 
+  this->modelLUT->SetNumberOfTableValues(N);
+  this->modelLUT->SetTableRange(this->CB_State.Min,
+                                this->CB_State.Max);
+//  this->modelLUT->UseAboveRangeColorOn();
+//  this->modelLUT->UseBelowRangeColorOn();
+  this->modelLUT->Build();
+ 
+  for(size_t i = 0; i < N; ++i)
+    {
+    double *rgb;
+    rgb = ctf->GetColor(static_cast<double>(i)/N);
+    this->modelLUT->SetTableValue(i,rgb[0], rgb[1], rgb[2]);
+    }
+
+  const double gray = 0.3;
+
+  this->modelLUT->SetBelowRangeColor( gray, gray, gray, 1.0 ); // Gray
+  this->modelLUT->SetAboveRangeColor( gray, gray, gray, 1.0 ); // Gray
+
+  /////////////////
+  // Loop Mapper //
+  /////////////////
+
+  this->modelLoopMapper->SetScalarRange(this->CB_State.Min,
+                                        this->CB_State.Max);
+  this->modelLoopMapper->SetLookupTable( this->modelLUT );
+
+  ///////////
+  // Actor //
+  ///////////
+
+  this->modelColorbarActor->SetTitle(this->CB_State.Title.c_str());
+  this->modelColorbarActor->SetLookupTable( this->modelLUT );
+
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateReslicePlanesDistance(const double d)
+{
+  this->ReslicePlanesDistance = d;
+  this->UpdateReslicePlanesPlacement();
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateReslicePlanesPlacement()
+{
+
+  // Short Axis
+  double offset[3];
+
+  for (size_t dim = 0; dim < 3; ++dim)
+    {
+    offset[dim] = this->planeWidget->GetNormal()[dim] * this->ReslicePlanesDistance;
+    }
+
+  for (size_t i = 0; i < this->reslicePlanesSA.size(); ++i)
+    {
+    this->reslicePlanesSA[i]->SetOrigin( this->planeWidget->GetOrigin() );
+    this->reslicePlanesSA[i]->SetPoint1( this->planeWidget->GetPoint1() );
+    this->reslicePlanesSA[i]->SetPoint2( this->planeWidget->GetPoint2() );
+
+    double center[3];
+
+    for (size_t dim = 0; dim < 3; ++dim)
+      {
+      center[dim] = this->planeWidget->GetCenter()[dim];
+      center[dim] += (static_cast<double>(i) - (static_cast<double>(this->reslicePlanesSA.size()) - 1.0)/2.0) * offset[dim];
+      }
+
+    this->reslicePlanesSA[i]->SetCenter( center );
+    }
+
+  // Long Axis
+  vnl_vector_fixed<double, 3> O(this->planeWidget->GetOrigin());
+  vnl_vector_fixed<double, 3> P(this->planeWidget->GetPoint1());
+  vnl_vector_fixed<double, 3> axis90 = P - O;
+  axis90.normalize();
+  vnl_quaternion<double> Q90(axis90, M_PI / 2);
+
+  vnl_vector_fixed<double, 3> delta(this->planeWidget->GetNormal());
+  delta.normalize();
+  vnl_quaternion<double> QDelta(delta, M_PI / this->reslicePlanesLA.size());
+
+  for (size_t i = 0; i < this->reslicePlanesLA.size(); ++i)
+    {
+    this->reslicePlanesLA[i]->SetOrigin( this->planeWidget->GetOrigin() );
+    this->reslicePlanesLA[i]->SetPoint1( this->planeWidget->GetPoint1() );
+    this->reslicePlanesLA[i]->SetPoint2( this->planeWidget->GetPoint2() );
+
+    vnl_vector_fixed<double, 3> norm(this->planeWidget->GetNormal());
+    norm = Q90.rotate(norm);
+    this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
+
+    for (size_t r = 0; r < i; ++r) norm = QDelta.rotate(norm);
+    this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
+    }
+
+
+
+
+
+//  // Long Axis
+//  vnl_vector_fixed<double, 3> O(this->planeWidget->GetOrigin());
+//  vnl_vector_fixed<double, 3> P(this->planeWidget->GetPoint1());
+//  vnl_vector_fixed<double, 3> axis = P - O;
+//  axis.normalize();
+//  vnl_quaternion<double> Q(axis, M_PI / this->reslicePlanesLA.size());
+//
+//  for (size_t i = 0; i < this->reslicePlanesLA.size(); ++i)
+//    {
+//    this->reslicePlanesLA[i]->SetOrigin( this->planeWidget->GetOrigin() );
+//    this->reslicePlanesLA[i]->SetPoint1( this->planeWidget->GetPoint1() );
+//    this->reslicePlanesLA[i]->SetPoint2( this->planeWidget->GetPoint2() );
+//
+//    vnl_vector_fixed<double, 3> norm(this->planeWidget->GetNormal());
+//    for (size_t r = 0; r < i; ++r) norm = Q.rotate(norm);
+//
+//    this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
+//    }
+}
+
+/*****************
+ * UPDATE SOURCE *
+ *****************/
+
+void
+SubdivisionRegistrationWindow
+::UpdatePlanesSource(const std::string &fileName)
+{
+
+  itkAssertOrThrowMacro( (nullptr != this->itk2vtk),
+                         "ERROR: itk2vtk is null.");
+
+  this->itkReader->SetFileName( fileName.c_str() );
+  this->itk2vtk->Update();
+
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateCandidatesSource(const std::string &fileName)
+{
+
+  itkAssertOrThrowMacro( (nullptr != this->candidateReader),
+                         "ERROR: Candidate reader is null.");
+
+  this->candidateReader->SetFileName( fileName.c_str() );
+  this->candidateReader->Update();
+
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateModelSource(const std::string &fileName)
+{
+
+  itkAssertOrThrowMacro( (nullptr != this->modelReader),
+                         "ERROR: Model reader is null.");
+
+  this->modelReader->SetFileName( fileName.c_str() );
+  this->modelReader->Update();
+
+  if (nullptr != this->modelCellData)
+    {
+    this->modelLoop->GetOutput()->GetCellData()->SetScalars( this->modelCellData );
+    this->UpdateLookupTable();
+    }
+
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateResidualsSource(const std::string &fileName)
+{
+
+  if (nullptr == this->modelResidualsReader)
+    {
+    std::cerr << "WARNING: Model residuals reader is null." << std::endl;
+    return;
+    }
+
+  this->modelResidualsReader->SetFileName( fileName.c_str() );
+  this->modelResidualsReader->Update();
+
+}
+
+void
+SubdivisionRegistrationWindow
+::UpdateTransferFunction(const double &wMin,
+                         const double &wMax,
+                         const double &mMin,
+                         const double &mMax)
+{
+
+  if ( nullptr == this->volumeProperty )
+    {
+    std::cerr << "volumeProperty is null...returning." << std::endl;
+    return;
+    }
+
+  const auto transferFunction = this->CalculateImageTransferFunction(wMin,wMax,mMin,mMax);
+
+  const auto compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
+  compositeOpacity->AddPoint(mMin - 1, 0.0);
+  compositeOpacity->AddPoint(mMin,     0.2);
+  compositeOpacity->AddPoint(mMax,     0.2);
+  compositeOpacity->AddPoint(mMax + 1, 0.0);
+  this->volumeProperty->SetScalarOpacity(compositeOpacity);
+ 
+  const auto color = vtkSmartPointer<vtkColorTransferFunction>::New();
+  color->AddRGBPoint(mMin,1.0,0.0,0.0);
+  color->AddRGBPoint(mMax,0.0,0.0,1.0);
+  this->volumeProperty->SetColor(color);
+ 
+}
+
+/*************
+ * Utilities *
+ *************/
+
+vtkSmartPointer<vtkColorTransferFunction>
+SubdivisionRegistrationWindow
+::CalculateMeshTransferFunction()
+{
+  const auto ctf = vtkSmartPointer<vtkColorTransferFunction>::New();
+  ctf->SetScaleToLinear();
+  ctf->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
+  ctf->AddRGBPoint(0.5, 1.0, 0.0, 0.0);
+  ctf->AddRGBPoint(1.0, 1.0, 1.0, 0.0);
+  return ctf;
+}
+
+vtkSmartPointer<vtkColorTransferFunction>
+SubdivisionRegistrationWindow
+::CalculateImageTransferFunction(const double &wMin,
+                                 const double &wMax,
+                                 const double &mMin,
+                                 const double &mMax)
+{
+
+  auto transferFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
+  const double &WindowRange = wMax - wMin;
+  const double &LowerBoundOuter = (mMin-1-wMin)/WindowRange;
+  const double &LowerBoundInner = (mMin-wMin)/WindowRange;
+  const double &UpperBoundInner = (mMax-wMin)/WindowRange;
+  const double &UpperBoundOuter = (mMax+1-wMin)/WindowRange;
+  transferFunction->AddRGBPoint(wMin,
+                                0.0,
+                                0.0,
+                                0.0);
+  transferFunction->AddRGBPoint(mMin-1,
+                                LowerBoundOuter,
+                                LowerBoundOuter,
+                                LowerBoundOuter);
+  transferFunction->AddRGBPoint(mMin,
+                                1.0,
+                                LowerBoundInner,
+                                LowerBoundInner);
+  transferFunction->AddRGBPoint(mMax,
+                                1.0,
+                                UpperBoundInner,
+                                UpperBoundInner);
+  transferFunction->AddRGBPoint(mMax+1,
+                                UpperBoundOuter,
+                                UpperBoundOuter,
+                                UpperBoundOuter);
+  transferFunction->AddRGBPoint(wMax,
+                                1.0,
+                                1.0,
+                                1.0);
+  return transferFunction;
+
+}
+
+void
+SubdivisionRegistrationWindow
+::PlaneWidgetDidMove()
+{
+  this->planeSource->SetOrigin(this->planeWidget->GetOrigin());
+  this->planeSource->SetPoint1(this->planeWidget->GetPoint1());
+  this->planeSource->SetPoint2(this->planeWidget->GetPoint2());
+  this->UpdateReslicePlanesPlacement();
+}
+
+} // end namespace
+
+#endif
+
