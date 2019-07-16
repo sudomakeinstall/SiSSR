@@ -5,7 +5,7 @@ cmake_policy(SET CMP0071 NEW)
 ## Project Settings ##
 ######################
 
-project(dv-sissr)
+project(SiSSR)
 
 # Tell CMake where ITK and VTK are
 #set(EIGEN_INCLUDE_DIR "$ENV{HOME}/Developer/eigen" CACHE STRING "Eigen Include Directory")
@@ -69,7 +69,7 @@ include_directories("$ENV{HOME}/Developer/dv-commandline-utils/src/includes/")
 # Set your files and resources here
 file(GLOB Srcs "src/*.cxx")
 set( Srcs ${Srcs}
-          dv-sissr.cxx
+          SiSSR.cxx
           dvSubdivisionRegistrationController.cxx
           dvSubdivisionRegistrationWindow.cxx)
 
@@ -109,8 +109,8 @@ set(QT_MOC_EXECUTABLE ${VTK_QT_MOC_EXECUTABLE} CACHE FILEPATH "")
 set(QT_UIC_EXECUTABLE ${VTK_QT_UIC_EXECUTABLE} CACHE FILEPATH "")
 qt5_wrap_ui(UI_Srcs ${UIs})
 
-add_executable(dv-sissr ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
-target_link_libraries(dv-sissr ${QT_LIBRARIES}
+add_executable(SiSSR ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
+target_link_libraries(SiSSR ${QT_LIBRARIES}
                                ${VTK_LIBRARIES}
                                ${ITK_LIBRARIES}
                                ${CERES_LIBRARIES}
@@ -118,6 +118,6 @@ target_link_libraries(dv-sissr ${QT_LIBRARIES}
                      )
 
 vtk_module_autoinit(
-  TARGETS dv-sissr
+  TARGETS SiSSR
   MODULES ${VTK_LIBRARIES}
 )
