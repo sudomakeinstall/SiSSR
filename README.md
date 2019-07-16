@@ -1,9 +1,15 @@
+- [Eigen3](http://eigen.tuxfamily.org)
+- [RapidJSON](https://github.com/miloyip/rapidjson)
+- [Ceres](https://github.com/ceres-solver/ceres-solver)
+- [Qt](https://www.qt.io/)
+
 Dependencies:
 - [ITK](https://github.com/insightsoftwareconsortium/itk)
     - External Module: ITKDVUtilities
     - Remote Modules:
         - [ITKSubdivision](https://github.com/InsightSoftwareConsortium/itkSubdivisionQuadEdgeMeshFilter)
-        - [IOSTL](https://github.com/InsightSoftwareConsortium/ITKSTLMeshIO)
+        - [ITKIOSTL](https://github.com/InsightSoftwareConsortium/ITKSTLMeshIO)
+        - [ITKMeshNoise](https://github.com/InsightSoftwareConsortium/ITKMeshNoise)
 
 ```bash
 ccmake ../src \
@@ -24,9 +30,4 @@ ccmake ../src \
   -DVTK_BUILD_TESTING=OFF \
   -DVTK_GROUP_ENABLE_Qt=YES
 ```
-
-- [Eigen3](http://eigen.tuxfamily.org)
-- [RapidJSON](https://github.com/miloyip/rapidjson)
-- [Ceres](https://github.com/ceres-solver/ceres-solver)
-- [Qt](https://www.qt.io/)
 
