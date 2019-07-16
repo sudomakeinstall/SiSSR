@@ -1,0 +1,33 @@
+# Exclude these directories anywhere in your tree
+bin/
+data/
+build/
+.cache/
+.eggs/
+
+#
+data
+
+# Virtualenv
+.Python
+[Bb]in
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+share/
+
+# Exclude these file types
+*.swp
+*.pyc
+*.egg-info/
+*.egg
+
+# Exclude these file names
+.DS_Store
+.Rhistory
+.RData
+gmon.out
