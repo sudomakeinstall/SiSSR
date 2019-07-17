@@ -63,8 +63,13 @@ find_package(VTK REQUIRED
 find_package(RapidJSON REQUIRED)
 include_directories(${RapidJSON_INCLUDE_DIRS})
 
-find_library(dv-commandline-utils_LIBRARIES NAME dv-commandline-utils-lib PATHS ${dv-commandline-utils-dir} REQUIRED)
-include_directories("$ENV{HOME}/Developer/dv-commandline-utils/src/includes/")
+set(dv-commandline-utils "$ENV{HOME}/Developer/dv-commandline-utils/")
+set(dv-commandline-utils_SRC_DIR "${dv-commandline-utils}src/" CACHE STRING "dv-commandline-utils source Directory")
+set(dv-commandline-utils_BIN_DIR "${dv-commandline-utils}bin/" CACHE STRING "dv-commandline-utils binary Directory")
+
+find_library(dv-commandline-utils_LIBRARIES NAME dv-commandline-utils-lib PATHS "${dv-commandline-utils_BIN_DIR}" REQUIRED)
+
+include_directories("${dv-commandline-utils_SRC_DIR}/includes/")
 
 # Set your files and resources here
 file(GLOB Srcs "src/*.cxx")
