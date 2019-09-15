@@ -18,6 +18,7 @@ OptDirectory(_OptDirectory.back() == '/' ? _OptDirectory : _OptDirectory + '/')
 {
 
   // Create directories
+  this->CreateDirectory(this->CandidateDirectory);
   this->CreateDirectory(this->InitialModelDirectory);
   this->CreateDirectory(this->RegisteredModelDirectory);
   this->CreateDirectory(this->ResidualsDirectory);

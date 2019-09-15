@@ -14,9 +14,7 @@
 #include <itkImageFileWriter.h>
 #include <itkImageToVTKImageFilter.h>
 #include <itkMeshFileWriter.h>
-//#include <itkNumericTraits.h>
 #include <itkVertexCell.h>
-//#include <itkImageRegionIterator.h>
 #include <itkBinaryMask3DMeshSource.h>
 
 // VTK
@@ -34,7 +32,6 @@
 #include <dvDirectoryStructure.h>
 #include <dvStateMachine.h>
 #include <dvSubdivisionRegistrationWindow.h>
-#include <itkCalculateBoundaryCandidates2.h>
 #include <itkLoopSubdivisionSurfaceMesh.h>
 
 namespace dv
@@ -129,7 +126,6 @@ private:
   typedef itk::ImageFileWriter< TImage >               TImageWriter;
   typedef itk::MeshFileWriter< TMesh >                 TMeshWriter;
 
-  typedef itk::CalculateBoundaryCandidates2< TImage >  TCandidates;
   typedef itk::BinaryMask3DMeshSource< TImage, TMesh > TMarchingCubes;
 
   // Qt Properties

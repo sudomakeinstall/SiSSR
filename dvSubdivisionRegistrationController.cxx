@@ -33,6 +33,7 @@
 #include <dvProgress.h>
 #include <dvSignedDistanceToPlane.h>
 #include <dvCyclicMean.h>
+#include <dvConvertLabelsToMesh.h>
 
 // Custom
 #include <itkAdditiveGaussianNoiseQuadEdgeMeshFilter.h>
@@ -702,34 +703,20 @@ SubdivisionRegistrationController
   itk::TimeProbe clock;
   clock.Start();
 
-  const auto imageReader = TImageReader::New();
-  const auto threshold   = TCandidates::New();
-  const auto marching    = TMarchingCubes::New();
-  const auto meshWriter  = TMeshWriter::New();
-
   for (unsigned int file = 0; file < this->FileTree.GetNumberOfFiles(); ++file)
     {
 
-    const auto inputImageFile = this->FileTree.ImagePathForFrame(file);
-    const auto meshFile = this->FileTree.CandidatePathForFrame(file);
+    const auto input = this->FileTree.SegmentationPathForFrame(file);
+    const auto output = this->FileTree.CandidatePathForFrame(file);
 
-    // Read in the input image
-    imageReader->SetFileName( inputImageFile );
-    imageReader->Update();
+    std::set<unsigned short> labels;
+    labels.emplace( 1 );
 
-    threshold->SetInput( imageReader->GetOutput() );
-
-    threshold->SetKernelRadius( this->State.BoundaryCandidateDilationRadius );
-    threshold->SetLowerThreshold( this->State.LVMin );
-    threshold->SetUpperThreshold( this->State.LVMax );
-
-    marching->SetObjectValue( 1 );
-    marching->SetInput( threshold->GetOutput() );
-    marching->Update();
-
-    meshWriter->SetInput( marching->GetOutput() );
-    meshWriter->SetFileName(meshFile);
-    meshWriter->Update();
+    ConvertLabelsToMesh<3, unsigned short, double>(
+      input,
+      labels,
+      output
+    );
 
     progress.UnitCompleted();
 

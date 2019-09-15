@@ -19,8 +19,9 @@ public:
   const std::string OptDirectory;
   
   const std::string ImageDirectory           = this->IptDirectory + "img-nii/";
-  const std::string CandidateDirectory       = this->IptDirectory + "candidates/";
+  const std::string SegmentationDirectory    = this->IptDirectory + "seg-nii/";
 
+  const std::string CandidateDirectory       = this->OptDirectory + "candidates/";
   const std::string InitialModelDirectory    = this->OptDirectory + "initial_models/";
   const std::string RegisteredModelDirectory = this->OptDirectory + "registered_models/";
   const std::string ResidualsDirectory       = this->OptDirectory + "residuals_models/";
@@ -47,6 +48,9 @@ public:
 
   std::string ImagePathForFrame(const unsigned int f) const
     { return this->ImageDirectory + std::to_string(f) + this->ImageSuffix; }
+  std::string SegmentationPathForFrame(const unsigned int f) const
+    { return this->SegmentationDirectory + std::to_string(f) + this->ImageSuffix; }
+
   std::string CandidatePathForFrame(const unsigned int f) const
     { return this->CandidateDirectory + std::to_string(f) + this->MeshSuffix; }
   std::string InitialModelPathForFrame(const unsigned int f) const;
