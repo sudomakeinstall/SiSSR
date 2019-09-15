@@ -46,7 +46,8 @@ StateMachine
   else
     currentState = State::ORIENTATION_CAPTURED;
 
-  if (!(this->InitialSubdividedModelDataExists && this->ModelHasBeenSetup))
+//  if (!(this->InitialSubdividedModelDataExists && this->ModelHasBeenSetup))
+  if (!(this->InitialModelDataExists && this->ModelHasBeenSetup))
     return currentState;
   else
     currentState = State::MODEL_POSITIONED;

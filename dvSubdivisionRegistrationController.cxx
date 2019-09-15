@@ -34,6 +34,7 @@
 #include <dvSignedDistanceToPlane.h>
 #include <dvCyclicMean.h>
 #include <dvConvertLabelsToMesh.h>
+#include <dvGenerateInitialModel.h>
 
 // Custom
 #include <itkAdditiveGaussianNoiseQuadEdgeMeshFilter.h>
@@ -190,32 +191,6 @@ SubdivisionRegistrationController
   else
     {
     std::cout << "not found." << std::endl;
-    }
-
-  std::cout << "Initial refined model data..." << std::flush;
-  this->State.InitialRefinedModelDataExists = itksys::SystemTools::FileExists(this->FileTree.InitialSmoothedModel,true);
-  if (this->State.InitialRefinedModelDataExists)
-    {
-    std::cout << "found." << std::endl;
-    }
-  else
-    {
-    std::cout << "not found." << std::endl;
-    }
-
-  std::cout << "Initial subdivided model data..." << std::flush;
-  this->State.InitialSubdividedModelDataExists = itksys::SystemTools::FileExists(this->FileTree.InitialSubdividedModel,true);
-  if (this->State.InitialSubdividedModelDataExists)
-    {
-    std::cout << "found." << std::endl;
-    }
-  else
-    {
-    std::cout << "not found." << std::endl;
-    }
-
-  if (!(this->State.InitialModelDataExists && this->State.InitialRefinedModelDataExists && this->State.InitialSubdividedModelDataExists))
-    {
     return;
     }
 
@@ -522,7 +497,7 @@ SubdivisionRegistrationController
 ::UpdateModelTransform()
 {
 
-  if ( !(this->State.InitialSubdividedModelDataExists && this->State.ModelHasBeenSetup) )
+  if ( !(this->State.InitialModelDataExists && this->State.ModelHasBeenSetup) )
     {
     return;
     }
@@ -890,14 +865,13 @@ SubdivisionRegistrationController
     {
 
     if (!this->State.InitialModelDataExists)
-      this->WriteInitialModel();
-    if (!this->State.InitialRefinedModelDataExists)
-      this->WriteInitialRefinedModel();
-    if (!this->State.InitialSubdividedModelDataExists)
-      this->WriteInitialSubdividedModel();
+      {
+      std::cout << "Generating initial model" << std::endl;
+      this->GenerateInitialModel();
+      }
 
     // Setup.
-    this->window.SetupModel( this->FileTree.InitialSubdividedModel.c_str() );
+    this->window.SetupModel( this->FileTree.InitialModel.c_str() );
 
     }
 
@@ -907,7 +881,7 @@ SubdivisionRegistrationController
   // Residuals //
   ///////////////
 
-  if (this->State.InitialSubdividedModelDataExists && this->State.ModelHasBeenSetup)
+  if (this->State.InitialModelDataExists && this->State.ModelHasBeenSetup)
     {
     const auto file = this->FileTree.ResidualMeshPathForPassAndFrame(
       this->State.NumberOfRegistrationPasses,
@@ -933,148 +907,29 @@ SubdivisionRegistrationController
 
 }
 
-
 void
 SubdivisionRegistrationController
-::WriteInitialModel()
-{
-  std::cout << "SHOULD NOT RUN" << std::endl;
-  const auto CURRENT_STATE = this->State.GetCurrentState();
-  const int index = static_cast<int>(CURRENT_STATE);
-
-  // GUARD: Ensure we're at or above 
-  if (!(index >= static_cast<int>(dv::State::ORIENTATION_CAPTURED)))
-    {
-    std::cerr << "Orientation hasn't been captured." << std::endl;
-    return;
-    }
-
-  typedef itk::MeshFileReader< TQEMesh > TQEReader;
-  typedef itk::AdditiveGaussianNoiseQuadEdgeMeshFilter< TQEMesh > TNoise;
-  typedef itk::NumberOfFacesCriterion< TQEMesh > TCriterion;
-//  typedef itk::QuadricDecimationQuadEdgeMeshFilter< TQEMesh,
-//                                                    TQEMesh,
-//                                                    TCriterion > TDecimation;
-  typedef itk::SquaredEdgeLengthDecimationQuadEdgeMeshFilter< TQEMesh,
-                                                    TQEMesh,
-                                                    TCriterion > TDecimation;
-  typedef itk::MeshFileWriter< TQEMesh > TQEWriter;
-
-  const auto reader = TQEReader::New();
-  reader->SetFileName( this->FileTree.CandidatePathForFrame( this->State.EDFrame ) );
-
-  const auto noise = TNoise::New();
-  noise->SetInput( reader->GetOutput() );
-  noise->SetSigma( this->State.DecimationNoiseSigma );
-
-  const auto criterion = TCriterion::New();
-  criterion->SetTopologicalChange( false );
-
-  criterion->SetNumberOfElements( this->State.NumberOfFacesInDecimatedMesh );
-
-  const auto decimate = TDecimation::New();
-  decimate->SetInput( noise->GetOutput() );
-  decimate->SetCriterion( criterion );
-
-  std::cout << "Decimating mesh..." << std::flush;
-  decimate->Update();
-  std::cout << "done." << std::endl;
-
-  const auto decimated = TQEMesh::New();
-  decimated->Graft( decimate->GetOutput() );
-
-  std::cout << "Faces in input mesh: " << reader->GetOutput()->GetNumberOfFaces() << std::endl;
-  std::cout << "Faces in refined mesh: " << decimated->GetNumberOfFaces() << std::endl;
-
-  const auto writer = TQEWriter::New();
-  writer->SetInput( decimated );
-  writer->SetFileName( this->FileTree.InitialModel );
-  writer->Update();
-
-  this->State.InitialModelDataExists = true;
-
-}
-
-void
-SubdivisionRegistrationController
-::WriteInitialRefinedModel()
+::GenerateInitialModel()
 {
 
-  // GUARD: Ensure we're at or above 
-  if (!this->State.InitialModelDataExists)
-    {
-    std::cerr << "Initial Model Data doesn't exist." << std::endl;
-    return;
-    }
+  const auto inputMeshName
+    = this->FileTree.CandidatePathForFrame( this->State.EDFrame );
 
-  typedef itk::MeshFileReader< TQEMesh > TQEReader;
-  typedef itk::SmoothingQuadEdgeMeshFilter< TQEMesh > TSmooth;
-  typedef itk::HarmonicMatrixCoefficients< TQEMesh > TCoefficients;
-  typedef itk::MeshFileWriter< TQEMesh > TQEWriter;
+  const auto outputMeshName
+    = this->FileTree.InitialModel;
 
-  TCoefficients mats;
+  const auto count = this->State.NumberOfFacesInDecimatedMesh;
 
-  const auto reader = TQEReader::New();
-  reader->SetFileName( this->FileTree.InitialModel );
+  const auto sigma = this->State.DecimationNoiseSigma;
 
-  const auto smooth = TSmooth::New();
-  smooth->SetInput( reader->GetOutput() );
-  smooth->SetCoefficientsMethod( &mats );
-  smooth->SetRelaxationFactor( 0.1 );
-  smooth->SetDelaunayConforming( true );
-  smooth->SetNumberOfIterations( 1 );
-  smooth->Update();
-
-  const auto smoothed = TQEMesh::New();
-  smoothed->Graft( smooth->GetOutput() );
-
-  while (dv::MeshIncludesValenceThreeVertices< TQEMesh >( smoothed ))
-    {
-    dv::RefineValenceThreeVertices< TQEMesh >( smoothed );
-    }
-
-  const auto writer = TQEWriter::New();
-  writer->SetInput( smoothed );
-  writer->SetFileName( this->FileTree.InitialSmoothedModel );
-  writer->Update();
-
-  this->State.InitialRefinedModelDataExists = true;
+  dv::GenerateInitialModel(
+    inputMeshName,
+    outputMeshName,
+    count,
+    sigma
+    );
 
 }
-
-void
-SubdivisionRegistrationController
-::WriteInitialSubdividedModel()
-{
-
-  // GUARD: Ensure we're at or above 
-  if (!this->State.InitialRefinedModelDataExists)
-    {
-    std::cerr << "Initial Refined Model Data does not exist." << std::endl;
-    return;
-    }
-
-  typedef itk::MeshFileReader< TQEMesh > TQEReader;
-  typedef itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter< TQEMesh, TQEMesh > TLoop;
-  typedef itk::MeshFileWriter< TQEMesh > TQEWriter;
-
-  const auto reader = TQEReader::New();
-  reader->SetFileName( this->FileTree.InitialSmoothedModel );
-
-  const auto loop = TLoop::New();
-  loop->SetInput( reader->GetOutput() );
-
-  const auto writer = TQEWriter::New();
-  writer->SetInput( loop->GetOutput() );
-  writer->SetFileName( this->FileTree.InitialSubdividedModel );
-  writer->Update();
-
-  this->CalculateResidualsForPass(0);
-
-  this->State.InitialSubdividedModelDataExists = true;
-
-}
-
 
 void
 SubdivisionRegistrationController
@@ -1234,7 +1089,7 @@ SubdivisionRegistrationController
   if (0 == pass)
     {
     const auto reader = TMovingReader::New();
-    reader->SetFileName( this->FileTree.InitialSubdividedModel );
+    reader->SetFileName( this->FileTree.InitialModel );
     reader->Update();
     initial->Graft( reader->GetOutput() );
     initial->Setup();
@@ -1347,7 +1202,7 @@ SubdivisionRegistrationController
 
     if (0 == this->State.NumberOfRegistrationPasses)
       {
-      movingReader->SetFileName( this->FileTree.InitialSubdividedModel );
+      movingReader->SetFileName( this->FileTree.InitialModel );
       movingReader->Update();
       movingVector.emplace_back(movingReader->GetOutput());
       }

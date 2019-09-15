@@ -1,4 +1,3 @@
-
 #ifndef dvSubdivisionRegistrationController_h
 #define dvSubdivisionRegistrationController_h
 
@@ -142,9 +141,10 @@ private:
   void UpdateCurrentIndex();
   void Serialize();
   void Deserialize();
-  void WriteInitialModel();
-  void WriteInitialRefinedModel();
-  void WriteInitialSubdividedModel();
+  void GenerateInitialModel();
+//  void WriteInitialModel();
+//  void WriteInitialRefinedModel();
+//  void WriteInitialSubdividedModel();
   unsigned int GetCurrentFrame();
   void UpdateModelTransform();
   void CalculateSurfaceAreas();

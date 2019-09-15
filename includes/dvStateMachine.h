@@ -107,8 +107,8 @@ public:
   bool PlaneDataExists = false;
   bool CandidateDataExists = false;
   bool InitialModelDataExists = false;
-  bool InitialRefinedModelDataExists = false;
-  bool InitialSubdividedModelDataExists = false;
+//  bool InitialRefinedModelDataExists = false;
+//  bool InitialSubdividedModelDataExists = false;
   unsigned int NumberOfRegistrationPasses = 0;
 
   dv::PlaneWidgetState<vtkPlaneWidget> planeWidgetState;

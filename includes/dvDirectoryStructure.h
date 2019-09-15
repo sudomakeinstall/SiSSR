@@ -34,8 +34,6 @@ public:
   const std::string ScreenshotSuffix = ".png";
 
   const std::string InitialModel           = this->InitialModelDirectory + "initial_model" + MeshSuffix;
-  const std::string InitialSmoothedModel   = this->InitialModelDirectory + "initial_smoothed_model" + MeshSuffix;
-  const std::string InitialSubdividedModel = this->InitialModelDirectory + "initial_subdivided_model" + MeshSuffix;
 
   const std::string SegmentationIDs = this->SerializationDirectory + "segmentation.txt";
   const std::string ParametersJSON = this->SerializationDirectory + "parameters.json";
