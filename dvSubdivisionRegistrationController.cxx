@@ -104,7 +104,6 @@ SubdivisionRegistrationController
   this->SetupImageVolume();
   this->SetupImagePlanes();
   this->SetupReslicePlanes();
-  this->UpdateTransferFunction();
   this->SetupCandidates();
   this->SetupModel();
 
@@ -245,30 +244,10 @@ SubdivisionRegistrationController
 
 void
 SubdivisionRegistrationController
-::UpdateTransferFunction()
-{
-  this->window.UpdateTransferFunction(this->State.WindowMin,
-                                      this->State.WindowMax,
-                                      this->State.LVMin,
-                                      this->State.LVMax);
-  this->Render();
-}
-
-void
-SubdivisionRegistrationController
 ::SetupSliderRanges()
 {
 
-  this->ui->lowerWindowSlider->setRange(this->State.SliderMin,this->State.SliderMax);
-  this->ui->lowerLVSlider->setRange(    this->State.SliderMin,this->State.SliderMax);
-  this->ui->upperLVSlider->setRange(    this->State.SliderMin,this->State.SliderMax);
-  this->ui->upperWindowSlider->setRange(this->State.SliderMin,this->State.SliderMax);
   this->ui->frameSlider->setRange(      0,this->FileTree.GetNumberOfFiles()-1);
-
-  this->ui->lowerWindowSlider->setValue(this->State.WindowMin);
-  this->ui->lowerLVSlider->setValue(    this->State.LVMin);
-  this->ui->upperLVSlider->setValue(    this->State.LVMax);
-  this->ui->upperWindowSlider->setValue(this->State.WindowMax);
 
   this->ui->planesDistanceSlider->setRange(this->State.ReslicePlanesDistanceMin * 100,
                                            this->State.ReslicePlanesDistanceMax * 100);
@@ -281,14 +260,6 @@ SubdivisionRegistrationController
 ::SetupValueLabels()
 {
 
-  this->ui->lowerWindowValue->setText(
-    QString::fromStdString(std::to_string(this->ui->lowerWindowSlider->value())));
-  this->ui->lowerLVValue->setText(
-    QString::fromStdString(std::to_string(this->ui->lowerLVSlider->value())));
-  this->ui->upperLVValue->setText(
-    QString::fromStdString(std::to_string(this->ui->upperLVSlider->value())));
-  this->ui->upperWindowValue->setText(
-    QString::fromStdString(std::to_string(this->ui->upperWindowSlider->value())));
   this->ui->frameValue->setText(
     QString::fromStdString(std::to_string(this->GetCurrentFrame())) );
 
@@ -308,15 +279,6 @@ SubdivisionRegistrationController
 {
 
   // Set up action signals and slots
-
-  connect(this->ui->lowerWindowSlider,
-          SIGNAL(valueChanged(int)), this, SLOT(LowerWindowValueChanged(int)));
-  connect(this->ui->lowerLVSlider,
-          SIGNAL(valueChanged(int)), this, SLOT(LowerLVValueChanged(int)));
-  connect(this->ui->upperLVSlider,
-          SIGNAL(valueChanged(int)), this, SLOT(UpperLVValueChanged(int)));
-  connect(this->ui->upperWindowSlider,
-          SIGNAL(valueChanged(int)), this, SLOT(UpperWindowValueChanged(int)));
 
   connect(this->ui->frameSlider,
           SIGNAL(valueChanged(int)), this, SLOT(FrameValueChanged(int)));
@@ -484,77 +446,6 @@ SubdivisionRegistrationController
 
   this->ui->toolBox->setCurrentIndex( static_cast<int>(this->State.GetCurrentState()));
 
-}
-
-void
-SubdivisionRegistrationController
-::LowerWindowValueChanged(int value)
-{
-
-  this->State.WindowMin = value;
-
-  if (value > this->State.LVMin)
-    {
-    this->State.LVMin = value;
-    this->ui->lowerLVSlider->setValue( value );
-    }
-
-  this->UpdateTransferFunction();
-
-  this->ui->lowerWindowValue->setText(QString::fromStdString(std::to_string(value)));
-
-}
-
-void
-SubdivisionRegistrationController
-::LowerLVValueChanged(int value)
-{
-  this->State.LVMin = value;
-  if (value > this->State.LVMax)
-    {
-    this->State.LVMax = value;
-    this->ui->upperLVSlider->setValue( value );
-    }
-  if (value < this->State.WindowMin)
-    {
-    this->State.WindowMin = value;
-    this->ui->lowerLVSlider->setValue( value );
-    }
-  this->UpdateTransferFunction();
-  this->ui->lowerLVValue->setText(QString::fromStdString(std::to_string(value)));
-}
-
-void
-SubdivisionRegistrationController
-::UpperLVValueChanged(int value)
-{
-  this->State.LVMax = value;
-  if (value > this->State.WindowMax)
-    {
-    this->State.WindowMax = value;
-    this->ui->upperWindowSlider->setValue( value );
-    }
-  if (value < this->State.LVMin)
-    {
-    this->State.LVMin = value;
-    this->ui->lowerLVSlider->setValue( value );
-    }
-  this->UpdateTransferFunction();
-  this->ui->upperLVValue->setText(QString::fromStdString(std::to_string(value)));
-}
-
-void
-SubdivisionRegistrationController
-::UpperWindowValueChanged(int value)
-{
-  this->State.WindowMax = value;
-  if (value < this->State.LVMax)
-    {
-    this->State.LVMax = value;
-    this->ui->upperLVSlider->setValue( value );
-    }
-  this->UpdateTransferFunction();
-  this->ui->upperWindowValue->setText(QString::fromStdString(std::to_string(value)));
 }
 
 void

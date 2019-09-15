@@ -70,13 +70,6 @@ public:
 
   double ReslicePlanesDistance;
 
-  const int SliderMin = -500;
-  const int SliderMax = 2000;
-  int WindowMin = SliderMin;
-  int WindowMax = SliderMax;
-  int LVMin = 200;
-  int LVMax = 1000;
-
   // Options
   unsigned int NumberOfFacesInDecimatedMesh;
 

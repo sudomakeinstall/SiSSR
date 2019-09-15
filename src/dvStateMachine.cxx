@@ -265,14 +265,6 @@ StateMachine
 ::SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer)
 {
 
-  writer.Key("WindowMin");
-  writer.Int(this->WindowMin);
-  writer.Key("LVMin");
-  writer.Int(this->LVMin);
-  writer.Key("LVMax");
-  writer.Int(this->LVMax);
-  writer.Key("WindowMax");
-  writer.Int(this->WindowMax);
   writer.Key("NumberOfFacesInDecimatedMesh");
   writer.Uint(this->NumberOfFacesInDecimatedMesh);
 
@@ -364,11 +356,6 @@ void
 StateMachine
 ::DeserializeJSON(const rapidjson::Document &d)
 {
-
-  check_and_set_int(d, this->WindowMin, "WindowMin");
-  check_and_set_int(d, this->LVMin    , "LVMin"    );
-  check_and_set_int(d, this->LVMax    , "LVMax"    );
-  check_and_set_int(d, this->WindowMax, "WindowMax");
 
   check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }

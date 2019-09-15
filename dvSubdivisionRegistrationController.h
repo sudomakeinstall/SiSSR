@@ -51,11 +51,7 @@ public:
 protected slots:
 
   void PlanesDistanceValueChanged(int);
-  void UpperLVValueChanged(int);
-  void LowerLVValueChanged(int);
   void FrameValueChanged(int);
-  void UpperWindowValueChanged(int);
-  void LowerWindowValueChanged(int);
   void EDButtonPressed();
   void JumpToEDButtonPressed();
   void CalculateBoundaryCandidates();
@@ -142,7 +138,6 @@ private:
   void SetupSlots();
 
   void DetermineState();
-  void UpdateTransferFunction();
   void Render();
   void UpdateCurrentIndex();
   void Serialize();
