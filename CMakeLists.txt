@@ -63,7 +63,7 @@ find_package(VTK REQUIRED
 find_package(RapidJSON REQUIRED)
 include_directories(${RapidJSON_INCLUDE_DIRS})
 
-set(dv-commandline-utils "$ENV{HOME}/Developer/dv-commandline-utils/")
+set(dv-commandline-utils "$ENV{HOME}/Developer/repositories/dv-commandline-utils/")
 set(dv-commandline-utils_SRC_DIR "${dv-commandline-utils}src/" CACHE STRING "dv-commandline-utils source Directory")
 set(dv-commandline-utils_BIN_DIR "${dv-commandline-utils}bin/" CACHE STRING "dv-commandline-utils binary Directory")
 
