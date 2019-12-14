@@ -7,22 +7,10 @@ cmake_policy(SET CMP0071 NEW)
 
 project(SiSSR)
 
-# Tell CMake where ITK and VTK are
-#set(EIGEN_INCLUDE_DIR "$ENV{HOME}/Developer/eigen" CACHE STRING "Eigen Include Directory")
-#set(Ceres_DIR "$ENV{HOME}/Developer/Ceres/bin" CACHE STRING "Ceres Directory")
-#set(ITK_DIR "$ENV{HOME}/Developer/ITK/bin" CACHE STRING "ITK Directory")
-#set(VTK_DIR "$ENV{HOME}/Developer/VTK/bin" CACHE STRING "VTK Directory")
-#set(RapidJSON_DIR "$ENV{HOME}/Developer/RapidJSON/bin" CACHE STRING "RapidJSON Directory")
-#set(DVCppUtils_DIR "$ENV{HOME}/Developer/Bitbucket/DVCppUtils/bin")
-#set(DVVTKUtils_DIR "$ENV{HOME}/Developer/Bitbucket/DVVTKUtils/bin")
-
-#set(QT_QMAKE_EXECUTABLE "/usr/bin/qmake" CACHE STRING "QMake Executable")
-
 # Set flags
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -O3 -fno-strict-overflow -ffast-math" CACHE STRING "cxx flags" FORCE)
-set(CMAKE_BUILD_TYPE "Release" CACHE STRING "build type" FORCE)
-#set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -Wall -Wextra" CACHE STRING "build type" FORCE)
+set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall -Wextra -O3 -fno-strict-overflow -ffast-math" CACHE STRING "cxx flags" FORCE)
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "build type" FORCE)
 
 # Ceres
 find_package(Ceres REQUIRED)
