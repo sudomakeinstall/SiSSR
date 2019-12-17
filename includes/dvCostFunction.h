@@ -15,15 +15,16 @@ public ceres::CostFunction
   public:
 
   typedef typename TFixedMesh::PointsContainer TContainer;
-  typedef itk::PointsLocator< TContainer > TLocator;
+// TODO
+//  typedef itk::PointsLocator< TContainer > TLocator;
+  typedef typename std::map<unsigned char, typename itk::PointsLocator< TContainer >::Pointer> TLocatorMap;
 
   CostFunction(
-               const typename TLocator::Pointer
-                 &_locator,
-               const typename TMovingMesh::Pointer
-                 &_moving,
-               const typename TMovingMesh::PointsContainer::Pointer
-                 &_initialPoints,
+// TODO
+//               const typename TLocator::Pointer &_locator,
+               const TLocatorMap &_locator,
+               const typename TMovingMesh::Pointer &_moving,
+               const typename TMovingMesh::PointsContainer::Pointer &_initialPoints,
                unsigned int _index);
 
   bool Evaluate(const double* const* parameters,
@@ -34,10 +35,9 @@ public ceres::CostFunction
 
 private:
 
-//  unsigned int GetNumberOfControlPoints() const;
-//  unsigned int GetNumberOfSurfacePoints() const;
-
-  const typename TLocator::Pointer &locator;
+// TODO
+//  const typename TLocator::Pointer &locator;
+  const TLocatorMap &locator;
   const typename TMovingMesh::Pointer &moving;
   const typename TMovingMesh::PointsContainer::Pointer &initialPoints;
 
@@ -52,4 +52,3 @@ private:
 #include <dvCostFunction.hxx>
 
 #endif
-

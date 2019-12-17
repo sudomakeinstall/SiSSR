@@ -27,6 +27,7 @@
 #include <dvGetVTKTransformationMatrixFromITKImage.h>
 #include <dvGetPointsFromITKImage.h>
 #include <dvSubdivisionRegistrationWindow.h>
+#include <dvLabeledVTKPointSetReader.h>
 
 namespace dv
 {
@@ -328,14 +329,19 @@ SubdivisionRegistrationWindow
     }
 
   // Logic
-  this->candidateReader = TVTKMeshReader::New();
+// TODO
+//  this->candidateReader = TVTKMeshReader::New();
   this->candidateMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
   this->candidateActor  = vtkSmartPointer<vtkActor>::New();
 
-  this->candidateReader->SetFileName( fileName.c_str() );
-  this->candidateReader->Update();
-  this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
+// TODO
+//  this->candidateReader->SetFileName( fileName.c_str() );
+//  this->candidateReader->Update();
+//  this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
+  const auto candidates = dv::LabeledVTKPointSetReader( fileName );
+  this->candidateMapper->SetInputData( candidates );
   this->candidateActor->SetMapper( this->candidateMapper );
+  this->candidateActor->GetProperty()->SetPointSize( 5 );
 
   // Set Flag
 
@@ -874,11 +880,14 @@ SubdivisionRegistrationWindow
 ::UpdateCandidatesSource(const std::string &fileName)
 {
 
-  itkAssertOrThrowMacro( (nullptr != this->candidateReader),
-                         "ERROR: Candidate reader is null.");
-
-  this->candidateReader->SetFileName( fileName.c_str() );
-  this->candidateReader->Update();
+//TODO
+//  itkAssertOrThrowMacro( (nullptr != this->candidateReader),
+//                         "ERROR: Candidate reader is null.");
+//
+//  this->candidateReader->SetFileName( fileName.c_str() );
+//  this->candidateReader->Update();
+  const auto candidates = dv::LabeledVTKPointSetReader( fileName );
+  this->candidateMapper->SetInputData( candidates );
 
 }
 

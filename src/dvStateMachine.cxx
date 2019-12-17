@@ -25,7 +25,7 @@ StateMachine
 
   ReslicePlanesDistance(10.0),
 
-  NumberOfFacesInDecimatedMesh(400),
+  NumberOfFacesInDecimatedMesh(100),
   BoundaryCandidateDilationRadius(3)
 {}
 

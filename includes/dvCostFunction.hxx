@@ -8,7 +8,9 @@ namespace dv
 template<class TFixedMesh, class TMovingMesh>
 CostFunction<TFixedMesh, TMovingMesh>
 ::CostFunction(
-               const typename TLocator::Pointer
+// TODO
+//               const typename TLocator::Pointer
+               const TLocatorMap
                  &_locator,
                const typename TMovingMesh::Pointer
                  &_moving,
@@ -24,7 +26,6 @@ CostFunction<TFixedMesh, TMovingMesh>
     residual(this->moving->GetResidualBlock(this->param.first,this->param.second)),
     L(this->moving->GetPointListForCell(this->param.first))
 {
-
   for (std::size_t i = 0; i < this->L.size(); ++i)
     {
     this->mutable_parameter_block_sizes()->push_back(3);
@@ -56,8 +57,12 @@ CostFunction<TFixedMesh, TMovingMesh>
   // Residuals
   const auto movingPoint =
     this->moving->GetPointOnSurface(this->param.first, this->param.second);
-  const auto fixedPointID = this->locator->FindClosestPoint(movingPoint);
-  const auto fixedPoint = this->locator->GetPoints()->ElementAt(fixedPointID);
+// TODO
+//  const auto fixedPointID = this->locator->FindClosestPoint(movingPoint);
+//  const auto fixedPoint = this->locator->GetPoints()->ElementAt(fixedPointID);
+  const auto label = this->moving->GetCellData()->ElementAt(this->index);
+  const auto fixedPointID = this->locator.at(label)->FindClosestPoint(movingPoint);
+  const auto fixedPoint = this->locator.at(label)->GetPoints()->ElementAt(fixedPointID);
   const auto error = movingPoint.GetVnlVector() - fixedPoint.GetVnlVector();
 
   for (unsigned int d = 0; d < 3; ++d) residuals[d] = error[d];
@@ -89,4 +94,3 @@ CostFunction<TFixedMesh, TMovingMesh>
 } // end namespace
 
 #endif
-

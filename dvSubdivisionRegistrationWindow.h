@@ -162,7 +162,6 @@ public:
   vtkSmartPointer< PlaneWidgetCallback > callback;
 
   // Planes
-  // TODO: Don't save the (ITK) reader.
   typename TImageReader::Pointer       itkReader = nullptr;
   typename TITK2VTK::Pointer           itk2vtk = nullptr;
 
@@ -186,7 +185,8 @@ public:
   std::vector<vtkSmartPointer<vtkActor>> resliceActorsLA;
 
   // Candidates
-  TVTKMeshReader      candidateReader = nullptr;
+// TODO
+//  TVTKMeshReader      candidateReader = nullptr;
   vtkSmartPointer<vtkPolyDataMapper> candidateMapper = nullptr;
   vtkSmartPointer<vtkActor>          candidateActor = nullptr;
 
@@ -227,7 +227,6 @@ public:
   // Color Mapping
   vtk::ColorbarState CB_State = {"", 0.0, 3.0};
 
-  // TODO: This should be part of colorbar state.
   unsigned int NumberOfColorbarLabels = 8;
 
   double HueRangeMinimum = 0.00;

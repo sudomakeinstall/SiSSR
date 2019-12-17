@@ -15,6 +15,7 @@
 #include <itkMeshFileWriter.h>
 #include <itkVertexCell.h>
 #include <itkBinaryMask3DMeshSource.h>
+#include <itkPointsLocator.h>
 
 // VTK
 #include <vtkSmartPointer.h>
@@ -120,6 +121,7 @@ private:
   typedef itk::VertexCell< TCell >                     TVertex;
   typedef itk::ImageFileWriter< TImage >               TImageWriter;
   typedef itk::MeshFileWriter< TMesh >                 TMeshWriter;
+  using TLocator = itk::PointsLocator< TMesh::PointsContainer >;
 
   typedef itk::BinaryMask3DMeshSource< TImage, TMesh > TMarchingCubes;
 

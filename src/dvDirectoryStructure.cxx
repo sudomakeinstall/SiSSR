@@ -99,5 +99,78 @@ DirectoryStructure
   return this->ResidualsDirectory + std::to_string(p) + "/" + std::to_string(f) + this->ResidualSuffix;
 }
 
+std::string
+DirectoryStructure
+::ImagePathForFrame(const unsigned int f) const {
+  return this->ImageDirectory + std::to_string(f) + this->ImageSuffix;
+}
+
+std::string
+DirectoryStructure
+::SegmentationPathForFrame(const unsigned int f) const {
+  return this->SegmentationDirectory + std::to_string(f) + this->ImageSuffix;
+}
+
+std::string
+DirectoryStructure
+::CandidatePathForFrame(const unsigned int f) const {
+  // TODO: .csv
+//  return this->CandidateDirectory + std::to_string(f) + this->MeshSuffix;
+  return this->CandidateDirectory + std::to_string(f) + ".txt";
+}
+
+std::string
+DirectoryStructure
+::ScreenshotPathForFrame(const unsigned int f) const {
+  return this->ScreenshotDirectory + std::to_string(f) + this->ScreenshotSuffix;
+}
+
+bool
+DirectoryStructure
+::CandidateDataExists() const {
+  for (size_t f = 0; f < this->GetNumberOfFiles(); ++f) {
+    if (!itksys::SystemTools::FileExists(this->CandidatePathForFrame(f),true)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+unsigned int
+DirectoryStructure
+::NumberOfRegistrationPasses() const {
+  unsigned int NumberOfRegistrationPasses = 0;
+  while (true) {
+    bool AllFilesFound = true;
+    for (unsigned int f = 0; f < this->GetNumberOfFiles(); ++f) {
+      const auto file
+        = this->RegisteredModelPathForPassAndFrame(NumberOfRegistrationPasses, f);
+      if (!itksys::SystemTools::FileExists(file,true)) {
+        AllFilesFound = false;
+        break;
+        }
+    }
+    if (AllFilesFound) {
+      ++NumberOfRegistrationPasses;
+    }
+    else {
+      break;
+    }
+  }
+  return NumberOfRegistrationPasses;
+}
+
+bool
+DirectoryStructure
+::ResidualMeshDataExistsForPass(const unsigned int p) const {
+  for (unsigned int f = 0; f < this->GetNumberOfFiles(); ++f) {
+    const auto file = this->ResidualMeshPathForPassAndFrame(p, f);
+    if (!itksys::SystemTools::FileExists(file,true)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }
 #endif
