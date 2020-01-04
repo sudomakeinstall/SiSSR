@@ -45,7 +45,6 @@ enum class CellData : std::int8_t
   NONE = 0,
   SQUEEZ = 1,
   RESIDUALS = 2,
-  SEGMENTATION = 3
 };
 
 class StateMachine
@@ -58,17 +57,6 @@ public:
   ////////////////
   // Parameters //
   ////////////////
-
-  const size_t ReslicePlanesNumberMin;
-  const size_t ReslicePlanesNumberMax;
-
-  unsigned int ReslicePlanesSANumber;
-  unsigned int ReslicePlanesLANumber;
-
-  const double ReslicePlanesDistanceMin;
-  const double ReslicePlanesDistanceMax;
-
-  double ReslicePlanesDistance;
 
   // Options
   unsigned int NumberOfFacesInDecimatedMesh;
@@ -87,7 +75,6 @@ public:
 
   bool ImageVolumeIsVisible    = true;
   bool ImagePlanesAreVisible   = true;
-  bool ReslicePlanesAreVisible = true;
   bool CandidatesAreVisible    = true;
   bool ModelIsVisible          = true;
   bool ModelWiresAreVisible    = true;
@@ -107,8 +94,6 @@ public:
   bool PlaneDataExists = false;
   bool CandidateDataExists = false;
   bool InitialModelDataExists = false;
-//  bool InitialRefinedModelDataExists = false;
-//  bool InitialSubdividedModelDataExists = false;
   unsigned int NumberOfRegistrationPasses = 0;
 
   dv::PlaneWidgetState<vtkPlaneWidget> planeWidgetState;
@@ -148,7 +133,6 @@ public:
       { CellData::NONE, {"", 0.0, 0.0} },
       { CellData::SQUEEZ, {"SQUEEZ", 0.70, 1.05} },
       { CellData::RESIDUALS, {"Residuals", 0.0, 10.0} },
-      { CellData::SEGMENTATION, {"Segmentation", 0.0, 17.0} },
     };
 
   std::string RegistrationSummary;
@@ -157,4 +141,3 @@ public:
 }; // end class
 } // end namespace
 #endif
-

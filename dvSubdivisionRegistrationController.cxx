@@ -84,7 +84,6 @@ SubdivisionRegistrationController
   this->ui->cellDataButtonNone->setChecked(false);
   this->ui->cellDataButtonSQUEEZ->setChecked(false);
   this->ui->cellDataButtonResidual->setChecked(false);
-  this->ui->cellDataButtonSegmentation->setChecked(false);
   switch (this->State.CellDataToDisplay)
     {
     case CellData::NONE:
@@ -96,16 +95,12 @@ SubdivisionRegistrationController
     case CellData::RESIDUALS:
       this->ui->cellDataButtonResidual->setChecked(true);
       break;
-    case CellData::SEGMENTATION:
-      this->ui->cellDataButtonSegmentation->setChecked(true);
-      break;
     }
 
   // Setup IMAGE pipeline
   this->SetupImage();
   this->SetupImageVolume();
   this->SetupImagePlanes();
-  this->SetupReslicePlanes();
   this->SetupCandidates();
   this->SetupModel();
 
@@ -127,11 +122,6 @@ SubdivisionRegistrationController
   if (arguments.find(std::string("--register")) != arguments.end())
     {
     this->Register();
-    }
-
-  if (arguments.find(std::string("--segment")) != arguments.end())
-    {
-    this->CalculateSegmentIDs();
     }
 
   if (arguments.find(std::string("--areas")) != arguments.end())
@@ -225,10 +215,6 @@ SubdivisionRegistrationController
 
   this->ui->frameSlider->setRange(      0,this->FileTree.GetNumberOfFiles()-1);
 
-  this->ui->planesDistanceSlider->setRange(this->State.ReslicePlanesDistanceMin * 100,
-                                           this->State.ReslicePlanesDistanceMax * 100);
-  this->ui->planesDistanceSlider->setValue(this->State.ReslicePlanesDistance * 100);
-
 }
 
 void
@@ -243,10 +229,6 @@ SubdivisionRegistrationController
     this->ui->edValue->setText(
       QString::fromStdString(std::to_string(this->State.EDFrame))
                               );
-
-  this->ui->planesDistanceValue->setText(
-    QString::fromStdString(std::to_string(this->ui->planesDistanceSlider->value())));
-
 }
 
 void
@@ -279,9 +261,6 @@ SubdivisionRegistrationController
 
   connect(this->ui->toggleModelButton,
           SIGNAL(pressed()), this, SLOT(ToggleModel()));
-
-  connect(this->ui->toggleReslicePlanes,
-          SIGNAL(pressed()), this, SLOT(ToggleReslicePlanes()));
 
   connect(this->ui->toggleWiresButton,
           SIGNAL(pressed()), this, SLOT(ToggleModelWires()));
@@ -319,25 +298,6 @@ SubdivisionRegistrationController
   connect(this->ui->cellDataButtonResidual,
           SIGNAL(clicked()), this, SLOT(UpdateCellData()));
 
-  connect(this->ui->planesDistanceSlider,
-          SIGNAL(valueChanged(int)), this, SLOT(PlanesDistanceValueChanged(int)));
-
-  connect(this->ui->calculateSegmentIDsButton,
-          SIGNAL(pressed()), this, SLOT(CalculateSegmentIDs()));
-
-}
-
-void
-SubdivisionRegistrationController
-::PlanesDistanceValueChanged(int value)
-{
-  this->State.ReslicePlanesDistance = static_cast<double>(value) / 100.0;
-  this->ui->planesDistanceSlider->setValue( value );
-  this->ui->planesDistanceValue->setText(
-    QString::fromStdString(std::to_string(static_cast<float>(value) / 100.0f))
-                                        );
-  this->UpdateReslicePlanesPlacement();
-  this->Render();
 }
 
 void
@@ -547,13 +507,6 @@ SubdivisionRegistrationController
 
 void
 SubdivisionRegistrationController
-::UpdateReslicePlanesPlacement()
-{
-  this->window.UpdateReslicePlanesDistance(this->State.ReslicePlanesDistance);
-}
-
-void
-SubdivisionRegistrationController
 ::Render()
 {
   this->ui->imageWindow->renderWindow()->Render();
@@ -632,17 +585,6 @@ SubdivisionRegistrationController
 
 }
 
-void
-SubdivisionRegistrationController
-::ToggleReslicePlanes()
-{
-
-  this->State.ReslicePlanesAreVisible = !this->State.ReslicePlanesAreVisible;
-  this->window.SetReslicePlanesVisible(this->State.ReslicePlanesAreVisible);
-  this->Render();
-
-}
-  
 void
 SubdivisionRegistrationController
 ::ToggleCandidates()
@@ -781,29 +723,6 @@ SubdivisionRegistrationController
   this->State.ImagePlanesHaveBeenSetup = true;
 
   this->window.SetImagePlanesVisible( this->State.ImagePlanesAreVisible );
-
-  this->Render();
-
-}
-
-void
-SubdivisionRegistrationController
-::SetupReslicePlanes()
-{
-
-  if (!this->State.ImagePlanesHaveBeenSetup)
-    {   
-    std::cerr << "Image planes have not been setup." << std::endl;
-    std::cerr << "Returning." << std::endl;
-    return;
-    }   
-
-  this->window.SetupReslicePlanesSA(this->State.ReslicePlanesSANumber);
-  this->window.SetupReslicePlanesLA(this->State.ReslicePlanesLANumber);
-
-  this->UpdateReslicePlanesPlacement();
-
-  this->window.SetReslicePlanesVisible( this->State.ReslicePlanesAreVisible );
 
   this->Render();
 
@@ -980,18 +899,6 @@ SubdivisionRegistrationController
       std::ofstream fileStream;
       fileStream.open(fileName);
       fileStream << this->State.RegistrationSummary;
-      fileStream.close();
-      }
-    }
-
-    {
-    if (nullptr != this->State.SegmentIDs)
-      {
-      std::string fileName
-        = this->FileTree.SegmentationIDsForPass(this->State.NumberOfRegistrationPasses - 1);
-      std::ofstream fileStream;
-      fileStream.open(fileName);
-      this->State.SerializeSegmentation(fileStream, this->State.SegmentIDs);
       fileStream.close();
       }
     }
@@ -1262,7 +1169,6 @@ SubdivisionRegistrationController
 
   this->CalculateSurfaceAreas();
   this->CalculateResidualsForPass(this->State.NumberOfRegistrationPasses);
-  this->CalculateSegmentIDs();
 
   std::cout << "done." << std::endl;
 
@@ -1325,10 +1231,6 @@ SubdivisionRegistrationController
     {
     this->State.CellDataToDisplay = CellData::RESIDUALS;
     }
-  else if (this->ui->cellDataButtonSegmentation->isChecked())
-    {
-    this->State.CellDataToDisplay = CellData::SEGMENTATION;
-    }
   else
     {
     std::cerr << "Selection not recognized." << std::endl;
@@ -1386,160 +1288,11 @@ SubdivisionRegistrationController
 
       break;
       }
-    case CellData::SEGMENTATION:
-      {
-      if (this->State.NumberOfRegistrationPasses < 1)
-        {
-        std::cerr << "Warning: Surface areas cannot be calculated." << std::endl;
-        this->window.modelCellData = nullptr;
-        return;
-        }
-      if (nullptr == this->State.SegmentIDs)
-        {
-        this->CalculateSegmentIDs();
-        }
-      this->window.modelCellData = this->State.SegmentIDs;
-
-      break;
-      }
     default:
       {
       std::cout << "Cell Data type not recognized." << std::endl;
       break;
       }
-    }
-
-}
-
-std::vector<unsigned short>
-SubdivisionRegistrationController
-::CalculateSASegmentIDsForCellData(const std::vector<std::array<double, 3>> &centers)
-{
-
-  std::vector<unsigned short> sa_index(centers.size(), 0);
-
-  for (size_t i = 0; i < centers.size(); ++i)
-    {
-    for (size_t N = 0; N < this->State.ReslicePlanesSANumber; ++N)
-      {
-      const auto dist =
-        dv::SignedDistanceToPlane(this->window.reslicePlanesSA[N]->GetNormal(),
-                                  this->window.reslicePlanesSA[N]->GetOrigin(),
-                                  centers[i].data());
-      if (dist > 0.0)
-        {
-        sa_index[i] +=1;
-        }
-      else
-        {
-        break;
-        }
-      }
-    }
-
-  return sa_index;
-
-}
-
-std::vector<unsigned short>
-SubdivisionRegistrationController
-::CalculateLASegmentIDsForCellData(const std::vector<std::array<double, 3>> &centers)
-{
-
-  std::vector<unsigned short> la_index(centers.size(), 0);
-
-  for (size_t i = 0; i < centers.size(); ++i)
-    {
-    for (size_t p = 0; p < this->State.ReslicePlanesLANumber*2; ++p)
-      {
-      const size_t p_mod = p       % this->State.ReslicePlanesLANumber;
-      const size_t n_mod = (p + 1) % this->State.ReslicePlanesLANumber;
-
-      const size_t p_flp = p       / this->State.ReslicePlanesLANumber;
-      const size_t n_flp = (p + 1) / this->State.ReslicePlanesLANumber;
-
-      const auto p_dist =
-        dv::SignedDistanceToPlane(this->window.reslicePlanesLA[p_mod]->GetNormal(),
-                                  this->window.reslicePlanesLA[p_mod]->GetOrigin(),
-                                  centers[i].data()) * std::pow(-1, p_flp);
-      const auto n_dist =
-        dv::SignedDistanceToPlane(this->window.reslicePlanesLA[n_mod]->GetNormal(),
-                                  this->window.reslicePlanesLA[n_mod]->GetOrigin(),
-                                  centers[i].data()) * std::pow(-1, n_flp);
-
-      if (p_dist > 0.0 && n_dist < 0.0)
-        {
-        la_index[i] = this->State.ReslicePlanesLANumber * 2 - (p + 1);
-        break;
-        }
-      }
-    }
-
-  return la_index;
-
-}
-
-vtkSmartPointer<vtkFloatArray>
-SubdivisionRegistrationController
-::CalculateSegmentIDsForCellData(const std::vector<std::array<double, 3>> &centers)
-{
-
-  const auto sa_index = this->CalculateSASegmentIDsForCellData(centers);
-  const auto la_index = this->CalculateLASegmentIDsForCellData(centers);
-
-  const auto cellData = vtkSmartPointer<vtkFloatArray>::New();
-  cellData->SetNumberOfComponents(1);
-  cellData->SetNumberOfValues( centers.size() );
-
-  for (vtkIdType i = 0; i < cellData->GetSize(); ++i)
-    {
-    unsigned short cell_index =
-      la_index[i] + sa_index[i] * 2 * this->State.ReslicePlanesLANumber;
-    cellData->SetValue( i, cell_index );
-    }
-
-  return cellData;
-
-}
-
-void
-SubdivisionRegistrationController
-::CalculateSegmentIDs()
-{
-
-  //////////////////////////
-  // For the Actual Model //
-  //////////////////////////
-
-    {
-    if (!this->State.EDFrameHasBeenSet)
-      {
-      std::cerr << "WARNING: ED frame has not been set; returning." << std::endl;
-      return;
-      }
-  
-    const auto file = this->FileTree.RegisteredModelPathForPassAndFrame(
-          this->State.NumberOfRegistrationPasses - 1, this->State.EDFrame
-                                                                       );
-  
-    if (!itksys::SystemTools::FileExists(file,true))
-      {
-      std::cerr << "WARNING: File does not exist; returning." << std::endl;
-      return;
-      }
-  
-    const auto modelReader = TVTKMeshReader::New();
-    modelReader->SetFileName( file.c_str() );
-    modelReader->Update();
-  
-    const auto modelLoop = vtkSmartPointer<vtkLoopSubdivisionFilter>::New();
-    modelLoop->SetInputData( modelReader->GetOutput() );
-    modelLoop->SetNumberOfSubdivisions( this->State.NumberOfSubdivisions );
-    modelLoop->Update();
-  
-    const auto centers = dv::CalculateTriangleCenters( modelLoop->GetOutput() );
-  
-    this->State.SegmentIDs = this->CalculateSegmentIDsForCellData(centers);
     }
 
 }

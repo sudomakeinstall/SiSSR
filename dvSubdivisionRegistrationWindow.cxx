@@ -222,101 +222,6 @@ SubdivisionRegistrationWindow
 
 void
 SubdivisionRegistrationWindow
-::SetupReslicePlanesSA(size_t n)
-{
-
-  // Error Checking
-
-  if (this->ReslicePlanesSAHaveBeenSetup)
-    {
-    std::cerr << "WARNING: SetupReslicePlanesSA() has already been called.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  if (!this->ImagePlaneHasBeenSetup)
-    {
-    std::cerr << "WARNING: SetupImagePlanes() has not been called.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  // Logic
-
-  this->reslicePlanesSA.resize(n);
-  this->resliceMappersSA.resize(n);
-  this->resliceActorsSA.resize(n);
-
-  // Short Axis
-  for (size_t i = 0; i < n; ++i)
-    {
-    this->reslicePlanesSA[i] = vtkPlaneSource::New();
-    this->resliceMappersSA[i] = vtkPolyDataMapper::New();
-    this->resliceActorsSA[i] = vtkActor::New();
-
-    this->resliceMappersSA[i]->SetInputConnection( this->reslicePlanesSA[i]->GetOutputPort() );
-    this->resliceActorsSA[i]->SetMapper( this->resliceMappersSA[i] );
-    this->resliceActorsSA[i]->GetProperty()->SetColor( 0.0, 0.0, 0.0 );
-    this->resliceActorsSA[i]->GetProperty()->SetOpacity( this->reslicePlaneOpacity );
-
-    this->renderer->AddActor( this->resliceActorsSA[i] );
-    }
-
-  // Set Flag
-
-  this->ReslicePlanesSAHaveBeenSetup = true;
-
-}
-
-void
-SubdivisionRegistrationWindow
-::SetupReslicePlanesLA(size_t n)
-{
-
-  // Error Checking
-
-  if (this->ReslicePlanesLAHaveBeenSetup)
-    {
-    std::cerr << "WARNING: SetupReslicePlanesLA() has already been called.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  if (!this->ImagePlaneHasBeenSetup)
-    {
-    std::cerr << "WARNING: SetupImagePlanes() has not been called.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  // Logic
-
-  this->reslicePlanesLA.resize(n);
-  this->resliceMappersLA.resize(n);
-  this->resliceActorsLA.resize(n);
-
-  for (size_t i = 0; i < n; ++i)
-    {
-    this->reslicePlanesLA[i] = vtkPlaneSource::New();
-    this->resliceMappersLA[i] = vtkPolyDataMapper::New();
-    this->resliceActorsLA[i] = vtkActor::New();
-
-    this->resliceMappersLA[i]->SetInputConnection( this->reslicePlanesLA[i]->GetOutputPort() );
-    this->resliceActorsLA[i]->SetMapper( this->resliceMappersLA[i] );
-    this->resliceActorsLA[i]->GetProperty()->SetColor( 0.0, 0.0, 0.0 );
-    this->resliceActorsLA[i]->GetProperty()->SetOpacity( this->reslicePlaneOpacity );
-
-    this->renderer->AddActor( this->resliceActorsLA[i] );
-    }
-
-  // Set Flag
-
-  this->ReslicePlanesLAHaveBeenSetup = true;
-
-}
-
-void
-SubdivisionRegistrationWindow
 ::SetupCandidates(std::string fileName)
 {
 
@@ -544,42 +449,6 @@ SubdivisionRegistrationWindow
 
 void
 SubdivisionRegistrationWindow
-::SetReslicePlanesVisible(const bool &visible)
-{
-  
-  for (const auto &p : this->resliceActorsSA)
-    {
-    if (nullptr == p)
-      {
-      std::cerr << "WARNING: SA reslice plane is null.\n"
-                << "Returning." << std::endl;
-      return;
-      }
-    }
-
-  for (const auto &p : this->resliceActorsSA)
-    {
-    visible ? this->renderer->AddActor( p ) : this->renderer->RemoveActor( p );
-    }
-
-  for (const auto &p : this->resliceActorsLA)
-    {
-    if (nullptr == p)
-      {
-      std::cerr << "WARNING: LA reslice plane is null.\n"
-                << "Returning." << std::endl;
-      return;
-      }
-    }
-
-  for (const auto &p : this->resliceActorsLA)
-    {
-    visible ? this->renderer->AddActor( p ) : this->renderer->RemoveActor( p );
-    }
-}
-
-void
-SubdivisionRegistrationWindow
 ::SetCandidatesVisible(const bool &visible)
 {
 
@@ -777,70 +646,6 @@ SubdivisionRegistrationWindow
 
 }
 
-void
-SubdivisionRegistrationWindow
-::UpdateReslicePlanesDistance(const double d)
-{
-  this->ReslicePlanesDistance = d;
-  this->UpdateReslicePlanesPlacement();
-}
-
-void
-SubdivisionRegistrationWindow
-::UpdateReslicePlanesPlacement()
-{
-
-  // Short Axis
-  double offset[3];
-
-  for (size_t dim = 0; dim < 3; ++dim)
-    {
-    offset[dim] = this->planeWidget->GetNormal()[dim] * this->ReslicePlanesDistance;
-    }
-
-  for (size_t i = 0; i < this->reslicePlanesSA.size(); ++i)
-    {
-    this->reslicePlanesSA[i]->SetOrigin( this->planeWidget->GetOrigin() );
-    this->reslicePlanesSA[i]->SetPoint1( this->planeWidget->GetPoint1() );
-    this->reslicePlanesSA[i]->SetPoint2( this->planeWidget->GetPoint2() );
-
-    double center[3];
-
-    for (size_t dim = 0; dim < 3; ++dim)
-      {
-      center[dim] = this->planeWidget->GetCenter()[dim];
-      center[dim] += (static_cast<double>(i) - (static_cast<double>(this->reslicePlanesSA.size()) - 1.0)/2.0) * offset[dim];
-      }
-
-    this->reslicePlanesSA[i]->SetCenter( center );
-    }
-
-  // Long Axis
-  vnl_vector_fixed<double, 3> O(this->planeWidget->GetOrigin());
-  vnl_vector_fixed<double, 3> P(this->planeWidget->GetPoint1());
-  vnl_vector_fixed<double, 3> axis90 = P - O;
-  axis90.normalize();
-  vnl_quaternion<double> Q90(axis90, M_PI / 2);
-
-  vnl_vector_fixed<double, 3> delta(this->planeWidget->GetNormal());
-  delta.normalize();
-  vnl_quaternion<double> QDelta(delta, M_PI / this->reslicePlanesLA.size());
-
-  for (size_t i = 0; i < this->reslicePlanesLA.size(); ++i)
-    {
-    this->reslicePlanesLA[i]->SetOrigin( this->planeWidget->GetOrigin() );
-    this->reslicePlanesLA[i]->SetPoint1( this->planeWidget->GetPoint1() );
-    this->reslicePlanesLA[i]->SetPoint2( this->planeWidget->GetPoint2() );
-
-    vnl_vector_fixed<double, 3> norm(this->planeWidget->GetNormal());
-    norm = Q90.rotate(norm);
-    this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
-
-    for (size_t r = 0; r < i; ++r) norm = QDelta.rotate(norm);
-    this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
-    }
-}
-
 /*****************
  * UPDATE SOURCE *
  *****************/
@@ -1004,7 +809,6 @@ SubdivisionRegistrationWindow
   this->planeSource->SetOrigin(this->planeWidget->GetOrigin());
   this->planeSource->SetPoint1(this->planeWidget->GetPoint1());
   this->planeSource->SetPoint2(this->planeWidget->GetPoint2());
-  this->UpdateReslicePlanesPlacement();
 }
 
 } // end namespace

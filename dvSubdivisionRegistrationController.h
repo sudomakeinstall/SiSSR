@@ -45,11 +45,8 @@ public:
   SubdivisionRegistrationController(int,char**);
   ~SubdivisionRegistrationController();
 
-  void UpdateReslicePlanesPlacement();
-
 protected slots:
 
-  void PlanesDistanceValueChanged(int);
   void FrameValueChanged(int);
   void EDButtonPressed();
   void JumpToEDButtonPressed();
@@ -57,7 +54,6 @@ protected slots:
 
   void ToggleImageVolume();
   void ToggleImagePlanes();
-  void ToggleReslicePlanes();
   void ToggleCandidates();
   void ToggleModel();
   void ToggleModelWires();
@@ -73,17 +69,6 @@ protected slots:
   void CalculateResidualsForPass(const unsigned int pass);
   void WriteScreenshots();
   void UpdateCellData();
-
-  std::vector<unsigned short>
-  CalculateSASegmentIDsForCellData(const std::vector<std::array<double, 3>> &);
-
-  std::vector<unsigned short>
-  CalculateLASegmentIDsForCellData(const std::vector<std::array<double, 3>> &);
-
-  vtkSmartPointer<vtkFloatArray>
-  CalculateSegmentIDsForCellData(const std::vector<std::array<double, 3>> &);
-
-  void CalculateSegmentIDs();
 
 private:
 
@@ -129,7 +114,6 @@ private:
   void SetupImage();
   void SetupImageVolume();
   void SetupImagePlanes();
-  void SetupReslicePlanes();
   void SetupCandidates();
   void SetupValueLabels();
   void SetupSliderRanges();

@@ -14,17 +14,6 @@ namespace dv
 
 StateMachine
 ::StateMachine() :
-  ReslicePlanesNumberMin(0),
-  ReslicePlanesNumberMax(40),
-
-  ReslicePlanesSANumber(9),
-  ReslicePlanesLANumber(15),
-
-  ReslicePlanesDistanceMin(0.0),
-  ReslicePlanesDistanceMax(20.0),
-
-  ReslicePlanesDistance(10.0),
-
   NumberOfFacesInDecimatedMesh(20),
   BoundaryCandidateDilationRadius(3)
 {}
@@ -296,8 +285,6 @@ StateMachine
   writer.Bool(this->ImageVolumeIsVisible);
   writer.Key("ImagePlanesAreVisible");
   writer.Bool(this->ImagePlanesAreVisible);
-  writer.Key("ReslicePlanesAreVisible");
-  writer.Bool(this->ReslicePlanesAreVisible);
   writer.Key("CandidatesAreVisible");
   writer.Bool(this->CandidatesAreVisible);
   writer.Key("ModelIsVisible");
@@ -321,14 +308,6 @@ StateMachine
   writer.Key("CellDataToDisplay");
   writer.Int( static_cast<int>(this->CellDataToDisplay) );
 
-  writer.Key("ReslicePlanesSANumber");
-  writer.Uint(this->ReslicePlanesSANumber);
-
-  writer.Key("ReslicePlanesLANumber");
-  writer.Uint(this->ReslicePlanesLANumber);
-
-  writer.Key("ReslicePlanesDistance");
-  writer.Double( this->ReslicePlanesDistance );
 }
 
 void
@@ -340,8 +319,6 @@ StateMachine
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
   check_and_set_uint(d, this->NumberOfFacesInDecimatedMesh, "NumberOfFacesInDecimatedMesh");
-  check_and_set_uint(d, this->ReslicePlanesSANumber, "ReslicePlanesSANumber");
-  check_and_set_uint(d, this->ReslicePlanesLANumber, "ReslicePlanesLANumber");
 
   check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");
 
@@ -352,14 +329,11 @@ StateMachine
   check_and_set_double(d, this->RegistrationWeights.TriangleAspectRatio, "RegistrationWeights.TriangleAspectRatio");
   check_and_set_double(d, this->RegistrationWeights.EdgeLength, "RegistrationWeights.EdgeLength");
 
-  check_and_set_double(d, this->ReslicePlanesDistance, "ReslicePlanesDistance");
-
   this->camera.DeserializeJSON(d);
 
   check_and_set_bool(d, this->ImageVolumeIsVisible,   "ImageVolumeIsVisible");
   check_and_set_bool(d, this->ImagePlanesAreVisible,   "ImagePlanesAreVisible");
 
-  check_and_set_bool(d, this->ReslicePlanesAreVisible, "ReslicePlanesAreVisible");
   check_and_set_bool(d, this->CandidatesAreVisible,    "CandidatesAreVisible");
   check_and_set_bool(d, this->ModelIsVisible,          "ModelIsVisible");
 

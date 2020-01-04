@@ -127,7 +127,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page_2">
      <property name="geometry">
@@ -173,7 +173,7 @@
         <x>0</x>
         <y>0</y>
         <width>601</width>
-        <height>81</height>
+        <height>41</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -221,45 +221,6 @@
         <string>ED Frame:</string>
        </property>
       </widget>
-      <widget class="QSlider" name="planesDistanceSlider">
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>50</y>
-         <width>411</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>111</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Plane Distance:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="planesDistanceValue">
-       <property name="geometry">
-        <rect>
-         <x>550</x>
-         <y>50</y>
-         <width>41</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Value</string>
-       </property>
-      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="page">
@@ -293,7 +254,7 @@
         <x>10</x>
         <y>70</y>
         <width>131</width>
-        <height>101</height>
+        <height>91</height>
        </rect>
       </property>
       <property name="title">
@@ -336,19 +297,6 @@
        </property>
        <property name="text">
         <string>Residual</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="cellDataButtonSegmentation">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>80</y>
-         <width>141</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Segmentation</string>
        </property>
       </widget>
      </widget>
@@ -402,19 +350,6 @@
       </property>
       <property name="text">
        <string>Model Residuals</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="calculateSegmentIDsButton">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>370</y>
-        <width>161</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Calculate Segment IDs</string>
       </property>
      </widget>
     </widget>
@@ -482,19 +417,6 @@
     </property>
     <property name="text">
      <string>Jump to Frame:</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="toggleReslicePlanes">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>580</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Reslice Planes</string>
     </property>
    </widget>
    <widget class="QPushButton" name="toggleImageVolumeButton">

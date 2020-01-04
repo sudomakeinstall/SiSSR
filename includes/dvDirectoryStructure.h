@@ -35,10 +35,8 @@ public:
 
   const std::string InitialModel           = this->InitialModelDirectory + "initial_model" + MeshSuffix;
 
-  const std::string SegmentationIDs = this->SerializationDirectory + "segmentation.txt";
   const std::string ParametersJSON = this->SerializationDirectory + "parameters.json";
 
-  std::string SegmentationIDsForPass(const unsigned int p) const;
   std::string SurfaceAreaForPass(const unsigned int p) const;
 
   std::string ResidualsForPass(const unsigned int p) const;

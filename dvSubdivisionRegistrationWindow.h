@@ -84,8 +84,6 @@ public:
   void SetupImageInformation();
   void SetupImageVolume();
   void SetupImagePlane(vtkRenderWindowInteractor*);
-  void SetupReslicePlanesSA(size_t);
-  void SetupReslicePlanesLA(size_t);
   void SetupCandidates(std::string);
   void SetupModel(const std::string);
   void SetupResiduals(const std::string fileName);
@@ -94,8 +92,6 @@ public:
   bool ImageInformationHasBeenSetup = false;
   bool ImageVolumeHasBeenSetup      = false;
   bool ImagePlaneHasBeenSetup       = false;
-  bool ReslicePlanesSAHaveBeenSetup = false;
-  bool ReslicePlanesLAHaveBeenSetup = false;
   bool CandidatesHaveBeenSetup      = false;
   bool ModelHasBeenSetup            = false;
   bool ResidualsHaveBeenSetup       = false;
@@ -106,7 +102,6 @@ public:
 
   void SetImageVolumeVisible(const bool &);
   void SetImagePlanesVisible(const bool &);
-  void SetReslicePlanesVisible(const bool &);
   void SetCandidatesVisible(const bool &);
   void SetModelVisible(const bool &);
   void SetModelWiresVisible(const bool &);
@@ -119,8 +114,6 @@ public:
   //
 
   void UpdateLookupTable();
-  void UpdateReslicePlanesDistance(double);
-  void UpdateReslicePlanesPlacement();
   void UpdatePlanesSource(const std::string &);
   void UpdateCandidatesSource(const std::string &);
   void UpdateModelSource(const std::string &);
@@ -130,7 +123,6 @@ public:
                               const double &,
                               const double &);
 
-  double ReslicePlanesDistance = 0;
   unsigned int PlaneSourceResolution = 256;
 
   //
@@ -167,21 +159,9 @@ public:
   vtkSmartPointer<vtkPlaneWidget> planeWidget = nullptr;
   vtkSmartPointer<vtkActor> imageActor = nullptr;
 
-  // Reslice Planes
-  const double reslicePlaneOpacity = 0.25;
-
+  // Volume
   vtkSmartPointer<vtkVolume> volumeActor = nullptr;
   vtkSmartPointer<vtkVolumeProperty> volumeProperty = nullptr;
-
-  // Short Axis
-  std::vector<vtkSmartPointer<vtkPlaneSource>> reslicePlanesSA;
-  std::vector<vtkSmartPointer<vtkPolyDataMapper>> resliceMappersSA;
-  std::vector<vtkSmartPointer<vtkActor>> resliceActorsSA;
-
-  // Horizontal Long Axis
-  std::vector<vtkSmartPointer<vtkPlaneSource>> reslicePlanesLA;
-  std::vector<vtkSmartPointer<vtkPolyDataMapper>> resliceMappersLA;
-  std::vector<vtkSmartPointer<vtkActor>> resliceActorsLA;
 
   // Candidates
 // TODO

@@ -57,13 +57,6 @@ DirectoryStructure
 
 std::string
 DirectoryStructure
-::SegmentationIDsForPass(const unsigned int p) const
-{
-  return this->SerializationDirectory + "segmentation_" + std::to_string(p) + ".txt";
-}
-
-std::string
-DirectoryStructure
 ::SurfaceAreaForPass(const unsigned int p) const
 {
   return this->SerializationDirectory + "surface_area_" + std::to_string(p) + ".txt";
