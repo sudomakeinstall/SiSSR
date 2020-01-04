@@ -52,7 +52,6 @@ protected slots:
   void JumpToEDButtonPressed();
   void CalculateBoundaryCandidates();
 
-  void ToggleImageVolume();
   void ToggleImagePlanes();
   void ToggleCandidates();
   void ToggleModel();
@@ -112,7 +111,6 @@ private:
 
   // Setup
   void SetupImage();
-  void SetupImageVolume();
   void SetupImagePlanes();
   void SetupCandidates();
   void SetupValueLabels();

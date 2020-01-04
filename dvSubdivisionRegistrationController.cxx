@@ -99,7 +99,6 @@ SubdivisionRegistrationController
 
   // Setup IMAGE pipeline
   this->SetupImage();
-  this->SetupImageVolume();
   this->SetupImagePlanes();
   this->SetupCandidates();
   this->SetupModel();
@@ -249,9 +248,6 @@ SubdivisionRegistrationController
 
   connect(this->ui->calculateCandidatesButton,
           SIGNAL(pressed()), this, SLOT(CalculateBoundaryCandidates()));
-
-  connect(this->ui->toggleImageVolumeButton,
-          SIGNAL(pressed()), this, SLOT(ToggleImageVolume()));
 
   connect(this->ui->togglePlanesButton,
           SIGNAL(pressed()), this, SLOT(ToggleImagePlanes()));
@@ -550,25 +546,6 @@ SubdivisionRegistrationController
 
 void
 SubdivisionRegistrationController
-::ToggleImageVolume()
-{
-  
-  this->State.ImageVolumeIsVisible = !this->State.ImageVolumeIsVisible;
-
-  if (this->State.ImageVolumeIsVisible)
-    {
-    const auto file = this->FileTree.ImagePathForFrame( this->GetCurrentFrame() );
-    this->window.UpdatePlanesSource( file );
-    }
-
-  this->window.SetImageVolumeVisible( this->State.ImageVolumeIsVisible );
-
-  this->Render();
-
-}
-
-void
-SubdivisionRegistrationController
 ::ToggleImagePlanes()
 {
 
@@ -684,15 +661,6 @@ SubdivisionRegistrationController
   this->window.SetupImageData(imageFileName);
   this->window.SetupImageInformation();
   this->window.SetupImagePlane(iren);
-}
-
-void
-SubdivisionRegistrationController
-::SetupImageVolume()
-{
-  this->window.SetupImageVolume();
-  this->window.SetImageVolumeVisible( this->State.ImageVolumeIsVisible );
-  this->Render();
 }
 
 void

@@ -73,7 +73,6 @@ public:
 
   dv::CameraState camera;
 
-  bool ImageVolumeIsVisible    = true;
   bool ImagePlanesAreVisible   = true;
   bool CandidatesAreVisible    = true;
   bool ModelIsVisible          = true;

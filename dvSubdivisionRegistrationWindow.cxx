@@ -115,44 +115,6 @@ SubdivisionRegistrationWindow
 
 void
 SubdivisionRegistrationWindow
-::SetupImageVolume()
-{
-
-  // Error Checking
-
-  if (this->ImageVolumeHasBeenSetup)
-    {
-    std::cerr << "WARNING: SetupImageVolume() has already been called.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  // Logic
-
-  const auto volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-  volumeMapper->SetInputData( this->itk2vtk->GetOutput() );
- 
-  this->volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
- 
-  this->volumeActor = vtkSmartPointer<vtkVolume>::New();
-  this->volumeActor->SetMapper(volumeMapper);
-  this->volumeActor->SetProperty(volumeProperty);
- 
-  this->volumeActor->SetUserMatrix(this->fTrans->GetMatrix());
-  this->volumeActor->SetPosition(-this->fTrans->GetMatrix()->GetElement(0,3),
-                                 -this->fTrans->GetMatrix()->GetElement(1,3),
-                                 -this->fTrans->GetMatrix()->GetElement(2,3));
-
-  this->renderer->AddActor( this->volumeActor );
-
-  // Set Flag
-
-  this->ImageVolumeHasBeenSetup = true;
-
-}
-
-void
-SubdivisionRegistrationWindow
 ::SetupImagePlane(vtkRenderWindowInteractor* interactor)
 {
 
@@ -407,29 +369,6 @@ SubdivisionRegistrationWindow
 /**************
  * VISIBILITY *
  **************/
-
-void
-SubdivisionRegistrationWindow
-::SetImageVolumeVisible(const bool &visible)
-{
-
-  if (nullptr == this->volumeActor)
-    {
-    std::cerr << "WARNING: Image volume is null.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  if (visible)
-    {
-    this->renderer->AddActor( this->volumeActor );
-    }
-  else
-    {
-    this->renderer->RemoveActor( this->volumeActor );
-    }
-
-}
 
 void
 SubdivisionRegistrationWindow
@@ -712,36 +651,6 @@ SubdivisionRegistrationWindow
   this->modelResidualsReader->SetFileName( fileName.c_str() );
   this->modelResidualsReader->Update();
 
-}
-
-void
-SubdivisionRegistrationWindow
-::UpdateTransferFunction(const double &wMin,
-                         const double &wMax,
-                         const double &mMin,
-                         const double &mMax)
-{
-
-  if ( nullptr == this->volumeProperty )
-    {
-    std::cerr << "volumeProperty is null...returning." << std::endl;
-    return;
-    }
-
-  const auto transferFunction = this->CalculateImageTransferFunction(wMin,wMax,mMin,mMax);
-
-  const auto compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
-  compositeOpacity->AddPoint(mMin - 1, 0.0);
-  compositeOpacity->AddPoint(mMin,     0.2);
-  compositeOpacity->AddPoint(mMax,     0.2);
-  compositeOpacity->AddPoint(mMax + 1, 0.0);
-  this->volumeProperty->SetScalarOpacity(compositeOpacity);
- 
-  const auto color = vtkSmartPointer<vtkColorTransferFunction>::New();
-  color->AddRGBPoint(mMin,1.0,0.0,0.0);
-  color->AddRGBPoint(mMax,0.0,0.0,1.0);
-  this->volumeProperty->SetColor(color);
- 
 }
 
 /*************

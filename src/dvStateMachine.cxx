@@ -281,8 +281,6 @@ StateMachine
   // Camera
   this->camera.SerializeJSON(writer);
 
-  writer.Key("ImageVolumeIsVisible");
-  writer.Bool(this->ImageVolumeIsVisible);
   writer.Key("ImagePlanesAreVisible");
   writer.Bool(this->ImagePlanesAreVisible);
   writer.Key("CandidatesAreVisible");
@@ -331,7 +329,6 @@ StateMachine
 
   this->camera.DeserializeJSON(d);
 
-  check_and_set_bool(d, this->ImageVolumeIsVisible,   "ImageVolumeIsVisible");
   check_and_set_bool(d, this->ImagePlanesAreVisible,   "ImagePlanesAreVisible");
 
   check_and_set_bool(d, this->CandidatesAreVisible,    "CandidatesAreVisible");

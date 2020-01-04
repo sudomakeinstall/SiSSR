@@ -44,11 +44,9 @@
 #include <vtkGlyph3D.h>
 #include <vtkSphereSource.h>
 #include <vtkPlaneSource.h>
-#include <vtkSmartVolumeMapper.h>
 #include <vtkTransform.h>
 #include <vtkImageData.h>
 #include <vtkPlaneWidget.h>
-#include <vtkVolumeProperty.h>
 
 // Custom
 #include <dvDirectoryStructure.h>
@@ -82,7 +80,6 @@ public:
 
   void SetupImageData(const std::string&);
   void SetupImageInformation();
-  void SetupImageVolume();
   void SetupImagePlane(vtkRenderWindowInteractor*);
   void SetupCandidates(std::string);
   void SetupModel(const std::string);
@@ -90,7 +87,6 @@ public:
 
   bool ImageDataHasBeenSetup        = false;
   bool ImageInformationHasBeenSetup = false;
-  bool ImageVolumeHasBeenSetup      = false;
   bool ImagePlaneHasBeenSetup       = false;
   bool CandidatesHaveBeenSetup      = false;
   bool ModelHasBeenSetup            = false;
@@ -100,7 +96,6 @@ public:
   // Visibility
   //
 
-  void SetImageVolumeVisible(const bool &);
   void SetImagePlanesVisible(const bool &);
   void SetCandidatesVisible(const bool &);
   void SetModelVisible(const bool &);
@@ -118,10 +113,6 @@ public:
   void UpdateCandidatesSource(const std::string &);
   void UpdateModelSource(const std::string &);
   void UpdateResidualsSource(const std::string &);
-  void UpdateTransferFunction(const double &,
-                              const double &,
-                              const double &,
-                              const double &);
 
   unsigned int PlaneSourceResolution = 256;
 
@@ -158,10 +149,6 @@ public:
 
   vtkSmartPointer<vtkPlaneWidget> planeWidget = nullptr;
   vtkSmartPointer<vtkActor> imageActor = nullptr;
-
-  // Volume
-  vtkSmartPointer<vtkVolume> volumeActor = nullptr;
-  vtkSmartPointer<vtkVolumeProperty> volumeProperty = nullptr;
 
   // Candidates
 // TODO
