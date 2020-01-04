@@ -87,11 +87,11 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
     {
     this->AddPrimaryCost(problem, parameterVector);
     }
-  if (this->RegistrationWeights.Velocity > 1e-6)
+  if ((this->RegistrationWeights.Velocity > 1e-6) && (this->NumberOfFrames > 1))
     {
     this->AddVelocityRegularizer(problem, parameterVector);
     }
-  if (this->RegistrationWeights.Acceleration > 1e-6)
+  if ((this->RegistrationWeights.Acceleration) > 1e-6 && (this->NumberOfFrames > 2))
     {
     this->AddAccelerationRegularizer(problem, parameterVector);
     }
@@ -190,6 +190,12 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   itkAssertOrThrowMacro(this->locatorVector.size() > 0, "");
   itkAssertOrThrowMacro(this->movingVector.size() > 0, "");
   itkAssertOrThrowMacro(this->locatorVector.size() == this->movingVector.size(), "");
+
+  for (const auto& moving : movingVector) {
+    for (auto it = moving->GetCellData()->Begin(); it != moving->GetCellData()->End(); ++it) {
+      itkAssertOrThrowMacro(it.Value() != 0, "label == 0");
+    }
+  }
 }
 
 template < typename TFixedMesh, typename TMovingMesh >

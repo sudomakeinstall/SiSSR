@@ -29,7 +29,7 @@ public:
   const std::string ScreenshotDirectory      = this->OptDirectory + "screenshots/";
 
   const std::string ImageSuffix = ".nii.gz";
-  const std::string MeshSuffix = ".obj";
+  const std::string MeshSuffix = ".vtk";
   const std::string ResidualSuffix = ".vtk";
   const std::string ScreenshotSuffix = ".png";
 

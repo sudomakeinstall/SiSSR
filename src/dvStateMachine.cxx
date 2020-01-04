@@ -25,7 +25,7 @@ StateMachine
 
   ReslicePlanesDistance(10.0),
 
-  NumberOfFacesInDecimatedMesh(100),
+  NumberOfFacesInDecimatedMesh(20),
   BoundaryCandidateDilationRadius(3)
 {}
 
@@ -46,7 +46,6 @@ StateMachine
   else
     currentState = State::ORIENTATION_CAPTURED;
 
-//  if (!(this->InitialSubdividedModelDataExists && this->ModelHasBeenSetup))
   if (!(this->InitialModelDataExists && this->ModelHasBeenSetup))
     return currentState;
   else
@@ -292,27 +291,6 @@ StateMachine
 
   // Camera
   this->camera.SerializeJSON(writer);
-//  writer.Key("camera.ViewAngle");
-//  writer.Double(this->camera.ViewAngle);
-//  writer.Key("camera.ParallelScale");
-//  writer.Double(this->camera.ParallelScale);
-//  writer.Key("camera.ParallelProjection");
-//  writer.Double(this->camera.ParallelProjection);
-//
-//  writer.Key("camera.Position");
-//  writer.StartArray();
-//  for (std::size_t i = 0; i < 3; ++i) writer.Double(this->camera.Position[i]);
-//  writer.EndArray();
-//  
-//  writer.Key("camera.FocalPoint");
-//  writer.StartArray();
-//  for (std::size_t i = 0; i < 3; ++i) writer.Double(this->camera.FocalPoint[i]);
-//  writer.EndArray();
-//
-//  writer.Key("camera.ViewUp");
-//  writer.StartArray();
-//  for (std::size_t i = 0; i < 3; ++i) writer.Double(this->camera.ViewUp[i]);
-//  writer.EndArray();
 
   writer.Key("ImageVolumeIsVisible");
   writer.Bool(this->ImageVolumeIsVisible);
@@ -377,14 +355,6 @@ StateMachine
   check_and_set_double(d, this->ReslicePlanesDistance, "ReslicePlanesDistance");
 
   this->camera.DeserializeJSON(d);
-//  check_and_set_double(d, this->camera.ViewAngle,      "camera.ViewAngle");
-//  check_and_set_double(d, this->camera.ParallelScale,  "camera.ParallelScale");
-//
-//  check_and_set_int(d, this->camera.ParallelProjection, "camera.ParallelProjection");
-//
-//  check_and_set_double_array(d, this->camera.Position, "camera.Position");
-//  check_and_set_double_array(d, this->camera.FocalPoint, "camera.FocalPoint");
-//  check_and_set_double_array(d, this->camera.ViewUp, "camera.ViewUp");
 
   check_and_set_bool(d, this->ImageVolumeIsVisible,   "ImageVolumeIsVisible");
   check_and_set_bool(d, this->ImagePlanesAreVisible,   "ImagePlanesAreVisible");

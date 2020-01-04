@@ -28,6 +28,7 @@
 #include <dvGetPointsFromITKImage.h>
 #include <dvSubdivisionRegistrationWindow.h>
 #include <dvLabeledVTKPointSetReader.h>
+#include <dvGetLookupTable.h>
 
 namespace dv
 {
@@ -408,8 +409,8 @@ SubdivisionRegistrationWindow
   this->modelLoop->Update();
   this->modelLoopMapper->SetInputConnection( this->modelLoop->GetOutputPort() );
   this->modelLoopActor->SetMapper( this->modelLoopMapper );
-  this->modelLoopActor->GetProperty()->SetColor( 1.0, 0.8, 0.8 );
-  this->modelLoopActor->GetProperty()->LightingOff();
+
+//  this->modelLoopActor->GetProperty()->LightingOff();
 
   this->modelAssembly->AddPart( this->modelLoopActor );
   this->modelAssembly->AddPart( this->modelWireActor );
@@ -714,6 +715,7 @@ SubdivisionRegistrationWindow
     }
 }
 
+// FIXME
 void
 SubdivisionRegistrationWindow
 ::UpdateLookupTable()
@@ -758,9 +760,13 @@ SubdivisionRegistrationWindow
   // Loop Mapper //
   /////////////////
 
-  this->modelLoopMapper->SetScalarRange(this->CB_State.Min,
-                                        this->CB_State.Max);
-  this->modelLoopMapper->SetLookupTable( this->modelLUT );
+  const auto lut = dv::GetLookupTable();
+  this->modelLoopMapper->SetLookupTable( lut );
+  this->modelLoopMapper->SetScalarRange(0, 8);
+
+//  this->modelLoopMapper->SetScalarRange(this->CB_State.Min,
+//                                        this->CB_State.Max);
+//  this->modelLoopMapper->SetLookupTable( this->modelLUT );
 
   ///////////
   // Actor //
@@ -833,29 +839,6 @@ SubdivisionRegistrationWindow
     for (size_t r = 0; r < i; ++r) norm = QDelta.rotate(norm);
     this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
     }
-
-
-
-
-
-//  // Long Axis
-//  vnl_vector_fixed<double, 3> O(this->planeWidget->GetOrigin());
-//  vnl_vector_fixed<double, 3> P(this->planeWidget->GetPoint1());
-//  vnl_vector_fixed<double, 3> axis = P - O;
-//  axis.normalize();
-//  vnl_quaternion<double> Q(axis, M_PI / this->reslicePlanesLA.size());
-//
-//  for (size_t i = 0; i < this->reslicePlanesLA.size(); ++i)
-//    {
-//    this->reslicePlanesLA[i]->SetOrigin( this->planeWidget->GetOrigin() );
-//    this->reslicePlanesLA[i]->SetPoint1( this->planeWidget->GetPoint1() );
-//    this->reslicePlanesLA[i]->SetPoint2( this->planeWidget->GetPoint2() );
-//
-//    vnl_vector_fixed<double, 3> norm(this->planeWidget->GetNormal());
-//    for (size_t r = 0; r < i; ++r) norm = Q.rotate(norm);
-//
-//    this->reslicePlanesLA[i]->SetNormal( norm.data_block() );
-//    }
 }
 
 /*****************

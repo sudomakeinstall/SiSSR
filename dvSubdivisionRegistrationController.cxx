@@ -27,23 +27,20 @@
 #include <itkQuadEdgeMeshParamMatrixCoefficients.h>
 #include <itkMeshFileReader.h>
 #include <itkMeshFileWriter.h>
+#include <itkAdditiveGaussianNoiseQuadEdgeMeshFilter.h>
 
 // DVCppUtils
 #include <dvProgress.h>
 #include <dvSignedDistanceToPlane.h>
 #include <dvCyclicMean.h>
-#include <dvConvertLabelsToMesh.h>
 #include <dvSegmentationToLabeledPointSet.h>
 #include <dvLabeledITKPointSetReader.h>
 #include <dvLabeledITKPointSetToPointSetMap.h>
-#include <dvLabeledITKPointSetReader.h>
-#include <dvLabeledITKPointSetToPointSetMap.h>
-#include <dvGenerateInitialModel.h>
+#include <dvGenerateInitialModel2.h>
+#include <dvVTKPolyDataToITKTriangleMesh.h>
 
 // Custom
-#include <itkAdditiveGaussianNoiseQuadEdgeMeshFilter.h>
 #include <dvRegisterMeshToPointSet.h>
-#include <dvRefineValenceThreeVertices.h>
 #include <dvCalculateResidualMesh.h>
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
@@ -579,15 +576,6 @@ SubdivisionRegistrationController
     const auto input = this->FileTree.SegmentationPathForFrame(file);
     const auto output = this->FileTree.CandidatePathForFrame(file);
 
-    // TODO
-//    std::set<unsigned short> labels;
-//    labels.emplace( 1 );
-//
-//    ConvertLabelsToMesh<3, unsigned short, double>(
-//      input,
-//      labels,
-//      output
-//    );
     SegmentationToLabeledPointSet<3, unsigned short, double>(
       input,
       output
@@ -921,73 +909,19 @@ SubdivisionRegistrationController
 ::GenerateInitialModel()
 {
 
-// TODO
-//  const auto inputMeshName
-//    = this->FileTree.CandidatePathForFrame( this->State.EDFrame );
-  std::set<unsigned short> labels;
-  for (unsigned short i = 1; i < 10; ++i) {
-    labels.emplace( i );
-  }
-
   const auto inputSegmentationName
     = this->FileTree.SegmentationPathForFrame( this->State.EDFrame );
-  ConvertLabelsToMesh<3, unsigned short, double>(
-    inputSegmentationName,
-    labels,
-    "out.obj"
-  );
-
   const auto outputMeshName
     = this->FileTree.InitialModel;
-
   const auto count = this->State.NumberOfFacesInDecimatedMesh;
-
   const auto sigma = this->State.DecimationNoiseSigma;
 
-  dv::GenerateInitialModel(
-    "out.obj",
+  dv::GenerateInitialModel2(
+    inputSegmentationName,
     outputMeshName,
     count,
     sigma
     );
-
-//  using TMeshReader = itk::MeshFileReader< TMesh >;
-//  const auto reader = TMeshReader::New();
-//  reader->SetFileName( outputMeshName );
-//  reader->Update();
-//
-//  const auto mesh = TMesh::New();
-//  mesh->Graft( reader->GetOutput() );
-//  mesh->DisconnectPipeline();
-//
-//  using TPoints = itk::Mesh< TReal, 3, TMeshTraits >;
-//  const auto points = dv::LabeledITKPointSetReader<TPoints>(
-//    this->FileTree.CandidatePathForFrame( this->State.EDFrame )
-//  );
-//  const auto locator = TLocator::New();
-//  locator->SetPoints( points->GetPoints() );
-//  locator->Initialize();
-//
-//  for (auto it = mesh->GetCells()->Begin();
-//       it != mesh->GetCells()->End();
-//       ++it) {
-//
-//    const auto cell = it.Value();
-//
-//    typename TImage::PointType centroid;
-//    centroid.SetToMidPoint(
-//      mesh->GetPoint(cell->GetPointIds()[0]),
-//      mesh->GetPoint(cell->GetPointIds()[2])
-//      );
-//
-//    const auto id = locator->FindClosestPoint(centroid);
-//    unsigned int label = points->GetPointData()->ElementAt(id);
-//
-//    std::cout << centroid[0] << ' '
-//              << centroid[1] << ' '
-//              << centroid[2] << ' '
-//              << label << '\n';
-//  }
 
 }
 
@@ -1139,18 +1073,17 @@ SubdivisionRegistrationController
   // Get the vectors
   typedef dv::CalculateResidualMesh< TMesh, TLoopMesh, TMesh > TResidualCalculator;
 
-  typedef itk::MeshFileReader< TMesh >     TFixedReader;
-  typedef itk::MeshFileReader< TLoopMesh > TMovingReader;
   typedef itk::MeshFileWriter< TMesh >     TWriter;
 
   const auto initial = TLoopMesh::New();
 
   if (0 == pass)
     {
-    const auto reader = TMovingReader::New();
-    reader->SetFileName( this->FileTree.InitialModel );
+    const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
+    reader->SetFileName( this->FileTree.InitialModel.c_str() );
     reader->Update();
-    initial->Graft( reader->GetOutput() );
+    const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
+    initial->Graft( mesh );
     initial->Setup();
     }
 
@@ -1160,27 +1093,22 @@ SubdivisionRegistrationController
     const auto locator = TLocator::New();
 
       {
-      // Fixed
-      auto reader = TFixedReader::New();
-      reader->SetFileName( this->FileTree.CandidatePathForFrame(f) );
-      reader->Update();
+      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->FileTree.CandidatePathForFrame(f) );
+      locator->SetPoints( points->GetPoints() );
 
-      const auto mesh = TMesh::New();
-      mesh->Graft( reader->GetOutput() );
-
-      locator->SetPoints( mesh->GetPoints() );
       }
 
     locator->Initialize();
 
     if (0 != pass)
       {
-      const auto reader = TMovingReader::New();
+      const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
       const auto file
         = this->FileTree.RegisteredModelPathForPassAndFrame( pass - 1, f );
-      reader->SetFileName( file );
+      reader->SetFileName( file.c_str() );
       reader->Update();
-      initial->Graft( reader->GetOutput() );
+      const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
+    initial->Graft( mesh );
       initial->Setup();
       }
 
@@ -1219,21 +1147,14 @@ SubdivisionRegistrationController
   clock.Start();
 
   // Get the vectors
-  typedef itk::Mesh< TReal, 3, TMeshTraits > TFixed;
-  typedef itk::LoopSubdivisionSurfaceMesh< TReal, 3, TQEMeshTraits > TMoving;
-  typedef itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter< TMoving, TMoving > TLoop;
-  typedef itk::PointsLocator< TFixed::PointsContainer > TLocator;
-  typedef dv::RegisterMeshToPointSet< TFixed, TMoving > TRegister;
+  typedef itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter< TLoopMesh, TLoopMesh > TLoop;
+  typedef itk::PointsLocator< TMesh::PointsContainer > TLocator;
+  typedef dv::RegisterMeshToPointSet< TMesh, TLoopMesh > TRegister;
 
-// TODO
-//  typedef itk::MeshFileReader< TFixed > TFixedReader;
-  typedef itk::MeshFileReader< TMoving > TMovingReader;
-  typedef itk::MeshFileWriter< TMoving > TMovingWriter;
+  typedef itk::MeshFileWriter< TLoopMesh > TMovingWriter;
 
-// TODO
-//  std::vector<TLocator::Pointer> locatorVector;
   std::vector<std::map<unsigned char, TLocator::Pointer>> locatorVector;
-  std::vector<TMoving::Pointer> movingVector;
+  std::vector<TLoopMesh::Pointer> movingVector;
 
   std::string dirToCreate =
     this->FileTree.RegisteredModelDirectory +
@@ -1248,18 +1169,8 @@ SubdivisionRegistrationController
   for (unsigned int i = 0; i < this->FileTree.GetNumberOfFiles(); ++i)
     {
 
-// TODO
-//    // Fixed
-//    const auto fixedReader = TFixedReader::New();
-//    fixedReader->SetFileName( this->FileTree.CandidatePathForFrame(i) );
-//    fixedReader->Update();
-//    const auto locator = TLocator::New();
-//    locator->SetPoints( fixedReader->GetOutput()->GetPoints() );
-//    locator->Initialize();
-//    locatorVector.emplace_back(locator);
-
-    const auto points = dv::LabeledITKPointSetReader<TFixed>( this->FileTree.CandidatePathForFrame(i) );
-    const auto pointset_map = dv::LabeledITKPointSetToPointSetMap<TFixed>(points);
+    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->FileTree.CandidatePathForFrame(i) );
+    const auto pointset_map = dv::LabeledITKPointSetToPointSetMap<TMesh>(points);
     std::map<unsigned char, TLocator::Pointer> locator_map;
     for (const auto& pointset : pointset_map) {
       locator_map[pointset.first] = TLocator::New();
@@ -1270,22 +1181,25 @@ SubdivisionRegistrationController
     locatorVector.emplace_back(locator_map);
 
     // Moving 
-    const auto movingReader = TMovingReader::New();
-
     if (0 == this->State.NumberOfRegistrationPasses)
       {
-      movingReader->SetFileName( this->FileTree.InitialModel );
-      movingReader->Update();
-      movingVector.emplace_back(movingReader->GetOutput());
+      const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
+      reader->SetFileName( this->FileTree.InitialModel.c_str() );
+      reader->Update();
+      const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
+      movingVector.emplace_back( mesh );
       }
     else
       {
       const auto file
         = this->FileTree.RegisteredModelPathForPassAndFrame(
           this->State.NumberOfRegistrationPasses - 1, i);
-      movingReader->SetFileName( file );
+      const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
+      reader->SetFileName( file.c_str() );
+      reader->Update();
+      const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
       const auto loop = TLoop::New();
-      loop->SetInput( movingReader->GetOutput() );
+      loop->SetInput( mesh );
       loop->Update();
       movingVector.emplace_back(loop->GetOutput());
       }
@@ -1686,4 +1600,3 @@ SubdivisionRegistrationController
 }
 
 #endif
-

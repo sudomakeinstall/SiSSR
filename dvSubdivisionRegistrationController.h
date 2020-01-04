@@ -14,12 +14,11 @@
 #include <itkImageToVTKImageFilter.h>
 #include <itkMeshFileWriter.h>
 #include <itkVertexCell.h>
-#include <itkBinaryMask3DMeshSource.h>
 #include <itkPointsLocator.h>
 
 // VTK
 #include <vtkSmartPointer.h>
-#include <vtkOBJReader.h>
+#include <vtkPolyDataReader.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkPNGWriter.h>
 
@@ -88,7 +87,7 @@ protected slots:
 
 private:
 
-  using TVTKMeshReader = vtkSmartPointer<vtkOBJReader>;
+  using TVTKMeshReader = vtkSmartPointer<vtkPolyDataReader>;
 
   void UpdateAnnotations();
   typedef double TReal;
@@ -123,8 +122,6 @@ private:
   typedef itk::MeshFileWriter< TMesh >                 TMeshWriter;
   using TLocator = itk::PointsLocator< TMesh::PointsContainer >;
 
-  typedef itk::BinaryMask3DMeshSource< TImage, TMesh > TMarchingCubes;
-
   // Qt Properties
   Ui_QtVTKRenderWindows *ui;
 
@@ -144,9 +141,6 @@ private:
   void Serialize();
   void Deserialize();
   void GenerateInitialModel();
-//  void WriteInitialModel();
-//  void WriteInitialRefinedModel();
-//  void WriteInitialSubdividedModel();
   unsigned int GetCurrentFrame();
   void UpdateModelTransform();
   void CalculateSurfaceAreas();

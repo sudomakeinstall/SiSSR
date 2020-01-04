@@ -8,8 +8,6 @@ namespace dv
 template<class TFixedMesh, class TMovingMesh>
 CostFunction<TFixedMesh, TMovingMesh>
 ::CostFunction(
-// TODO
-//               const typename TLocator::Pointer
                const TLocatorMap
                  &_locator,
                const typename TMovingMesh::Pointer
@@ -26,7 +24,7 @@ CostFunction<TFixedMesh, TMovingMesh>
     residual(this->moving->GetResidualBlock(this->param.first,this->param.second)),
     L(this->moving->GetPointListForCell(this->param.first))
 {
-  for (std::size_t i = 0; i < this->L.size(); ++i)
+  for (size_t i = 0; i < this->L.size(); ++i)
     {
     this->mutable_parameter_block_sizes()->push_back(3);
     }
@@ -42,7 +40,7 @@ CostFunction<TFixedMesh, TMovingMesh>
            double** jacobians) const
 {
 
-  for (std::size_t i = 0; i < this->L.size(); ++i)
+  for (size_t i = 0; i < this->L.size(); ++i)
     {
     const auto initial = this->initialPoints->ElementAt(this->L[i]);
     const auto difference = parameters[i];
@@ -57,10 +55,10 @@ CostFunction<TFixedMesh, TMovingMesh>
   // Residuals
   const auto movingPoint =
     this->moving->GetPointOnSurface(this->param.first, this->param.second);
-// TODO
-//  const auto fixedPointID = this->locator->FindClosestPoint(movingPoint);
-//  const auto fixedPoint = this->locator->GetPoints()->ElementAt(fixedPointID);
-  const auto label = this->moving->GetCellData()->ElementAt(this->index);
+  const auto cellID = std::get<0>(this->moving->GetSurfaceParameter(this->index));
+  const auto label = this->moving->GetCellData()->ElementAt(cellID);
+  std::cout << cellID << " " << label << std::endl;
+  itkAssertOrThrowMacro(label != 0, "Label == 0");
   const auto fixedPointID = this->locator.at(label)->FindClosestPoint(movingPoint);
   const auto fixedPoint = this->locator.at(label)->GetPoints()->ElementAt(fixedPointID);
   const auto error = movingPoint.GetVnlVector() - fixedPoint.GetVnlVector();
@@ -74,7 +72,7 @@ CostFunction<TFixedMesh, TMovingMesh>
     }
 
   // Set Jacobian to zero.
-  for (std::size_t i = 0; i < L.size(); ++i)
+  for (size_t i = 0; i < L.size(); ++i)
     {
 
     if (nullptr == jacobians[i]) continue;
