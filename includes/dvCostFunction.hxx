@@ -57,7 +57,6 @@ CostFunction<TFixedMesh, TMovingMesh>
     this->moving->GetPointOnSurface(this->param.first, this->param.second);
   const auto cellID = std::get<0>(this->moving->GetSurfaceParameter(this->index));
   const auto label = this->moving->GetCellData()->ElementAt(cellID);
-  std::cout << cellID << " " << label << std::endl;
   itkAssertOrThrowMacro(label != 0, "Label == 0");
   const auto fixedPointID = this->locator.at(label)->FindClosestPoint(movingPoint);
   const auto fixedPoint = this->locator.at(label)->GetPoints()->ElementAt(fixedPointID);
