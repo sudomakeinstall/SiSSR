@@ -36,7 +36,7 @@
 #include <dvSegmentationToLabeledPointSet.h>
 #include <dvLabeledITKPointSetReader.h>
 #include <dvLabeledITKPointSetToPointSetMap.h>
-#include <dvGenerateInitialModel2.h>
+#include <dvGenerateInitialModel.h>
 #include <dvVTKPolyDataToITKTriangleMesh.h>
 
 // Custom
@@ -803,7 +803,7 @@ SubdivisionRegistrationController
   const auto count = this->State.NumberOfFacesInDecimatedMesh;
   const auto sigma = this->State.DecimationNoiseSigma;
 
-  dv::GenerateInitialModel2(
+  dv::GenerateInitialModel(
     inputSegmentationName,
     outputMeshName,
     count,
