@@ -33,6 +33,9 @@ public:
   const std::string ResidualSuffix = ".vtk";
   const std::string ScreenshotSuffix = ".png";
 
+  const std::string InitialModelSegmentation =
+    this->IptDirectory +
+    "initial_model_segmentation" + ImageSuffix;
   const std::string InitialModel           = this->InitialModelDirectory + "initial_model" + MeshSuffix;
 
   const std::string ParametersJSON = this->SerializationDirectory + "parameters.json";
