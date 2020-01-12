@@ -796,18 +796,11 @@ SubdivisionRegistrationController
 ::GenerateInitialModel()
 {
 
-  const auto inputSegmentationName
-    = this->FileTree.SegmentationPathForFrame( this->State.EDFrame );
-  const auto outputMeshName
-    = this->FileTree.InitialModel;
-  const auto count = this->State.NumberOfFacesInDecimatedMesh;
-  const auto sigma = this->State.DecimationNoiseSigma;
-
   dv::GenerateInitialModel(
-    inputSegmentationName,
-    outputMeshName,
-    count,
-    sigma
+    this->FileTree.InitialModelSegmentation,
+    this->FileTree.InitialModel,
+    this->State.NumberOfFacesInDecimatedMesh,
+    this->State.DecimationNoiseSigma
     );
 
 }
