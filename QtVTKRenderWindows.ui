@@ -35,7 +35,7 @@
     </property>
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
-      <widget class="QVTKOpenGLWidget" name="imageWindow" native="true"/>
+      <widget class="QVTKOpenGLStereoWidget" name="imageWindow" native="true"/>
      </item>
     </layout>
    </widget>
@@ -423,9 +423,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKOpenGLWidget</class>
+   <class>QVTKOpenGLStereoWidget</class>
    <extends>QWidget</extends>
-   <header>QVTKOpenGLWidget.h</header>
+   <header>QVTKOpenGLStereoWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

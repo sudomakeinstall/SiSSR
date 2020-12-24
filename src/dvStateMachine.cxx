@@ -14,7 +14,7 @@ namespace dv
 
 StateMachine
 ::StateMachine() :
-  NumberOfFacesInDecimatedMesh(20),
+  NumberOfFacesInDecimatedMesh(250),
   BoundaryCandidateDilationRadius(3)
 {}
 

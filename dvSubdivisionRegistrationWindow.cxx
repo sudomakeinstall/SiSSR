@@ -568,7 +568,7 @@ SubdivisionRegistrationWindow
   // Loop Mapper //
   /////////////////
 
-  const auto lut = dv::GetLookupTable();
+  const auto lut = dv::LUT::Rainbow();
   this->modelLoopMapper->SetLookupTable( lut );
   this->modelLoopMapper->SetScalarRange(0, 8);
 

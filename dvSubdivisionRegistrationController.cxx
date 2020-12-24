@@ -750,8 +750,9 @@ SubdivisionRegistrationController
 
     if (!this->State.InitialModelDataExists)
       {
-      std::cout << "Generating initial model" << std::endl;
+      std::cout << "Generating initial model...";
       this->GenerateInitialModel();
+      std::cout << "done." << std::endl;
       }
 
     // Setup.
@@ -800,7 +801,8 @@ SubdivisionRegistrationController
     this->FileTree.InitialModelSegmentation,
     this->FileTree.InitialModel,
     this->State.NumberOfFacesInDecimatedMesh,
-    this->State.DecimationNoiseSigma
+    this->State.DecimationNoiseSigma,
+    10
     );
 
 }

@@ -4,7 +4,7 @@
 // Qt
 #include <QApplication>
 #include <QSurfaceFormat>
-#include <QVTKOpenGLWidget.h>
+#include <QVTKOpenGLStereoWidget.h>
 #include <vtkOpenGLRenderWindow.h>
 
 // Custom
@@ -43,7 +43,7 @@ main(int argc, char** argv)
 
   // QT Stuff
   vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
-  QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
+  QSurfaceFormat::setDefaultFormat(QVTKOpenGLStereoWidget::defaultFormat());
 
   QApplication application(argc,argv);
 

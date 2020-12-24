@@ -1,24 +1,87 @@
-cmake_minimum_required(VERSION 3.3.0 FATAL_ERROR)
-cmake_policy(SET CMP0071 NEW)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+##################
+## Set Policies ##
+##################
+
+# Double colons must indicate an imported/alias target.
+cmake_policy(SET CMP0028 NEW)
+
+# Search prefixes specified by <PackageName>_ROOT.
+cmake_policy(SET CMP0074 NEW)
+#cmake_policy(SET CMP0071 NEW)
 
 ######################
 ## Project Settings ##
 ######################
 
-project(SiSSR)
+project("dv-sissr" LANGUAGES CXX C)
 
-# Set flags
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall -Wextra -O3 -fno-strict-overflow -ffast-math" CACHE STRING "cxx flags" FORCE)
-set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "build type" FORCE)
+set(${PROJECT_NAME}_VERSION_MAJOR "2020")
+set(${PROJECT_NAME}_VERSION_MINOR "12")
+set(${PROJECT_NAME}_VERSION_PATCH "14")
+set(${PROJECT_NAME}_VERSION
+  "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
+
+###################
+## CMake Modules ##
+###################
+
+set(${PROJECT_NAME}_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${${PROJECT_NAME}_CMAKE_DIR} ${CMAKE_MODULE_PATH})
+
+include(dvInitializeBuildType)
+include(dvPreventInSourceBuilds)
+include(dvPreventInBuildInstalls)
+
+#############
+## Options ##
+#############
+
+## Set flags
+#set(CMAKE_CXX_STANDARD 14)
+#set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall -Wextra -O3 -fno-strict-overflow -ffast-math" CACHE STRING "cxx flags" FORCE)
+set(CMAKE_BUILD_TYPE "RelWithDebugInfo" CACHE STRING "build type" FORCE)
+
+##########################
+## Third Party Packages ##
+##########################
+
+# Find a threading package
+
+find_package(OpenMP REQUIRED)
 
 # Ceres
+
 find_package(Ceres REQUIRED)
 include_directories(${CERES_INCLUDE_DIRS})
 
 # ITK
-find_package(ITK REQUIRED)
+
+find_package(ITK REQUIRED COMPONENTS
+  ITKCommon
+  ITKIOImageBase
+  ITKIOMeshBase
+  ITKIOXML
+  ITKMesh
+  ITKQuadEdgeMesh
+  ITKQuadEdgeMeshFiltering
+  ITKRegistrationCommon
+  ITKVtkGlue
+  ITKImageIO
+  ITKMeshIO
+  ITKDVUtilities
+  SubdivisionQuadEdgeMeshFilter
+  MeshNoise
+  IOMeshSTL
+  Cuberille
+)
+
 include(${ITK_USE_FILE})
+
+# CGAL
+
+find_package(CGAL QUIET REQUIRED)
 
 # VTK
 find_package(VTK REQUIRED
@@ -48,21 +111,18 @@ find_package(VTK REQUIRED
 )
 
 # RapidJSON
+
 find_package(RapidJSON REQUIRED)
 include_directories(${RapidJSON_INCLUDE_DIRS})
 
-set(dv-commandline-utils "$ENV{HOME}/Developer/repositories/dv-commandline-utils/")
-set(dv-commandline-utils_SRC_DIR "${dv-commandline-utils}src/" CACHE STRING "dv-commandline-utils source Directory")
-set(dv-commandline-utils_BIN_DIR "${dv-commandline-utils}bin/" CACHE STRING "dv-commandline-utils binary Directory")
+# dv-commandline-utils
 
-find_library(dv-commandline-utils_LIBRARIES NAME dv-commandline-utils-lib PATHS "${dv-commandline-utils_BIN_DIR}" REQUIRED)
-
-include_directories("${dv-commandline-utils_SRC_DIR}/includes/")
+find_package(dv-commandline-utils REQUIRED)
 
 # Set your files and resources here
 file(GLOB Srcs "src/*.cxx")
 set( Srcs ${Srcs}
-          SiSSR.cxx
+          dv-sissr.cxx
           dvSubdivisionRegistrationController.cxx
           dvSubdivisionRegistrationWindow.cxx)
 
@@ -102,15 +162,18 @@ set(QT_MOC_EXECUTABLE ${VTK_QT_MOC_EXECUTABLE} CACHE FILEPATH "")
 set(QT_UIC_EXECUTABLE ${VTK_QT_UIC_EXECUTABLE} CACHE FILEPATH "")
 qt5_wrap_ui(UI_Srcs ${UIs})
 
-add_executable(SiSSR ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
-target_link_libraries(SiSSR ${QT_LIBRARIES}
-                               ${VTK_LIBRARIES}
-                               ${ITK_LIBRARIES}
-                               ${CERES_LIBRARIES}
-                               ${dv-commandline-utils_LIBRARIES}
-                     )
+add_executable(dv-sissr ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
+target_link_libraries(dv-sissr PUBLIC
+  ${QT_LIBRARIES}
+  OpenMP::OpenMP_CXX
+  ${VTK_LIBRARIES}
+  ${ITK_LIBRARIES}
+  ceres
+  dv-commandline-utils::dv-commandline-utils
+  CGAL::CGAL
+)
 
 vtk_module_autoinit(
-  TARGETS SiSSR
+  TARGETS dv-sissr
   MODULES ${VTK_LIBRARIES}
 )

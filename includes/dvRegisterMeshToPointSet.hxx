@@ -116,15 +116,13 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   const auto threads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << threads << std::endl;
 
-
   ceres::Solver::Options solverOptions;
   solverOptions.minimizer_progress_to_stdout = true;
   solverOptions.max_num_iterations = this->MaximumNumberOfIterations;
   solverOptions.function_tolerance = this->FunctionTolerance;
   solverOptions.parameter_tolerance = this->ParameterTolerance;
   solverOptions.max_solver_time_in_seconds = MaximumSolverTimeInSeconds;
-  solverOptions.num_threads = threads;
-  solverOptions.num_threads = threads;
+  solverOptions.num_threads = threads * 4;
   solverOptions.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
   solverOptions.dynamic_sparsity = false;
   solverOptions.minimizer_type = ceres::TRUST_REGION;
