@@ -1,6 +1,3 @@
-#ifndef dvSubdivisionRegistrationWindow_cxx
-#define dvSubdivisionRegistrationWindow_cxx
-
 // Qt
 #include <QMessageBox>
 
@@ -26,7 +23,7 @@
 // Custom
 #include <dvGetVTKTransformationMatrixFromITKImage.h>
 #include <dvGetPointsFromITKImage.h>
-#include <dvSubdivisionRegistrationWindow.h>
+#include <dvSiSSRView.h>
 #include <dvLabeledVTKPointSetReader.h>
 #include <dvGetLookupTable.h>
 
@@ -37,8 +34,8 @@ namespace dv
  * CONSTRUCTOR *
  ***************/
 
-SubdivisionRegistrationWindow
-::SubdivisionRegistrationWindow()
+SiSSRView
+::SiSSRView()
 {
   this->renderer = vtkSmartPointer< vtkRenderer >::New();
   this->renderer->SetBackground(1.0, 1.0, 1.0);
@@ -49,7 +46,7 @@ SubdivisionRegistrationWindow
  *********/
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetupImageData(const std::string &fileName)
 {
 
@@ -80,7 +77,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetupImageInformation()
 {
   // Error Checking
@@ -114,7 +111,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetupImagePlane(vtkRenderWindowInteractor* interactor)
 {
 
@@ -183,7 +180,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetupCandidates(std::string fileName)
 {
 
@@ -218,7 +215,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetupModel(const std::string fileName)
 {
 
@@ -308,7 +305,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetupResiduals(const std::string fileName)
 {
 
@@ -371,7 +368,7 @@ SubdivisionRegistrationWindow
  **************/
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetImagePlanesVisible(const bool &visible)
 {
 
@@ -387,7 +384,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetCandidatesVisible(const bool &visible)
 {
 
@@ -410,7 +407,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetModelVisible(const bool &visible)
 {
 
@@ -433,7 +430,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetModelWiresVisible(const bool &visible)
 {
 
@@ -457,7 +454,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetModelSurfaceVisible(const bool &visible)
 {
 
@@ -479,7 +476,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetColorbarVisible(const bool &visible)
 {
 
@@ -501,7 +498,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::SetResidualsVisible(const bool &visible)
 {
 
@@ -525,7 +522,7 @@ SubdivisionRegistrationWindow
 
 // FIXME
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::UpdateLookupTable()
 {
   if (!this->ModelHasBeenSetup)
@@ -590,7 +587,7 @@ SubdivisionRegistrationWindow
  *****************/
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::UpdatePlanesSource(const std::string &fileName)
 {
 
@@ -603,7 +600,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::UpdateCandidatesSource(const std::string &fileName)
 {
 
@@ -619,7 +616,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::UpdateModelSource(const std::string &fileName)
 {
 
@@ -638,7 +635,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::UpdateResidualsSource(const std::string &fileName)
 {
 
@@ -658,7 +655,7 @@ SubdivisionRegistrationWindow
  *************/
 
 vtkSmartPointer<vtkColorTransferFunction>
-SubdivisionRegistrationWindow
+SiSSRView
 ::CalculateMeshTransferFunction()
 {
   const auto ctf = vtkSmartPointer<vtkColorTransferFunction>::New();
@@ -670,7 +667,7 @@ SubdivisionRegistrationWindow
 }
 
 vtkSmartPointer<vtkColorTransferFunction>
-SubdivisionRegistrationWindow
+SiSSRView
 ::CalculateImageTransferFunction(const double &wMin,
                                  const double &wMax,
                                  const double &mMin,
@@ -712,7 +709,7 @@ SubdivisionRegistrationWindow
 }
 
 void
-SubdivisionRegistrationWindow
+SiSSRView
 ::PlaneWidgetDidMove()
 {
   this->planeSource->SetOrigin(this->planeWidget->GetOrigin());
@@ -721,6 +718,3 @@ SubdivisionRegistrationWindow
 }
 
 } // end namespace
-
-#endif
-

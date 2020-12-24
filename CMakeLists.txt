@@ -121,13 +121,13 @@ find_package(dv-commandline-utils REQUIRED)
 file(GLOB Srcs "src/*.cxx")
 set( Srcs ${Srcs}
           dv-sissr.cxx
-          dvSubdivisionRegistrationController.cxx
-          dvSubdivisionRegistrationWindow.cxx)
+          dvSiSSRController.cxx
+          dvSiSSRView.cxx)
 
-set( Hdrs dvSubdivisionRegistrationController.h
-          dvSubdivisionRegistrationWindow.h)
+set( Hdrs dvSiSSRController.h
+          dvSiSSRView.h)
 
-set( MOC_Hdrs dvSubdivisionRegistrationController.h )
+set( MOC_Hdrs dvSiSSRController.h )
 
 set( UIs QtVTKRenderWindows.ui )
 

@@ -1,5 +1,5 @@
-#ifndef dvSubdivisionRegistrationController_h
-#define dvSubdivisionRegistrationController_h
+#ifndef dvSiSSRController_h
+#define dvSiSSRController_h
 
 // Qt
 #include <ui_QtVTKRenderWindows.h>
@@ -30,20 +30,20 @@
 // Custom
 #include <dvDirectoryStructure.h>
 #include <dvStateMachine.h>
-#include <dvSubdivisionRegistrationWindow.h>
+#include <dvSiSSRView.h>
 #include <itkLoopSubdivisionSurfaceMesh.h>
 
 namespace dv
 {
-class SubdivisionRegistrationController
+class SiSSRController
 : public QMainWindow
 {
   Q_OBJECT
 public:
 
   // Constructor/Destructor
-  SubdivisionRegistrationController(int,char**);
-  ~SubdivisionRegistrationController();
+  SiSSRController(int,char**);
+  ~SiSSRController();
 
 protected slots:
 
@@ -131,10 +131,10 @@ private:
   DirectoryStructure FileTree;
 
   StateMachine State;
-  SubdivisionRegistrationWindow window;
+  SiSSRView window;
 
 };
 } // End namespace
 
-#endif // SubdivisionRegistrationController_h
+#endif // SiSSRController_h
 

@@ -1,7 +1,4 @@
-#ifndef dvSubdivisionRegistrationController_cxx
-#define dvSubdivisionRegistrationController_cxx
-
-#include <dvSubdivisionRegistrationController.h>
+#include <dvSiSSRController.h>
 
 // Qt
 #include <QMessageBox>
@@ -56,8 +53,8 @@ namespace dv
   CONSTRUCTOR
 */
 
-SubdivisionRegistrationController
-::SubdivisionRegistrationController(int argc, char **argv) :
+SiSSRController
+::SiSSRController(int argc, char **argv) :
   FileTree(argv[1], argv[2])
 {
 
@@ -131,7 +128,7 @@ SubdivisionRegistrationController
 };
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::DetermineState()
 {
 
@@ -208,7 +205,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupSliderRanges()
 {
 
@@ -217,7 +214,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupValueLabels()
 {
 
@@ -231,7 +228,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupSlots()
 {
 
@@ -297,7 +294,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::EDButtonPressed()
 {
 
@@ -311,7 +308,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::JumpToEDButtonPressed()
 {
   if (this->State.EDFrameHasBeenSet)
@@ -321,7 +318,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::UpdateCurrentIndex()
 {
 
@@ -341,7 +338,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::IncrementFrame()
 {
 
@@ -352,7 +349,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::DecrementFrame()
 {
 
@@ -363,7 +360,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::CurrentPageChanged(int index)
 {
 
@@ -381,7 +378,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::FrameValueChanged(int value)
 {
 
@@ -432,7 +429,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::UpdateAnnotations()
 {
 
@@ -450,7 +447,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::UpdateModelTransform()
 {
 
@@ -502,14 +499,14 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::Render()
 {
   this->ui->imageWindow->renderWindow()->Render();
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::CalculateBoundaryCandidates()
 {
 
@@ -545,7 +542,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleImagePlanes()
 {
 
@@ -563,7 +560,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleCandidates()
 {
 
@@ -589,7 +586,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleModel()
 {
 
@@ -601,7 +598,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleModelWires()
 {
   this->State.ModelWiresAreVisible = !this->State.ModelWiresAreVisible;
@@ -610,7 +607,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleModelSurface()
 {
   this->State.ModelSurfaceIsVisible = !this->State.ModelSurfaceIsVisible;
@@ -619,7 +616,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleColorbar()
 {
   this->State.ColorbarIsVisible = !this->State.ColorbarIsVisible;
@@ -628,7 +625,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::ToggleResiduals()
 {
   this->State.ResidualsAreVisible = !this->State.ResidualsAreVisible;
@@ -652,7 +649,7 @@ SubdivisionRegistrationController
 //
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupImage()
 {
   const auto imageFileName = this->FileTree.ImagePathForFrame(this->GetCurrentFrame());
@@ -664,7 +661,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupImagePlanes()
 {
 
@@ -697,7 +694,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupCandidates()
 {
 
@@ -726,7 +723,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::SetupModel()
 {
 
@@ -793,7 +790,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::GenerateInitialModel()
 {
 
@@ -808,7 +805,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::Serialize()
 {
 
@@ -869,7 +866,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::Deserialize()
 {
 
@@ -917,14 +914,14 @@ SubdivisionRegistrationController
 
 }
 
-SubdivisionRegistrationController
-::~SubdivisionRegistrationController()
+SiSSRController
+::~SiSSRController()
 {
   this->Serialize();
 }
 
 unsigned int
-SubdivisionRegistrationController
+SiSSRController
 ::GetCurrentFrame()
 {
   itkAssertOrThrowMacro(this->ui->frameSlider->value() >= 0,
@@ -933,7 +930,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::CalculateResidualsForPass(const unsigned int pass)
 {
 
@@ -1003,7 +1000,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::Register()
 {
 
@@ -1143,7 +1140,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::WriteScreenshots()
 {
 
@@ -1174,7 +1171,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::UpdateCellData()
 {
 
@@ -1261,7 +1258,7 @@ SubdivisionRegistrationController
 }
 
 void
-SubdivisionRegistrationController
+SiSSRController
 ::CalculateSurfaceAreas()
 {
 
@@ -1314,5 +1311,3 @@ SubdivisionRegistrationController
 }
 
 }
-
-#endif

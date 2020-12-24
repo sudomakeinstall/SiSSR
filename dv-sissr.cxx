@@ -8,7 +8,7 @@
 #include <vtkOpenGLRenderWindow.h>
 
 // Custom
-#include <dvSubdivisionRegistrationController.h>
+#include <dvSiSSRController.h>
 
 int
 main(int argc, char** argv)
@@ -47,7 +47,7 @@ main(int argc, char** argv)
 
   QApplication application(argc,argv);
 
-  dv::SubdivisionRegistrationController controller(argc, argv);
+  dv::SiSSRController controller(argc, argv);
   controller.show();
 
   for (int i = 3; i < argc; ++i)

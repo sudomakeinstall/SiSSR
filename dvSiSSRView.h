@@ -1,5 +1,5 @@
-#ifndef dvSubdivisionRegistrationWindow_h
-#define dvSubdivisionRegistrationWindow_h
+#ifndef dvSiSSRView_h
+#define dvSiSSRView_h
 
 // STD
 #include <array>
@@ -56,13 +56,13 @@
 
 namespace dv
 {
-class SubdivisionRegistrationWindow
+class SiSSRView
 {
 public:
 
   // Constructor/Destructor
-  SubdivisionRegistrationWindow();
-  ~SubdivisionRegistrationWindow(){};
+  SiSSRView();
+  ~SiSSRView(){};
 
   //
   // Typedefs
@@ -223,5 +223,5 @@ public:
 
 } // End namespace
 
-#endif // SubdivisionRegistrationWindow_h
+#endif // SiSSRView_h
 

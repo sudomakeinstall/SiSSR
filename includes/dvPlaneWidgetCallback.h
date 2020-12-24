@@ -6,7 +6,7 @@
 namespace dv
 {
 
-class SubdivisionRegistrationWindow;
+class SiSSRView;
 
 /*
  A callback function which keeps the position of a vtkPlaneSource
@@ -19,7 +19,7 @@ static PlaneWidgetCallback *New();
 
 void Execute(vtkObject*, unsigned long, void*) override;
 
-SubdivisionRegistrationWindow* window;
+SiSSRView* window;
 vtkPlaneWidget* widget;
 vtkPlaneSource* source;
 
