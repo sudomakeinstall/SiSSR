@@ -19,7 +19,7 @@ project("dv-sissr" LANGUAGES CXX C)
 
 set(${PROJECT_NAME}_VERSION_MAJOR "2020")
 set(${PROJECT_NAME}_VERSION_MINOR "12")
-set(${PROJECT_NAME}_VERSION_PATCH "14")
+set(${PROJECT_NAME}_VERSION_PATCH "24")
 set(${PROJECT_NAME}_VERSION
   "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
@@ -38,9 +38,7 @@ include(dvPreventInBuildInstalls)
 ## Options ##
 #############
 
-## Set flags
-#set(CMAKE_CXX_STANDARD 14)
-#set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall -Wextra -O3 -fno-strict-overflow -ffast-math" CACHE STRING "cxx flags" FORCE)
+# Set flags
 set(CMAKE_BUILD_TYPE "RelWithDebugInfo" CACHE STRING "build type" FORCE)
 
 ##########################
@@ -162,8 +160,8 @@ set(QT_MOC_EXECUTABLE ${VTK_QT_MOC_EXECUTABLE} CACHE FILEPATH "")
 set(QT_UIC_EXECUTABLE ${VTK_QT_UIC_EXECUTABLE} CACHE FILEPATH "")
 qt5_wrap_ui(UI_Srcs ${UIs})
 
-add_executable(dv-sissr ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
-target_link_libraries(dv-sissr PUBLIC
+add_library(dv-sissr-dependencies INTERFACE)
+target_link_libraries(dv-sissr-dependencies INTERFACE
   ${QT_LIBRARIES}
   OpenMP::OpenMP_CXX
   ${VTK_LIBRARIES}
@@ -171,9 +169,29 @@ target_link_libraries(dv-sissr PUBLIC
   ceres
   dv-commandline-utils::dv-commandline-utils
   CGAL::CGAL
+  )
+
+add_executable(dv-sissr ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
+target_link_libraries(dv-sissr PUBLIC
+  dv-sissr-dependencies
 )
 
 vtk_module_autoinit(
   TARGETS dv-sissr
   MODULES ${VTK_LIBRARIES}
 )
+
+#############
+## Testing ##
+#############
+
+option(BUILD_TESTING "Build the testing tree." ON)
+
+include(CTest)
+
+if(BUILD_TESTING)
+
+  add_subdirectory(test)
+
+endif()
+
