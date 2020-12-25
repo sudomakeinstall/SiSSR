@@ -5,10 +5,12 @@
 #include <QApplication>
 #include <QSurfaceFormat>
 #include <QVTKOpenGLStereoWidget.h>
+
+// VTK
 #include <vtkOpenGLRenderWindow.h>
 
-// Custom
-#include <dvSiSSRController.h>
+// SiSSR
+#include <sissrController.h>
 
 int
 main(int argc, char** argv)
@@ -47,7 +49,7 @@ main(int argc, char** argv)
 
   QApplication application(argc,argv);
 
-  sissr::SiSSRController controller(argc, argv);
+  sissr::Controller controller(argc, argv);
   controller.show();
 
   for (int i = 3; i < argc; ++i)
