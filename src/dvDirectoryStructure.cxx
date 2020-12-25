@@ -6,129 +6,92 @@
 
 // Custom
 #include <dvDirectoryStructure.h>
+#include <dvStringOperations.h>
 
-namespace dv
-{
+namespace dv {
 
 DirectoryStructure
 ::DirectoryStructure(const std::string _IptDirectory,
                      const std::string _OptDirectory) :
-IptDirectory(_IptDirectory.back() == '/' ? _IptDirectory : _IptDirectory + '/'),
-OptDirectory(_OptDirectory.back() == '/' ? _OptDirectory : _OptDirectory + '/')
+  IptDirectory(dv::AppendCharacterIfAbsent(_IptDirectory, '/')),
+  OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
+  SegmentationDirectory  (IptDirectory + "seg-nii/"         , ".nii.gz"),
+  ImageDirectory         (IptDirectory + "img-nii/"         , ".nii.gz", GetNumberOfFiles()),
+  CandidateMeshDirectory (IptDirectory + "candidate-meshes/", ".vtk"   , GetNumberOfFiles()),
+  CandidatePointDirectory(IptDirectory + "candidate-points/", ".txt"   , GetNumberOfFiles())
 {
 
   // Create directories
-  std::filesystem::create_directory(this->CandidateDirectory);
-  std::filesystem::create_directory(this->InitialModelDirectory);
-  std::filesystem::create_directory(this->RegisteredModelDirectory);
-  std::filesystem::create_directory(this->ResidualsDirectory);
-  std::filesystem::create_directory(this->SerializationDirectory);
-  std::filesystem::create_directory(this->ScreenshotDirectory);
-
-  this->DetermineNumberOfFiles();
+  namespace fs = std::filesystem;
+  fs::create_directory(this->InitialModelDirectory);
+  fs::create_directory(this->RegisteredModelDirectory);
+  fs::create_directory(this->ResidualsDirectory);
+  fs::create_directory(this->SerializationDirectory);
+  fs::create_directory(this->ScreenshotDirectory);
 
 };
   
-void
-DirectoryStructure
-::DetermineNumberOfFiles()
-{
-  this->NumberOfFiles = 0;
-  while (
-    std::filesystem::exists(
-      this->SegmentationDirectory + std::to_string(NumberOfFiles) + this->ImageSuffix)
-        ) ++NumberOfFiles;
-  itkAssertOrThrowMacro(NumberOfFiles > 0, "At least one image must be supplied.");
-}
-
-unsigned int
+size_t
 DirectoryStructure
 ::GetNumberOfFiles() const
 {
-  return this->NumberOfFiles;
+  return this->SegmentationDirectory.NumberOfFiles;
 }
 
 std::string
 DirectoryStructure
-::SurfaceAreaForPass(const unsigned int p) const
-{
-  return this->SerializationDirectory + "surface_area_" + std::to_string(p) + ".txt";
-}
-
-std::string
-DirectoryStructure
-::ResidualsForPass(const unsigned int p) const
-{
-  return this->SerializationDirectory + "residuals_" + std::to_string(p) + ".txt";
-}
-
-std::string
-DirectoryStructure
-::RegistrationSummaryForPass(const unsigned int p) const
-{
-  return this->SerializationDirectory + "summary_" + std::to_string(p) + ".txt";
-}
-
-std::string
-DirectoryStructure
-::RegisteredModelPathForPassAndFrame(const unsigned int p, const unsigned int f) const
+::RegisteredModelPathForPassAndFrame(const size_t p, const size_t f) const
 {
   return this->RegisteredModelDirectory +
          std::to_string(p) + '/' +
          std::to_string(f) + this->MeshSuffix;
 }
 
+/////////////////////
+// Does Data Exist //
+/////////////////////
+
 std::string
 DirectoryStructure
-::ResidualMeshPathForPassAndFrame(const unsigned int p, const unsigned int f) const
+::SurfaceAreaForPass(const size_t p) const
 {
-  return this->ResidualsDirectory + std::to_string(p) + "/" + std::to_string(f) + this->ResidualSuffix;
+  return this->SerializationDirectory + "surface_area_" + std::to_string(p) + ".txt";
 }
 
 std::string
 DirectoryStructure
-::ImagePathForFrame(const unsigned int f) const {
-  return this->ImageDirectory + std::to_string(f) + this->ImageSuffix;
+::ResidualsForPass(const size_t p) const
+{
+  return this->SerializationDirectory + "residuals_" + std::to_string(p) + ".txt";
 }
 
 std::string
 DirectoryStructure
-::SegmentationPathForFrame(const unsigned int f) const {
-  return this->SegmentationDirectory + std::to_string(f) + this->ImageSuffix;
+::RegistrationSummaryForPass(const size_t p) const
+{
+  return this->SerializationDirectory + "summary_" + std::to_string(p) + ".txt";
 }
 
 std::string
 DirectoryStructure
-::CandidatePathForFrame(const unsigned int f) const {
-  // TODO: .csv
-//  return this->CandidateDirectory + std::to_string(f) + this->MeshSuffix;
-  return this->CandidateDirectory + std::to_string(f) + ".txt";
+::ResidualMeshPathForPassAndFrame(const size_t p, const size_t f) const
+{
+  return this->ResidualsDirectory + std::to_string(p) + "/" + std::to_string(f) + this->MeshSuffix;
 }
 
 std::string
 DirectoryStructure
-::ScreenshotPathForFrame(const unsigned int f) const {
+::ScreenshotPathForFrame(const size_t f) const {
   return this->ScreenshotDirectory + std::to_string(f) + this->ScreenshotSuffix;
 }
 
-bool
-DirectoryStructure
-::CandidateDataExists() const {
-  for (size_t f = 0; f < this->GetNumberOfFiles(); ++f) {
-    if (!std::filesystem::exists(this->CandidatePathForFrame(f))) {
-      return false;
-    }
-  }
-  return true;
-}
-
-unsigned int
+size_t
 DirectoryStructure
 ::NumberOfRegistrationPasses() const {
-  unsigned int NumberOfRegistrationPasses = 0;
+  size_t NumberOfRegistrationPasses = 0;
   while (true) {
     bool AllFilesFound = true;
-    for (unsigned int f = 0; f < this->GetNumberOfFiles(); ++f) {
+    for (size_t f = 0; f < this->GetNumberOfFiles(); ++f) {
       const auto file
         = this->RegisteredModelPathForPassAndFrame(NumberOfRegistrationPasses, f);
       if (!std::filesystem::exists(file)) {
@@ -148,8 +111,8 @@ DirectoryStructure
 
 bool
 DirectoryStructure
-::ResidualMeshDataExistsForPass(const unsigned int p) const {
-  for (unsigned int f = 0; f < this->GetNumberOfFiles(); ++f) {
+::ResidualMeshDataExistsForPass(const size_t p) const {
+  for (size_t f = 0; f < this->GetNumberOfFiles(); ++f) {
     const auto file = this->ResidualMeshPathForPassAndFrame(p, f);
     if (!std::filesystem::exists(file)) {
       return false;
@@ -158,4 +121,4 @@ DirectoryStructure
   return true;
 }
 
-}
+} // namespace dv

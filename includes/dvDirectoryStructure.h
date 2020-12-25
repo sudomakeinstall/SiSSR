@@ -1,8 +1,12 @@
 #ifndef itkDirectoryStructure_h
 #define itkDirectoryStructure_h
 
+// STD
 #include <vector>
 #include <string>
+
+// Custom
+#include <sissrSequentialDirectory.h>
 
 namespace dv
 {
@@ -17,10 +21,11 @@ public:
   const std::string IptDirectory;
   const std::string OptDirectory;
 
-  const std::string SegmentationDirectory    = this->IptDirectory + "seg-nii/";
-  const std::string ImageDirectory           = this->IptDirectory + "img-nii/";
+  const sissr::SequentialDirectory SegmentationDirectory;
+  const sissr::SequentialDirectory ImageDirectory;
+  const sissr::SequentialDirectory CandidateMeshDirectory;
+  const sissr::SequentialDirectory CandidatePointDirectory;
 
-  const std::string CandidateDirectory       = this->OptDirectory + "candidates/";
   const std::string InitialModelDirectory    = this->OptDirectory + "initial_models/";
   const std::string RegisteredModelDirectory = this->OptDirectory + "registered_models/";
   const std::string ResidualsDirectory       = this->OptDirectory + "residuals_models/";
@@ -29,7 +34,7 @@ public:
 
   const std::string ImageSuffix = ".nii.gz";
   const std::string MeshSuffix = ".vtk";
-  const std::string ResidualSuffix = ".vtk";
+  const std::string PointSuffix = ".txt";
   const std::string ScreenshotSuffix = ".png";
 
   const std::string InitialModelSegmentation =
@@ -39,30 +44,22 @@ public:
 
   const std::string ParametersJSON = this->SerializationDirectory + "parameters.json";
 
-  std::string SurfaceAreaForPass(const unsigned int p) const;
+  std::string SurfaceAreaForPass(const size_t p) const;
 
-  std::string ResidualsForPass(const unsigned int p) const;
-  std::string RegistrationSummaryForPass(const unsigned int p) const;
+  std::string ResidualsForPass(const size_t p) const;
+  std::string RegistrationSummaryForPass(const size_t p) const;
 
-  std::string ImagePathForFrame(const unsigned int f) const;
-  std::string SegmentationPathForFrame(const unsigned int f) const;
+  std::string CandidateMeshPathForFrame(const size_t f) const;
+  std::string CandidatePointPathForFrame(const size_t f) const;
+  std::string ScreenshotPathForFrame(const size_t f) const;
 
-  std::string CandidatePathForFrame(const unsigned int f) const;
-  std::string ScreenshotPathForFrame(const unsigned int f) const;
+  std::string RegisteredModelPathForPassAndFrame(const size_t p, const size_t f) const;
+  std::string ResidualMeshPathForPassAndFrame(const size_t p, const size_t f) const;
+  size_t GetNumberOfFiles() const;
 
-  std::string RegisteredModelPathForPassAndFrame(const unsigned int p, const unsigned int f) const;
-  std::string ResidualMeshPathForPassAndFrame(const unsigned int p, const unsigned int f) const;
-  unsigned int GetNumberOfFiles() const;
+  size_t NumberOfRegistrationPasses() const;
+  bool ResidualMeshDataExistsForPass(const size_t p) const;
 
-  bool CandidateDataExists() const;
-  unsigned int NumberOfRegistrationPasses() const;
-  bool ResidualMeshDataExistsForPass(const unsigned int p) const;
-
-private:
-
-  unsigned int NumberOfFiles = 0;
-  void DetermineNumberOfFiles();
- 
 };
 }
 #endif

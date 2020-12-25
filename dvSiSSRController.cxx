@@ -130,42 +130,27 @@ SiSSRController
 ::DetermineState()
 {
 
-  ///////////////////////
-  // Segmentation Data //
-  ///////////////////////
+  // Segmentation Data
 
   std::cout << "Segmentation data..." << std::flush;
-  if (this->DirectoryStructure.GetNumberOfFiles() > 0)
-    {
-    this->State.SegmentationDataExists = true;
+  if (this->DirectoryStructure.GetNumberOfFiles() > 0) {
     std::cout << "found (" << std::to_string(this->DirectoryStructure.GetNumberOfFiles()) << " files)." << std::endl;
-    }
-  else
-    {
-    this->State.PlaneDataExists = false;
+  } else {
     std::cout << "not found." << std::endl;
     return;
-    }
+  }
 
-  ////////////////////
-  // Candidate Data //
-  ////////////////////
+  // Candidate Data
 
   std::cout << "Candidate data..." << std::flush;
-  this->State.CandidateDataExists = this->DirectoryStructure.CandidateDataExists();
-  if (this->State.CandidateDataExists)
-    {
+  if (this->DirectoryStructure.CandidateMeshDirectory.DataExists() && this->DirectoryStructure.CandidatePointDirectory.DataExists()) {
     std::cout << "found." << std::endl;
-    }
-  else
-    {
+  } else {
     std::cout << "not found." << std::endl;
-    return;
-    }
+    this->CalculateBoundaryCandidates();
+  }
 
-  ////////////////////////
-  // Initial Model Data //
-  ////////////////////////
+  // Initial Model Data
 
   std::cout << "Initial model data..." << std::flush;
   this->State.InitialModelDataExists = std::filesystem::exists(this->DirectoryStructure.InitialModel);
@@ -320,17 +305,11 @@ SiSSRController
 ::UpdateCurrentIndex()
 {
 
-  const auto CURRENT_STATE = this->State.GetCurrentState();
-  const int index = static_cast<int>(CURRENT_STATE);
+  const int index = this->State.CurrentFrame;
 
   if (index != this->ui->toolBox->currentIndex())
     {
     this->ui->toolBox->setCurrentIndex(index);
-    }
-
-  if (dv::State::ORIENTATION_CAPTURED == CURRENT_STATE)
-    {
-    this->SetupModel();
     }
 
 }
@@ -390,7 +369,7 @@ SiSSRController
 
   if (this->State.ImagePlanesAreVisible)
     {
-    this->window.UpdatePlanesSource(this->DirectoryStructure.ImagePathForFrame(value));
+    this->window.UpdatePlanesSource(this->DirectoryStructure.ImageDirectory.PathForFrame(value));
     }
 
   /**************
@@ -399,7 +378,7 @@ SiSSRController
 
   if (this->State.CandidatesAreVisible)
     {
-    this->window.UpdateCandidatesSource(this->DirectoryStructure.CandidatePathForFrame(value));
+    this->window.UpdateCandidatesSource(this->DirectoryStructure.CandidateMeshDirectory.PathForFrame(value));
     }
 
   /*********
@@ -514,11 +493,11 @@ SiSSRController
   itk::TimeProbe clock;
   clock.Start();
 
-  for (unsigned int file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file)
+  for (size_t file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file)
     {
 
-    const auto input = this->DirectoryStructure.SegmentationPathForFrame(file);
-    const auto output = this->DirectoryStructure.CandidatePathForFrame(file);
+    const auto input = this->DirectoryStructure.SegmentationDirectory.PathForFrame(file);
+    const auto output = this->DirectoryStructure.CandidatePointDirectory.PathForFrame(file);
 
     SegmentationToLabeledPointSet<3, unsigned short, double>(
       input,
@@ -529,13 +508,8 @@ SiSSRController
 
     }
 
-  this->State.CandidateDataExists = true;
-  this->UpdateCurrentIndex();
-
   clock.Stop();
   std::cout << "Time elapsed: " << clock.GetTotal() << std::endl;
-
-  this->SetupCandidates();
 
 }
 
@@ -548,7 +522,7 @@ SiSSRController
 
   if (this->State.ImagePlanesAreVisible)
     {
-    const auto file = this->DirectoryStructure.ImagePathForFrame( this->GetCurrentFrame() );
+    const auto file = this->DirectoryStructure.ImageDirectory.PathForFrame( this->GetCurrentFrame() );
     this->window.UpdatePlanesSource( file );
     }
 
@@ -574,7 +548,7 @@ SiSSRController
 
   if (this->State.CandidatesAreVisible)
     {
-    const auto file = this->DirectoryStructure.CandidatePathForFrame( this->GetCurrentFrame() );
+    const auto file = this->DirectoryStructure.CandidatePointDirectory.PathForFrame( this->GetCurrentFrame() );
     this->window.UpdateCandidatesSource( file );
     }
 
@@ -650,7 +624,7 @@ void
 SiSSRController
 ::SetupImage()
 {
-  const auto imageFileName = this->DirectoryStructure.ImagePathForFrame(this->GetCurrentFrame());
+  const auto imageFileName = this->DirectoryStructure.ImageDirectory.PathForFrame(this->GetCurrentFrame());
   const auto iren = this->ui->imageWindow->interactor();
 
   this->window.SetupImageData(imageFileName);
@@ -709,7 +683,7 @@ SiSSRController
     return;
 
   const auto frame = this->GetCurrentFrame();
-  const auto fileName = this->DirectoryStructure.CandidatePathForFrame(frame);
+  const auto fileName = this->DirectoryStructure.CandidatePointDirectory.PathForFrame(frame);
 
   this->window.SetupCandidates(fileName);
 
@@ -958,7 +932,7 @@ SiSSRController
     const auto locator = TLocator::New();
 
       {
-      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePathForFrame(f) );
+      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePointDirectory.PathForFrame(f) );
       locator->SetPoints( points->GetPoints() );
 
       }
@@ -1034,7 +1008,7 @@ SiSSRController
   for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
     {
 
-    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePathForFrame(i) );
+    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePointDirectory.PathForFrame(i) );
     const auto pointset_map = dv::LabeledITKPointSetToPointSetMap<TMesh>(points);
     std::map<unsigned char, TLocator::Pointer> locator_map;
     for (const auto& pointset : pointset_map) {
