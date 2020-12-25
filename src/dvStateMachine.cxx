@@ -1,6 +1,3 @@
-#ifndef dvStateMachine_cxx
-#define dvStateMachine_cxx
-
 #include <dvStateMachine.h>
 
 #include <iostream>
@@ -348,5 +345,3 @@ StateMachine
 }
 
 } // end namespace
-#endif
-

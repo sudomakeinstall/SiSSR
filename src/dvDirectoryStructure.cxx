@@ -1,11 +1,9 @@
-#ifndef itkDirectoryStructure_cxx
-#define itkDirectoryStructure_cxx
-
 #include <dvDirectoryStructure.h>
 
 #include <itkFileTools.h>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace dv
 {
@@ -29,13 +27,6 @@ OptDirectory(_OptDirectory.back() == '/' ? _OptDirectory : _OptDirectory + '/')
 
 };
   
-unsigned int
-DirectoryStructure
-::GetNumberOfFiles() const
-{
-  return this->NumberOfFiles;
-}
-
 void
 DirectoryStructure
 ::DetermineNumberOfFiles()
@@ -43,9 +34,16 @@ DirectoryStructure
   this->NumberOfFiles = 0;
   while (
     itksys::SystemTools::FileExists(
-      this->ImageDirectory + std::to_string(NumberOfFiles) + this->ImageSuffix,true)
+      this->SegmentationDirectory + std::to_string(NumberOfFiles) + this->ImageSuffix,true)
         ) ++NumberOfFiles;
   itkAssertOrThrowMacro(NumberOfFiles > 0, "At least one image must be supplied.");
+}
+
+unsigned int
+DirectoryStructure
+::GetNumberOfFiles() const
+{
+  return this->NumberOfFiles;
 }
 
 void
@@ -166,4 +164,3 @@ DirectoryStructure
 }
 
 }
-#endif

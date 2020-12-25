@@ -1,6 +1,3 @@
-#ifndef vtkTransformState_cxx
-#define vtkTransformState_cxx
-
 #include <vtkTransformState.h>
 
 #include <vtkSmartPointer.h>
@@ -58,5 +55,3 @@ TransformState
 }
 
 } // end namespace vtk
-#endif
-

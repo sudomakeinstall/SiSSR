@@ -1,4 +1,3 @@
-
 #include <dvSiSSRView.h>
 #include <dvPlaneWidgetCallback.h>
 
