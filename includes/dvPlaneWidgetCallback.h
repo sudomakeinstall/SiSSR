@@ -1,6 +1,8 @@
 #ifndef dv_PlaneWidgetCallback_h
 #define dv_PlaneWidgetCallback_h
 
+#include <vtkPlaneWidget.h>
+#include <vtkPlaneSource.h>
 #include <vtkCommand.h>
 
 namespace dv

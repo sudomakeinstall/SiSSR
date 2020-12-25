@@ -1,5 +1,10 @@
 #include <dvSiSSRController.h>
 
+// STD
+#include <filesystem>
+#include <iostream>
+#include <thread>
+
 // Qt
 #include <QMessageBox>
 
@@ -42,20 +47,13 @@
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
 
-// Standard
-#include <iostream>
-#include <thread>
-
 namespace dv
 {
 
-/*
-  CONSTRUCTOR
-*/
-
+// CONSTRUCTOR
 SiSSRController
 ::SiSSRController(int argc, char **argv) :
-  FileTree(argv[1], argv[2])
+  DirectoryStructure(argv[1], argv[2])
 {
 
   // Determine current state
@@ -132,15 +130,15 @@ SiSSRController
 ::DetermineState()
 {
 
-  ////////////////
-  // Plane Data //
-  ////////////////
+  ///////////////////////
+  // Segmentation Data //
+  ///////////////////////
 
-  std::cout << "Plane data..." << std::flush;
-  if (this->FileTree.GetNumberOfFiles() > 0)
+  std::cout << "Segmentation data..." << std::flush;
+  if (this->DirectoryStructure.GetNumberOfFiles() > 0)
     {
-    this->State.PlaneDataExists = true;
-    std::cout << "found." << std::endl;
+    this->State.SegmentationDataExists = true;
+    std::cout << "found (" << std::to_string(this->DirectoryStructure.GetNumberOfFiles()) << " files)." << std::endl;
     }
   else
     {
@@ -154,7 +152,7 @@ SiSSRController
   ////////////////////
 
   std::cout << "Candidate data..." << std::flush;
-  this->State.CandidateDataExists = this->FileTree.CandidateDataExists();
+  this->State.CandidateDataExists = this->DirectoryStructure.CandidateDataExists();
   if (this->State.CandidateDataExists)
     {
     std::cout << "found." << std::endl;
@@ -170,7 +168,7 @@ SiSSRController
   ////////////////////////
 
   std::cout << "Initial model data..." << std::flush;
-  this->State.InitialModelDataExists = itksys::SystemTools::FileExists(this->FileTree.InitialModel,true);
+  this->State.InitialModelDataExists = itksys::SystemTools::FileExists(this->DirectoryStructure.InitialModel,true);
   if (this->State.InitialModelDataExists)
     {
     std::cout << "found." << std::endl;
@@ -187,16 +185,16 @@ SiSSRController
 
   std::cout << "Determining number of registration passes..." << std::flush;
 
-  this->State.NumberOfRegistrationPasses = this->FileTree.NumberOfRegistrationPasses();
+  this->State.NumberOfRegistrationPasses = this->DirectoryStructure.NumberOfRegistrationPasses();
   std::cout << this->State.NumberOfRegistrationPasses << "." << std::endl;
 
   ////////////////////////////
   // Calculated Information //
   ////////////////////////////
 
-  for (unsigned int p = 0; p <= this->FileTree.NumberOfRegistrationPasses(); ++p)
+  for (unsigned int p = 0; p <= this->DirectoryStructure.NumberOfRegistrationPasses(); ++p)
     {
-    if (!this->FileTree.ResidualMeshDataExistsForPass(p))
+    if (!this->DirectoryStructure.ResidualMeshDataExistsForPass(p))
       {
       this->CalculateResidualsForPass(p);
       }
@@ -209,7 +207,7 @@ SiSSRController
 ::SetupSliderRanges()
 {
 
-  this->ui->frameSlider->setRange(      0,this->FileTree.GetNumberOfFiles()-1);
+  this->ui->frameSlider->setRange(      0,this->DirectoryStructure.GetNumberOfFiles()-1);
 
 }
 
@@ -343,7 +341,7 @@ SiSSRController
 {
 
   int val = this->GetCurrentFrame() + 1;
-  val %= this->FileTree.GetNumberOfFiles();
+  val %= this->DirectoryStructure.GetNumberOfFiles();
   this->ui->frameSlider->setValue( val );
 
 }
@@ -354,7 +352,7 @@ SiSSRController
 {
 
   int val = this->GetCurrentFrame() - 1;
-  if (val < 0) val += this->FileTree.GetNumberOfFiles();
+  if (val < 0) val += this->DirectoryStructure.GetNumberOfFiles();
   this->ui->frameSlider->setValue( val );
 
 }
@@ -392,7 +390,7 @@ SiSSRController
 
   if (this->State.ImagePlanesAreVisible)
     {
-    this->window.UpdatePlanesSource(this->FileTree.ImagePathForFrame(value));
+    this->window.UpdatePlanesSource(this->DirectoryStructure.ImagePathForFrame(value));
     }
 
   /**************
@@ -401,7 +399,7 @@ SiSSRController
 
   if (this->State.CandidatesAreVisible)
     {
-    this->window.UpdateCandidatesSource(this->FileTree.CandidatePathForFrame(value));
+    this->window.UpdateCandidatesSource(this->DirectoryStructure.CandidatePathForFrame(value));
     }
 
   /*********
@@ -467,7 +465,7 @@ SiSSRController
   if (this->State.ResidualsAreVisible)
     {
     const auto file
-      = this->FileTree.ResidualMeshPathForPassAndFrame(
+      = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
           this->State.NumberOfRegistrationPasses,
           this->GetCurrentFrame()
                                                   );
@@ -485,7 +483,7 @@ SiSSRController
   if (this->State.ModelSurfaceIsVisible || this->State.ModelWiresAreVisible)
     {
     const auto file
-      = this->FileTree.RegisteredModelPathForPassAndFrame(
+      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
           this->State.NumberOfRegistrationPasses - 1,
           this->GetCurrentFrame()
                                                          );
@@ -511,16 +509,16 @@ SiSSRController
 {
 
   std::cout << "Calculating boundary candidates..." << std::endl;
-  auto progress = dv::Progress( this->FileTree.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
   itk::TimeProbe clock;
   clock.Start();
 
-  for (unsigned int file = 0; file < this->FileTree.GetNumberOfFiles(); ++file)
+  for (unsigned int file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file)
     {
 
-    const auto input = this->FileTree.SegmentationPathForFrame(file);
-    const auto output = this->FileTree.CandidatePathForFrame(file);
+    const auto input = this->DirectoryStructure.SegmentationPathForFrame(file);
+    const auto output = this->DirectoryStructure.CandidatePathForFrame(file);
 
     SegmentationToLabeledPointSet<3, unsigned short, double>(
       input,
@@ -550,7 +548,7 @@ SiSSRController
 
   if (this->State.ImagePlanesAreVisible)
     {
-    const auto file = this->FileTree.ImagePathForFrame( this->GetCurrentFrame() );
+    const auto file = this->DirectoryStructure.ImagePathForFrame( this->GetCurrentFrame() );
     this->window.UpdatePlanesSource( file );
     }
 
@@ -576,7 +574,7 @@ SiSSRController
 
   if (this->State.CandidatesAreVisible)
     {
-    const auto file = this->FileTree.CandidatePathForFrame( this->GetCurrentFrame() );
+    const auto file = this->DirectoryStructure.CandidatePathForFrame( this->GetCurrentFrame() );
     this->window.UpdateCandidatesSource( file );
     }
 
@@ -633,7 +631,7 @@ SiSSRController
   if (this->State.ResidualsAreVisible)
     {
     const auto file
-      = this->FileTree.ResidualMeshPathForPassAndFrame(
+      = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
           this->State.NumberOfRegistrationPasses,
           this->GetCurrentFrame()
                                                   );
@@ -652,7 +650,7 @@ void
 SiSSRController
 ::SetupImage()
 {
-  const auto imageFileName = this->FileTree.ImagePathForFrame(this->GetCurrentFrame());
+  const auto imageFileName = this->DirectoryStructure.ImagePathForFrame(this->GetCurrentFrame());
   const auto iren = this->ui->imageWindow->interactor();
 
   this->window.SetupImageData(imageFileName);
@@ -711,7 +709,7 @@ SiSSRController
     return;
 
   const auto frame = this->GetCurrentFrame();
-  const auto fileName = this->FileTree.CandidatePathForFrame(frame);
+  const auto fileName = this->DirectoryStructure.CandidatePathForFrame(frame);
 
   this->window.SetupCandidates(fileName);
 
@@ -735,7 +733,7 @@ SiSSRController
     {
 
     this->window.SetupModel(
-      this->FileTree.RegisteredModelPathForPassAndFrame(
+      this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
         this->State.NumberOfRegistrationPasses,
         this->GetCurrentFrame()
                                                        )
@@ -753,7 +751,7 @@ SiSSRController
       }
 
     // Setup.
-    this->window.SetupModel( this->FileTree.InitialModel.c_str() );
+    this->window.SetupModel( this->DirectoryStructure.InitialModel.c_str() );
 
     }
 
@@ -765,7 +763,7 @@ SiSSRController
 
   if (this->State.InitialModelDataExists && this->State.ModelHasBeenSetup)
     {
-    const auto file = this->FileTree.ResidualMeshPathForPassAndFrame(
+    const auto file = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
       this->State.NumberOfRegistrationPasses,
       this->GetCurrentFrame()
                                                                  );
@@ -795,8 +793,8 @@ SiSSRController
 {
 
   dv::GenerateInitialModel(
-    this->FileTree.InitialModelSegmentation,
-    this->FileTree.InitialModel,
+    this->DirectoryStructure.InitialModelSegmentation,
+    this->DirectoryStructure.InitialModel,
     this->State.NumberOfFacesInDecimatedMesh,
     this->State.DecimationNoiseSigma,
     10
@@ -820,7 +818,7 @@ SiSSRController
     this->State.SerializeJSON(writer);
     writer.EndObject();
 
-    std::string fileName = this->FileTree.ParametersJSON;
+    std::string fileName = this->DirectoryStructure.ParametersJSON;
     std::ofstream fileStream;
     fileStream.open(fileName);
     fileStream << sb.GetString();
@@ -831,7 +829,7 @@ SiSSRController
     if (!this->State.SurfaceAreas.empty())
       {
       std::string fileName
-        = this->FileTree.SurfaceAreaForPass(this->State.NumberOfRegistrationPasses - 1);
+        = this->DirectoryStructure.SurfaceAreaForPass(this->State.NumberOfRegistrationPasses - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       this->State.SerializeSurfaceArea(fileStream, this->State.SurfaceAreas);
@@ -843,7 +841,7 @@ SiSSRController
     if (!this->State.costFunctionFrames.empty())
       {
       std::string fileName
-        = this->FileTree.ResidualsForPass(this->State.NumberOfRegistrationPasses - 1);
+        = this->DirectoryStructure.ResidualsForPass(this->State.NumberOfRegistrationPasses - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       this->State.SerializeResiduals(fileStream);
@@ -855,7 +853,7 @@ SiSSRController
     if (this->State.RegistrationSummary != "")
       {
       std::string fileName
-        = this->FileTree.RegistrationSummaryForPass(this->State.NumberOfRegistrationPasses - 1);
+        = this->DirectoryStructure.RegistrationSummaryForPass(this->State.NumberOfRegistrationPasses - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       fileStream << this->State.RegistrationSummary;
@@ -871,7 +869,7 @@ SiSSRController
 {
 
     {
-    const auto fileName = this->FileTree.ParametersJSON;
+    const auto fileName = this->DirectoryStructure.ParametersJSON;
     if (itksys::SystemTools::FileExists(fileName,true))
       {
       std::ifstream fileStream;
@@ -890,7 +888,7 @@ SiSSRController
 
     {
     const auto fileName
-      = this->FileTree.SurfaceAreaForPass( this->State.NumberOfRegistrationPasses - 1 );
+      = this->DirectoryStructure.SurfaceAreaForPass( this->State.NumberOfRegistrationPasses - 1 );
     if (itksys::SystemTools::FileExists(fileName,true))
       {
       std::ifstream fileStream;
@@ -902,7 +900,7 @@ SiSSRController
 
     {
     const auto fileName
-      = this->FileTree.ResidualsForPass( this->State.NumberOfRegistrationPasses - 1 );
+      = this->DirectoryStructure.ResidualsForPass( this->State.NumberOfRegistrationPasses - 1 );
     if (itksys::SystemTools::FileExists(fileName,true))
       {
       std::ifstream fileStream;
@@ -935,7 +933,7 @@ SiSSRController
 {
 
   std::cout << "Calculating residuals for pass " << pass << "..." << std::endl;
-  auto progress = dv::Progress( this->FileTree.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
   // Get the vectors
   typedef dv::CalculateResidualMesh< TMesh, TLoopMesh, TMesh > TResidualCalculator;
@@ -947,20 +945,20 @@ SiSSRController
   if (0 == pass)
     {
     const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-    reader->SetFileName( this->FileTree.InitialModel.c_str() );
+    reader->SetFileName( this->DirectoryStructure.InitialModel.c_str() );
     reader->Update();
     const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
     initial->Graft( mesh );
     initial->Setup();
     }
 
-  for (unsigned int f = 0; f < this->FileTree.GetNumberOfFiles(); ++f)
+  for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
     {
 
     const auto locator = TLocator::New();
 
       {
-      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->FileTree.CandidatePathForFrame(f) );
+      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePathForFrame(f) );
       locator->SetPoints( points->GetPoints() );
 
       }
@@ -971,7 +969,7 @@ SiSSRController
       {
       const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
       const auto file
-        = this->FileTree.RegisteredModelPathForPassAndFrame( pass - 1, f );
+        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame( pass - 1, f );
       reader->SetFileName( file.c_str() );
       reader->Update();
       const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
@@ -983,13 +981,13 @@ SiSSRController
 
     const auto r = residuals.Calculate();
 
-    const std::string dir = this->FileTree.ResidualsDirectory + std::to_string(pass);
-    this->FileTree.CreateDirectory( dir );
+    const std::string dir = this->DirectoryStructure.ResidualsDirectory + std::to_string(pass);
+    std::filesystem::create_directory(dir);
 
       {
       const auto writer = TWriter::New();
       writer->SetInput(r);
-      writer->SetFileName(this->FileTree.ResidualMeshPathForPassAndFrame(pass, f));
+      writer->SetFileName(this->DirectoryStructure.ResidualMeshPathForPassAndFrame(pass, f));
       writer->Update();
       }
 
@@ -1024,19 +1022,19 @@ SiSSRController
   std::vector<TLoopMesh::Pointer> movingVector;
 
   std::string dirToCreate =
-    this->FileTree.RegisteredModelDirectory +
+    this->DirectoryStructure.RegisteredModelDirectory +
     std::to_string(this->State.NumberOfRegistrationPasses);
 
-  this->FileTree.CreateDirectory( dirToCreate );
+  std::filesystem::create_directory( dirToCreate );
 
   std::cout << "Preparing boundary candidates..." << std::endl;
 
-  auto progress = dv::Progress( this->FileTree.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
-  for (unsigned int i = 0; i < this->FileTree.GetNumberOfFiles(); ++i)
+  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
     {
 
-    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->FileTree.CandidatePathForFrame(i) );
+    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePathForFrame(i) );
     const auto pointset_map = dv::LabeledITKPointSetToPointSetMap<TMesh>(points);
     std::map<unsigned char, TLocator::Pointer> locator_map;
     for (const auto& pointset : pointset_map) {
@@ -1051,7 +1049,7 @@ SiSSRController
     if (0 == this->State.NumberOfRegistrationPasses)
       {
       const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-      reader->SetFileName( this->FileTree.InitialModel.c_str() );
+      reader->SetFileName( this->DirectoryStructure.InitialModel.c_str() );
       reader->Update();
       const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
       movingVector.emplace_back( mesh );
@@ -1059,7 +1057,7 @@ SiSSRController
     else
       {
       const auto file
-        = this->FileTree.RegisteredModelPathForPassAndFrame(
+        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
           this->State.NumberOfRegistrationPasses - 1, i);
       const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
       reader->SetFileName( file.c_str() );
@@ -1086,10 +1084,10 @@ SiSSRController
 
   std::cout << "Writing registered models..." << std::endl;
 
-  for (unsigned int i = 0; i < this->FileTree.GetNumberOfFiles(); ++i)
+  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
     {
     const auto file
-      = this->FileTree.RegisteredModelPathForPassAndFrame(
+      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
         this->State.NumberOfRegistrationPasses, i);
     const auto finalWriter = TMovingWriter::New();
     finalWriter->SetInput( movingVector.at(i) );
@@ -1145,9 +1143,9 @@ SiSSRController
 {
 
   std::cout << "Writing screenshots..." << std::endl;
-  auto progress = dv::Progress( this->FileTree.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
-  for (unsigned int i = 0; i < this->FileTree.GetNumberOfFiles(); ++i)
+  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
     {
     this->ui->frameSlider->setValue( i );
 
@@ -1161,7 +1159,7 @@ SiSSRController
     windowToImageFilter->Update();
 
     const auto writer = vtkSmartPointer<vtkPNGWriter>::New();
-    writer->SetFileName( this->FileTree.ScreenshotPathForFrame(i).c_str() );
+    writer->SetFileName( this->DirectoryStructure.ScreenshotPathForFrame(i).c_str() );
     writer->SetInputConnection( windowToImageFilter->GetOutputPort() );
     writer->Write();
 
@@ -1239,7 +1237,7 @@ SiSSRController
         }
 
       if (this->State.SurfaceAreas.empty() ||
-          this->State.SurfaceAreas.cols() != this->FileTree.GetNumberOfFiles())
+          this->State.SurfaceAreas.cols() != this->DirectoryStructure.GetNumberOfFiles())
         {
         this->CalculateSurfaceAreas();
         }
@@ -1268,16 +1266,16 @@ SiSSRController
 
     {
     std::cout << "Calculating surface areas..." << std::endl;
-    auto progress = dv::Progress( this->FileTree.GetNumberOfFiles() );
+    auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
   
     vnl_matrix<TReal> sa;
   
-    for (unsigned int f = 0; f < this->FileTree.GetNumberOfFiles(); ++f)
+    for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
       {
   
       const auto modelReader = TVTKMeshReader::New();
       modelReader->SetFileName(
-        this->FileTree.RegisteredModelPathForPassAndFrame(
+        this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
           this->State.NumberOfRegistrationPasses - 1, f ).c_str()
                               );
       modelReader->Update();
@@ -1290,7 +1288,7 @@ SiSSRController
       if (0 == f)
         {
         sa.set_size(modelLoop->GetOutput()->GetNumberOfCells(),
-                    this->FileTree.GetNumberOfFiles());
+                    this->DirectoryStructure.GetNumberOfFiles());
         sa.fill(-1.0);
         }
   
@@ -1302,7 +1300,7 @@ SiSSRController
   
     this->State.SurfaceAreas = sa;
   
-    for (unsigned int f = 0; f < this->FileTree.GetNumberOfFiles(); ++f)
+    for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
       {
       this->State.SQUEEZ[f] = this->State.CalculateSQUEEZ(f);
       }

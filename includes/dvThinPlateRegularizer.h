@@ -5,6 +5,7 @@
 #include <limits>
 #include <ceres/ceres.h>
 #include <itkMacro.h>
+#include <vnl_matrix_fixed.h>
 
 namespace dv
 {

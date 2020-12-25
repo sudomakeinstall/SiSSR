@@ -1,9 +1,11 @@
-#include <dvDirectoryStructure.h>
-
-#include <itkFileTools.h>
-#include <vector>
-#include <string>
+// STD
 #include <filesystem>
+
+// ITK
+#include <itkMacro.h>
+
+// Custom
+#include <dvDirectoryStructure.h>
 
 namespace dv
 {
@@ -16,12 +18,12 @@ OptDirectory(_OptDirectory.back() == '/' ? _OptDirectory : _OptDirectory + '/')
 {
 
   // Create directories
-  this->CreateDirectory(this->CandidateDirectory);
-  this->CreateDirectory(this->InitialModelDirectory);
-  this->CreateDirectory(this->RegisteredModelDirectory);
-  this->CreateDirectory(this->ResidualsDirectory);
-  this->CreateDirectory(this->SerializationDirectory);
-  this->CreateDirectory(this->ScreenshotDirectory);
+  std::filesystem::create_directory(this->CandidateDirectory);
+  std::filesystem::create_directory(this->InitialModelDirectory);
+  std::filesystem::create_directory(this->RegisteredModelDirectory);
+  std::filesystem::create_directory(this->ResidualsDirectory);
+  std::filesystem::create_directory(this->SerializationDirectory);
+  std::filesystem::create_directory(this->ScreenshotDirectory);
 
   this->DetermineNumberOfFiles();
 
@@ -33,8 +35,8 @@ DirectoryStructure
 {
   this->NumberOfFiles = 0;
   while (
-    itksys::SystemTools::FileExists(
-      this->SegmentationDirectory + std::to_string(NumberOfFiles) + this->ImageSuffix,true)
+    std::filesystem::exists(
+      this->SegmentationDirectory + std::to_string(NumberOfFiles) + this->ImageSuffix)
         ) ++NumberOfFiles;
   itkAssertOrThrowMacro(NumberOfFiles > 0, "At least one image must be supplied.");
 }
@@ -44,13 +46,6 @@ DirectoryStructure
 ::GetNumberOfFiles() const
 {
   return this->NumberOfFiles;
-}
-
-void
-DirectoryStructure
-::CreateDirectory(const std::string &Directory)
-{
-  itk::FileTools::CreateDirectory(Directory.c_str());
 }
 
 std::string
@@ -120,7 +115,7 @@ bool
 DirectoryStructure
 ::CandidateDataExists() const {
   for (size_t f = 0; f < this->GetNumberOfFiles(); ++f) {
-    if (!itksys::SystemTools::FileExists(this->CandidatePathForFrame(f),true)) {
+    if (!std::filesystem::exists(this->CandidatePathForFrame(f))) {
       return false;
     }
   }
@@ -136,7 +131,7 @@ DirectoryStructure
     for (unsigned int f = 0; f < this->GetNumberOfFiles(); ++f) {
       const auto file
         = this->RegisteredModelPathForPassAndFrame(NumberOfRegistrationPasses, f);
-      if (!itksys::SystemTools::FileExists(file,true)) {
+      if (!std::filesystem::exists(file)) {
         AllFilesFound = false;
         break;
         }
@@ -156,7 +151,7 @@ DirectoryStructure
 ::ResidualMeshDataExistsForPass(const unsigned int p) const {
   for (unsigned int f = 0; f < this->GetNumberOfFiles(); ++f) {
     const auto file = this->ResidualMeshPathForPassAndFrame(p, f);
-    if (!itksys::SystemTools::FileExists(file,true)) {
+    if (!std::filesystem::exists(file)) {
       return false;
     }
   }

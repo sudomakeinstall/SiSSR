@@ -1,6 +1,8 @@
 #ifndef vtk_ColorbarState_h
 #define vtk_ColorbarState_h
 
+#include <string>
+
 namespace vtk
 {
 

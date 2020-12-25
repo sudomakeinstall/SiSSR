@@ -8,6 +8,7 @@
 #include <itkPointsLocator.h>
 
 // Custom
+#include <dvProgress.h>
 #include <dvCostFunction.h>
 #include <dvVelocityRegularizer.h>
 #include <dvAccelerationRegularizer.h>

@@ -1,7 +1,9 @@
 #ifndef dv_CalculateResidualMesh_h
 #define dv_CalculateResidualMesh_h
 
+// ITK
 #include <itkPointsLocator.h>
+#include <itkLineCell.h>
 
 namespace dv
 {

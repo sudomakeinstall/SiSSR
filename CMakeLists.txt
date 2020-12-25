@@ -40,6 +40,7 @@ include(dvPreventInBuildInstalls)
 
 # Set flags
 set(CMAKE_BUILD_TYPE "RelWithDebugInfo" CACHE STRING "build type" FORCE)
+set(CMAKE_CXX_STANDARD 17)
 
 ##########################
 ## Third Party Packages ##

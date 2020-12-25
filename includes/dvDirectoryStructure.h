@@ -1,7 +1,6 @@
 #ifndef itkDirectoryStructure_h
 #define itkDirectoryStructure_h
 
-#include <itkFileTools.h>
 #include <vector>
 #include <string>
 
@@ -18,8 +17,8 @@ public:
   const std::string IptDirectory;
   const std::string OptDirectory;
 
-  const std::string ImageDirectory           = this->IptDirectory + "img-nii/";
   const std::string SegmentationDirectory    = this->IptDirectory + "seg-nii/";
+  const std::string ImageDirectory           = this->IptDirectory + "img-nii/";
 
   const std::string CandidateDirectory       = this->OptDirectory + "candidates/";
   const std::string InitialModelDirectory    = this->OptDirectory + "initial_models/";
@@ -55,7 +54,6 @@ public:
   std::string ResidualMeshPathForPassAndFrame(const unsigned int p, const unsigned int f) const;
   unsigned int GetNumberOfFiles() const;
 
-  void CreateDirectory(const std::string &Directory);
   bool CandidateDataExists() const;
   unsigned int NumberOfRegistrationPasses() const;
   bool ResidualMeshDataExistsForPass(const unsigned int p) const;

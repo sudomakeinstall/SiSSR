@@ -128,7 +128,7 @@ private:
   void CalculateSurfaceAreas();
 
   // Other properties
-  DirectoryStructure FileTree;
+  DirectoryStructure DirectoryStructure;
 
   StateMachine State;
   SiSSRView window;

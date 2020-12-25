@@ -91,6 +91,7 @@ public:
   // the program is run.  Then they are determined by
   // the file structure.
   bool PlaneDataExists = false;
+  bool SegmentationDataExists = false;
   bool CandidateDataExists = false;
   bool InitialModelDataExists = false;
   unsigned int NumberOfRegistrationPasses = 0;
