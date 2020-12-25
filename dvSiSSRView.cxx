@@ -27,8 +27,7 @@
 #include <dvLabeledVTKPointSetReader.h>
 #include <dvGetLookupTable.h>
 
-namespace dv
-{
+namespace sissr {
 
 /***************
  * CONSTRUCTOR *
@@ -94,7 +93,7 @@ SiSSRView
   const auto fMat = vtkSmartPointer<vtkMatrix4x4>::New();
   const auto bMat = vtkSmartPointer<vtkMatrix4x4>::New();
 
-  GetVTKTransformationMatrixFromITKImage<TImage>( this->itkReader->GetOutput(), fMat);
+  dv::GetVTKTransformationMatrixFromITKImage<TImage>( this->itkReader->GetOutput(), fMat);
 
   this->fTrans = vtkSmartPointer<vtkTransform>::New();
 
@@ -717,4 +716,4 @@ SiSSRView
   this->planeSource->SetPoint2(this->planeWidget->GetPoint2());
 }
 
-} // end namespace
+} // namespace sissr

@@ -54,8 +54,8 @@
 #include <vtkColorbarState.h>
 #include <dvPlaneWidgetCallback.h>
 
-namespace dv
-{
+namespace sissr {
+
 class SiSSRView
 {
 public:
@@ -191,7 +191,7 @@ public:
   unsigned int NumberOfSubdivisions = 3;
 
   // Color Mapping
-  vtk::ColorbarState CB_State = {"", 0.0, 3.0};
+  ColorbarState CB_State = {"", 0.0, 3.0};
 
   unsigned int NumberOfColorbarLabels = 8;
 
@@ -221,7 +221,7 @@ public:
   vtkSmartPointer<vtkPlaneSource> planeSource = nullptr;
 }; // End class
 
-} // End namespace
+} // namespace sissr
 
-#endif // SiSSRView_h
+#endif
 

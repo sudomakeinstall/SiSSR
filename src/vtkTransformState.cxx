@@ -5,8 +5,7 @@
 #include <array>
 #include <iostream>
 
-namespace vtk
-{
+namespace sissr {
 
 void
 TransformState
@@ -54,4 +53,4 @@ TransformState
     }
 }
 
-} // end namespace vtk
+} // namespace sissr

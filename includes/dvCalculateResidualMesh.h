@@ -5,8 +5,7 @@
 #include <itkPointsLocator.h>
 #include <itkLineCell.h>
 
-namespace dv
-{
+namespace sissr {
 
 template<typename TPointSet, typename TLoop, typename TMesh>
 class CalculateResidualMesh
@@ -59,6 +58,6 @@ public:
 
 };
 
-}
+} // namespace sissr
 
 #endif

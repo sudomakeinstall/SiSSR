@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace vtk
-{
+namespace sissr {
 
 struct ColorbarState
 {
@@ -13,7 +12,6 @@ struct ColorbarState
   double Max;
 };
 
-
-}
+} // namespace sissr
 
 #endif

@@ -8,7 +8,7 @@
 #include <dvDirectoryStructure.h>
 #include <dvStringOperations.h>
 
-namespace dv {
+namespace sissr {
 
 DirectoryStructure
 ::DirectoryStructure(const std::string _IptDirectory,
@@ -121,4 +121,4 @@ DirectoryStructure
   return true;
 }
 
-} // namespace dv
+} // namespace sissr

@@ -1,8 +1,7 @@
 #include <dvSiSSRView.h>
 #include <dvPlaneWidgetCallback.h>
 
-namespace dv
-{
+namespace sissr {
 
 PlaneWidgetCallback*
 PlaneWidgetCallback
@@ -18,4 +17,4 @@ PlaneWidgetCallback
   this->window->PlaneWidgetDidMove();
 }
 
-}
+} // namespace sissr

@@ -2,8 +2,8 @@
 #ifndef dv_PlaneWidgetState_h
 #define dv_PlaneWidgetState_h
 
-namespace dv
-{
+namespace sissr {
+
 template<typename PlaneWidget>
 class PlaneWidgetState
 {
@@ -34,5 +34,7 @@ public:
   }
 
 }; // end class
-} // end namespace vtk
+
+} // namespace sissr
+
 #endif

@@ -20,8 +20,7 @@
 // STD
 #include <vector>
 
-namespace dv
-{
+namespace sissr {
 
 template < typename TFixedMesh, typename TMovingMesh >
 class RegisterMeshToPointSet
@@ -90,7 +89,7 @@ public:
   std::vector<typename TMoving::PointsContainer::Pointer> initialPointsVector;
 };
 
-}
+} // namespace sissr
 
 #include "dvRegisterMeshToPointSet.hxx"
 

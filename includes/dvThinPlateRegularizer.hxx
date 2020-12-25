@@ -8,8 +8,7 @@
 #include <ceres/ceres.h>
 #include <itkMacro.h>
 
-namespace dv
-{
+namespace sissr {
 
 template<class TMesh>
 ThinPlateRegularizer<TMesh>
@@ -133,7 +132,7 @@ ThinPlateRegularizer<TMesh>
 
 }
 
-} // end namespace
+} // namespace sissr
 
 #endif
 

@@ -47,7 +47,7 @@ main(int argc, char** argv)
 
   QApplication application(argc,argv);
 
-  dv::SiSSRController controller(argc, argv);
+  sissr::SiSSRController controller(argc, argv);
   controller.show();
 
   for (int i = 3; i < argc; ++i)

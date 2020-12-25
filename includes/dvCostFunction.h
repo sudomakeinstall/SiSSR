@@ -5,8 +5,8 @@
 #include <ceres/ceres.h>
 #include <itkPointsLocator.h>
 
-namespace dv
-{
+namespace sissr {
+
 template<class TFixedMesh, class TMovingMesh>
 class CostFunction :
 public ceres::CostFunction
@@ -47,7 +47,8 @@ private:
   const vnl_vector<typename TMovingMesh::PointIdentifier> L;
 
 }; // end class
-} // end namespace
+
+} // namespace sissr
 
 #include <dvCostFunction.hxx>
 

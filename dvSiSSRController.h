@@ -33,8 +33,8 @@
 #include <dvSiSSRView.h>
 #include <itkLoopSubdivisionSurfaceMesh.h>
 
-namespace dv
-{
+namespace sissr {
+
 class SiSSRController
 : public QMainWindow
 {
@@ -134,7 +134,7 @@ private:
   SiSSRView window;
 
 };
-} // End namespace
 
-#endif // SiSSRController_h
+} // namespace sissr
 
+#endif

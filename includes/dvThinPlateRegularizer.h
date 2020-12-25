@@ -7,8 +7,8 @@
 #include <itkMacro.h>
 #include <vnl_matrix_fixed.h>
 
-namespace dv
-{
+namespace sissr {
+
 template<class TMesh>
 class ThinPlateRegularizer :
 public ceres::CostFunction
@@ -40,7 +40,7 @@ private:
 
 }; // end class
 
-} // end namespace
+} // namespace sissr
 
 #include <dvThinPlateRegularizer.hxx>
 

@@ -29,9 +29,9 @@
 #include <dvLossScaleFactors.h>
 #include <dvPlaneWidgetState.h>
 
-namespace dv
-{
-enum class State : std::int8_t
+namespace sissr {
+
+  enum class State : std::int8_t
 {
   INITIALIZED = 0,
   CANDIDATES_SELECTED = 1,
@@ -96,7 +96,7 @@ public:
   bool InitialModelDataExists = false;
   unsigned int NumberOfRegistrationPasses = 0;
 
-  dv::PlaneWidgetState<vtkPlaneWidget> planeWidgetState;
+  PlaneWidgetState<vtkPlaneWidget> planeWidgetState;
   bool ImagePlanesHaveBeenSetup = false;
   bool CandidatesHaveBeenSetup = false;
   bool ModelHasBeenSetup = false;
@@ -128,7 +128,7 @@ public:
   void SerializeSegmentation(std::ofstream& s, vtkFloatArray* ids) const;
   void DeserializeSegmentation(std::ifstream& s);
 
-  const std::map<CellData, vtk::ColorbarState> ColorbarState =
+  const std::map<CellData, ColorbarState> ColorbarState =
     {
       { CellData::NONE, {"", 0.0, 0.0} },
       { CellData::SQUEEZ, {"SQUEEZ", 0.70, 1.05} },

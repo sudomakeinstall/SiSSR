@@ -9,8 +9,7 @@
 #include <glog/logging.h>
 #include <thread>
 
-namespace dv
-{
+namespace sissr {
 
 template < typename TFixedMesh, typename TMovingMesh >
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
@@ -528,9 +527,8 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
     }
 
-}
+  }
 
-}
+} // namespace sissr
 
 #endif
-

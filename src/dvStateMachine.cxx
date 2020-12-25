@@ -6,8 +6,7 @@
 
 #include <dvVectorOperations.h>
 
-namespace dv
-{
+namespace sissr {
 
 StateMachine
 ::StateMachine() :
@@ -310,38 +309,38 @@ StateMachine
 ::DeserializeJSON(const rapidjson::Document &d)
 {
 
-  check_and_set_uint(d, this->EDFrame, "EDFrame");
+  dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
-  check_and_set_uint(d, this->NumberOfFacesInDecimatedMesh, "NumberOfFacesInDecimatedMesh");
+  dv::check_and_set_uint(d, this->NumberOfFacesInDecimatedMesh, "NumberOfFacesInDecimatedMesh");
 
-  check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");
+  dv::check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");
 
-  check_and_set_double(d, this->RegistrationWeights.Robust, "RegistrationWeights.Robust");
-  check_and_set_double(d, this->RegistrationWeights.Velocity, "RegistrationWeights.Velocity");
-  check_and_set_double(d, this->RegistrationWeights.Acceleration, "RegistrationWeights.Acceleration");
-  check_and_set_double(d, this->RegistrationWeights.ThinPlate, "RegistrationWeights.ThinPlate");
-  check_and_set_double(d, this->RegistrationWeights.TriangleAspectRatio, "RegistrationWeights.TriangleAspectRatio");
-  check_and_set_double(d, this->RegistrationWeights.EdgeLength, "RegistrationWeights.EdgeLength");
+  dv::check_and_set_double(d, this->RegistrationWeights.Robust, "RegistrationWeights.Robust");
+  dv::check_and_set_double(d, this->RegistrationWeights.Velocity, "RegistrationWeights.Velocity");
+  dv::check_and_set_double(d, this->RegistrationWeights.Acceleration, "RegistrationWeights.Acceleration");
+  dv::check_and_set_double(d, this->RegistrationWeights.ThinPlate, "RegistrationWeights.ThinPlate");
+  dv::check_and_set_double(d, this->RegistrationWeights.TriangleAspectRatio, "RegistrationWeights.TriangleAspectRatio");
+  dv::check_and_set_double(d, this->RegistrationWeights.EdgeLength, "RegistrationWeights.EdgeLength");
 
   this->camera.DeserializeJSON(d);
 
-  check_and_set_bool(d, this->ImagePlanesAreVisible,   "ImagePlanesAreVisible");
+  dv::check_and_set_bool(d, this->ImagePlanesAreVisible,   "ImagePlanesAreVisible");
 
-  check_and_set_bool(d, this->CandidatesAreVisible,    "CandidatesAreVisible");
-  check_and_set_bool(d, this->ModelIsVisible,          "ModelIsVisible");
+  dv::check_and_set_bool(d, this->CandidatesAreVisible,    "CandidatesAreVisible");
+  dv::check_and_set_bool(d, this->ModelIsVisible,          "ModelIsVisible");
 
   if (d.HasMember("planeWidgetState.Origin") && d.HasMember("planeWidgetState.Point1") && d.HasMember("planeWidgetState.Point2"))
     {
-    check_and_set_double_array(d, this->planeWidgetState.Origin, "planeWidgetState.Origin");
-    check_and_set_double_array(d, this->planeWidgetState.Point1, "planeWidgetState.Point1");
-    check_and_set_double_array(d, this->planeWidgetState.Point2, "planeWidgetState.Point2");
+    dv::check_and_set_double_array(d, this->planeWidgetState.Origin, "planeWidgetState.Origin");
+    dv::check_and_set_double_array(d, this->planeWidgetState.Point1, "planeWidgetState.Point1");
+    dv::check_and_set_double_array(d, this->planeWidgetState.Point2, "planeWidgetState.Point2");
     this->ImagePlaneHasBeenSet = true;
     }
 
   if (d.HasMember("CellDataToDisplay") && d["CellDataToDisplay"].IsInt())
       this->CellDataToDisplay = static_cast<CellData>(d["CellDataToDisplay"].GetInt());
 
-}
+  }
 
-} // end namespace
+} // namespace sissr

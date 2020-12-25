@@ -5,8 +5,7 @@
 #include <vtkPlaneSource.h>
 #include <vtkCommand.h>
 
-namespace dv
-{
+namespace sissr {
 
 class SiSSRView;
 
@@ -27,6 +26,6 @@ vtkPlaneSource* source;
 
 };
 
-}
+} // namespace sissr
 
 #endif

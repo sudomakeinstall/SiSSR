@@ -1,8 +1,7 @@
 #ifndef dv_GetPointsFromITKImage_h
 #define dv_GetPointsFromITKImage_h
 
-namespace dv
-{
+namespace sissr {
 
 /*
  Get a sensible origin, point1, and point2 (in world coordinates) to initialize
@@ -34,6 +33,6 @@ GetPointsFromITKImage(const typename TImage::Pointer image,
   image->TransformIndexToPhysicalPoint(p2_index, p2);
 }
 
-}
+} // namespace sissr
 
 #endif

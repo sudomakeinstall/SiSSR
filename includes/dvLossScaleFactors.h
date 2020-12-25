@@ -1,8 +1,7 @@
 #ifndef dv_LossScaleFactors_h
 #define dv_LossScaleFactors_h
 
-namespace dv
-{
+namespace sissr {
 
 struct LossScaleFactors
 {
@@ -37,6 +36,6 @@ struct LossScaleFactors
   double EdgeLength;
 };
 
-}
+} // namespace sissr
 
 #endif

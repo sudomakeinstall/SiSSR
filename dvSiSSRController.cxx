@@ -47,8 +47,7 @@
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
 
-namespace dv
-{
+namespace sissr {
 
 // CONSTRUCTOR
 SiSSRController
@@ -341,7 +340,7 @@ SiSSRController
 ::CurrentPageChanged(int index)
 {
 
-  dv::State requestedState = static_cast<dv::State>(index);
+  enum State requestedState = static_cast<enum State>(index);
 
   if (requestedState <= this->State.GetCurrentState())
     return;
@@ -410,7 +409,7 @@ SiSSRController
 ::UpdateAnnotations()
 {
 
-  if (this->State.GetCurrentState() == dv::State::MODEL_POSITIONED)
+  if (this->State.GetCurrentState() == State::MODEL_POSITIONED)
     {
       if (this->GetCurrentFrame() == this->State.EDFrame)
         {
@@ -499,7 +498,7 @@ SiSSRController
     const auto input = this->DirectoryStructure.SegmentationDirectory.PathForFrame(file);
     const auto output = this->DirectoryStructure.CandidatePointDirectory.PathForFrame(file);
 
-    SegmentationToLabeledPointSet<3, unsigned short, double>(
+    dv::SegmentationToLabeledPointSet<3, unsigned short, double>(
       input,
       output
     );
@@ -703,7 +702,7 @@ SiSSRController
   if (this->State.ModelHasBeenSetup)
     return;
 
-  if (this->State.GetCurrentState() == dv::State::REGISTERED)
+  if (this->State.GetCurrentState() == State::REGISTERED)
     {
 
     this->window.SetupModel(
@@ -714,7 +713,7 @@ SiSSRController
                            );
 
     }
-  else if (this->State.GetCurrentState() == dv::State::ORIENTATION_CAPTURED)
+  else if (this->State.GetCurrentState() == State::ORIENTATION_CAPTURED)
     {
 
     if (!this->State.InitialModelDataExists)
@@ -910,7 +909,7 @@ SiSSRController
   auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
   // Get the vectors
-  typedef dv::CalculateResidualMesh< TMesh, TLoopMesh, TMesh > TResidualCalculator;
+  typedef CalculateResidualMesh< TMesh, TLoopMesh, TMesh > TResidualCalculator;
 
   typedef itk::MeshFileWriter< TMesh >     TWriter;
 
@@ -988,7 +987,7 @@ SiSSRController
   // Get the vectors
   typedef itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter< TLoopMesh, TLoopMesh > TLoop;
   typedef itk::PointsLocator< TMesh::PointsContainer > TLocator;
-  typedef dv::RegisterMeshToPointSet< TMesh, TLoopMesh > TRegister;
+  typedef RegisterMeshToPointSet< TMesh, TLoopMesh > TRegister;
 
   typedef itk::MeshFileWriter< TLoopMesh > TMovingWriter;
 
@@ -1280,6 +1279,6 @@ SiSSRController
       }
     }
 
-}
+  }
 
-}
+} // namespace sissr

@@ -8,8 +8,8 @@
 // Custom
 #include <sissrSequentialDirectory.h>
 
-namespace dv
-{
+namespace sissr {
+
 class DirectoryStructure
 {
 public:
@@ -61,5 +61,7 @@ public:
   bool ResidualMeshDataExistsForPass(const size_t p) const;
 
 };
-}
+
+} // namespace sissr
+
 #endif

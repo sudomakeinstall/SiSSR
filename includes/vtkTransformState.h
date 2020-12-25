@@ -10,8 +10,8 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/document.h>
 
-namespace vtk
-{
+namespace sissr {
+
 class TransformState
 {
 
@@ -29,6 +29,7 @@ public:
   void DeserializeJSON(const rapidjson::Document &d, const std::string &key);
 
 }; // end class
-} // end namespace vtk
-#endif
 
+} // namespace sissr
+
+#endif

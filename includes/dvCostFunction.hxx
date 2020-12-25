@@ -3,8 +3,8 @@
 
 #include <dvCostFunction.h>
 
-namespace dv
-{
+namespace sissr {
+
 template<class TFixedMesh, class TMovingMesh>
 CostFunction<TFixedMesh, TMovingMesh>
 ::CostFunction(
@@ -88,6 +88,6 @@ CostFunction<TFixedMesh, TMovingMesh>
 
 }
 
-} // end namespace
+} // namespace sissr
 
 #endif
