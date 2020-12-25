@@ -168,7 +168,7 @@ SiSSRController
   ////////////////////////
 
   std::cout << "Initial model data..." << std::flush;
-  this->State.InitialModelDataExists = itksys::SystemTools::FileExists(this->DirectoryStructure.InitialModel,true);
+  this->State.InitialModelDataExists = std::filesystem::exists(this->DirectoryStructure.InitialModel);
   if (this->State.InitialModelDataExists)
     {
     std::cout << "found." << std::endl;
@@ -870,7 +870,7 @@ SiSSRController
 
     {
     const auto fileName = this->DirectoryStructure.ParametersJSON;
-    if (itksys::SystemTools::FileExists(fileName,true))
+    if (std::filesystem::exists(fileName))
       {
       std::ifstream fileStream;
       fileStream.open(fileName);
@@ -889,7 +889,7 @@ SiSSRController
     {
     const auto fileName
       = this->DirectoryStructure.SurfaceAreaForPass( this->State.NumberOfRegistrationPasses - 1 );
-    if (itksys::SystemTools::FileExists(fileName,true))
+    if (std::filesystem::exists(fileName))
       {
       std::ifstream fileStream;
       fileStream.open(fileName);
@@ -901,7 +901,7 @@ SiSSRController
     {
     const auto fileName
       = this->DirectoryStructure.ResidualsForPass( this->State.NumberOfRegistrationPasses - 1 );
-    if (itksys::SystemTools::FileExists(fileName,true))
+    if (std::filesystem::exists(fileName))
       {
       std::ifstream fileStream;
       fileStream.open(fileName);
