@@ -32,7 +32,7 @@ ThinPlateRegularizer<TMesh>
   // That is, the TP energy is dictated by the point positions.
   const auto cellList = this->moving->GetPointListForCell(this->index);
 
-  for (std::size_t i = 0; i < cellList.size(); ++i)
+  for (size_t i = 0; i < cellList.size(); ++i)
     {
     // Each point has an x, y, and z coordinate
     this->mutable_parameter_block_sizes()->push_back(3);
@@ -60,7 +60,7 @@ ThinPlateRegularizer<TMesh>
   const auto L =
     this->moving->GetPointListForCell(index);
 
-  for (std::size_t i = 0; i < L.size(); ++i)
+  for (size_t i = 0; i < L.size(); ++i)
     {
     const auto init = this->initialPoints->ElementAt( L[i] );
     const auto diff = parameters[i];
@@ -103,7 +103,7 @@ ThinPlateRegularizer<TMesh>
   const vnl_matrix_fixed<TReal, 15, 15> M_copy(M.data_block());
   const auto B = M * P;
 
-  for (std::size_t i = 0; i < L.size(); ++i)
+  for (size_t i = 0; i < L.size(); ++i)
     {
     if (nullptr == jacobians[i]) continue;
     // Jacobian isn an M x N matrix (M rows, N columns)

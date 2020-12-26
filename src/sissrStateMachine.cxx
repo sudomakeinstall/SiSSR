@@ -114,7 +114,7 @@ StateMachine
 
   s << "CellID,SegmentID\n";
 
-  for (std::size_t i = 0; i < static_cast<std::size_t>(ids->GetSize()); ++i)
+  for (size_t i = 0; i < static_cast<size_t>(ids->GetSize()); ++i)
     s << i << ',' << ids->GetValue( i ) << '\n';
   s << std::flush;
 }
@@ -140,7 +140,7 @@ StateMachine
     }
 
   s << "Frame,CellID,ResidualX,ResidualY,ResidualZ\n";
-  for (std::size_t i = 0; i < this->costFunctionFrames.size(); ++i)
+  for (size_t i = 0; i < this->costFunctionFrames.size(); ++i)
     {
     s << this->costFunctionFrames.at(i) << ','
       << this->costFunctionCellIDs.at(i) << ','
@@ -289,17 +289,17 @@ StateMachine
 
   writer.Key("planeWidgetState.Origin");
   writer.StartArray();
-  for (std::size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Origin[i]);
+  for (size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Origin[i]);
   writer.EndArray();
 
   writer.Key("planeWidgetState.Point1");
   writer.StartArray();
-  for (std::size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Point1[i]);
+  for (size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Point1[i]);
   writer.EndArray();
 
   writer.Key("planeWidgetState.Point2");
   writer.StartArray();
-  for (std::size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Point2[i]);
+  for (size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Point2[i]);
   writer.EndArray();
 
   writer.Key("CellDataToDisplay");

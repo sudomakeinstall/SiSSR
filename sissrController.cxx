@@ -1089,7 +1089,7 @@ Controller
   std::vector<TReal> residualY;
   std::vector<TReal> residualZ;
 
-  for (std::size_t i = 0; i < registerMesh.costFunctionResiduals.size();)
+  for (size_t i = 0; i < registerMesh.costFunctionResiduals.size();)
     {
     residualX.emplace_back(registerMesh.costFunctionResiduals[i++]);
     residualY.emplace_back(registerMesh.costFunctionResiduals[i++]);
