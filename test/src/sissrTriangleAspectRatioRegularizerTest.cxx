@@ -1,12 +1,19 @@
-#include <ceres/loss_function.h>
-#include <dvMath.h>
-#include <dvTriangleAspectRatioRegularizer.h>
+// ITK
 #include <itkMesh.h>
 #include <itkTriangleCell.h>
 
+// Ceres
+#include <ceres/loss_function.h>
+
+// DV
+#include <dvMath.h>
+
+// SiSSR
+#include <sissrTriangleAspectRatioRegularizer.h>
+
 typedef itk::Mesh<double, 3> TMesh;
 typedef itk::TriangleCell<TMesh::CellType> TTriangle;
-typedef dv::TriangleAspectRatioRegularizer<TMesh> TReg;
+typedef sissr::TriangleAspectRatioRegularizer<TMesh> TReg;
 
 int
 main(int, char**)
