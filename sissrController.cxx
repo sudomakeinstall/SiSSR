@@ -600,7 +600,7 @@ Controller
 {
 
   // GUARD: Make sure data exists
-  if (!this->State.PlaneDataExists)
+  if (!this->DirectoryStructure.ImageDirectory.DataExists())
     {
     this->State.ImagePlanesAreVisible = false;
     this->State.ImagePlanesHaveBeenSetup = false;

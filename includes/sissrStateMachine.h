@@ -86,13 +86,6 @@ public:
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer);
   void DeserializeJSON(const rapidjson::Document &d);
 
-  // These properties are intentionally not serialized,
-  // because they must be reset to false every time
-  // the program is run.  Then they are determined by
-  // the file structure.
-  bool PlaneDataExists = false;
-  bool SegmentationDataExists = false;
-
   PlaneWidgetState<vtkPlaneWidget> planeWidgetState;
   bool ImagePlanesHaveBeenSetup = false;
   bool CandidatesHaveBeenSetup = false;
