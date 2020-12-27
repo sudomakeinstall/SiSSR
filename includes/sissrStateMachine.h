@@ -92,7 +92,6 @@ public:
   // the file structure.
   bool PlaneDataExists = false;
   bool SegmentationDataExists = false;
-  bool CandidateDataExists = false;
 
   PlaneWidgetState<vtkPlaneWidget> planeWidgetState;
   bool ImagePlanesHaveBeenSetup = false;

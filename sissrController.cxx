@@ -500,21 +500,16 @@ Controller
 
 void
 Controller
-::ToggleCandidates()
-{
+::ToggleCandidates() {
 
-  if (!this->State.CandidateDataExists)
-    {
-    QMessageBox alert;
-    alert.setText("Candidates have not been calculated.");
-    alert.exec();
+  if (!this->DirectoryStructure.CandidateDirectory.DataExists()) {
+    std::cerr << "Candidate data doesn't exist." << std::endl;
     return;
     }
 
   this->State.CandidatesAreVisible = !this->State.CandidatesAreVisible;
 
-  if (this->State.CandidatesAreVisible)
-    {
+  if (this->State.CandidatesAreVisible) {
     const auto file = this->DirectoryStructure.CandidateDirectory.PathForFrame(this->GetCurrentFrame());
     this->window.UpdateCandidatesSource( file );
     }
@@ -634,12 +629,10 @@ Controller
 
 void
 Controller
-::SetupCandidates()
-{
+::SetupCandidates() {
 
   // GUARD: Make sure data exists.
-  if (!this->State.CandidateDataExists)
-    {
+  if (!this->DirectoryStructure.CandidateDirectory.DataExists()) {
     this->State.CandidatesAreVisible = false;
     this->State.CandidatesHaveBeenSetup = false;
     return;
