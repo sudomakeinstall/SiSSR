@@ -13,7 +13,7 @@ namespace sissr {
 
 StateMachine
 ::StateMachine() :
-  NumberOfFacesInDecimatedMesh(250),
+  NumberOfFacesInDecimatedMesh(1024),
   BoundaryCandidateDilationRadius(3)
 {}
 
