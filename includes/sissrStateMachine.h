@@ -83,8 +83,6 @@ public:
   bool ColorbarIsVisible       = true;
   bool ResidualsAreVisible     = true;
 
-  State GetCurrentState();
-
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer);
   void DeserializeJSON(const rapidjson::Document &d);
 
@@ -95,7 +93,7 @@ public:
   bool PlaneDataExists = false;
   bool SegmentationDataExists = false;
   bool CandidateDataExists = false;
-  bool InitialModelDataExists = false;
+//  bool InitialModelDataExists = false;
   unsigned int NumberOfRegistrationPasses = 0;
 
   PlaneWidgetState<vtkPlaneWidget> planeWidgetState;

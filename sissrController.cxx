@@ -74,7 +74,7 @@ Controller
   this->SetupValueLabels();
   this->SetupSlots();
 
-  this->ui->toolBox->setCurrentIndex(static_cast<int>(this->State.GetCurrentState()));
+//  this->ui->toolBox->setCurrentIndex(static_cast<int>(this->State.GetCurrentState()));
 
   // Setup radio buttons
   this->ui->cellDataButtonNone->setChecked(false);
@@ -154,16 +154,13 @@ Controller
   // Initial Model Data
 
   std::cout << "Initial model data..." << std::flush;
-  this->State.InitialModelDataExists = std::filesystem::exists(this->DirectoryStructure.InitialModel);
-  if (this->State.InitialModelDataExists)
-    {
+
+  if (this->DirectoryStructure.InitialModelDataExists()) {
     std::cout << "found." << std::endl;
-    }
-  else
-    {
+  } else {
     std::cout << "not found." << std::endl;
     return;
-    }
+  }
 
   ///////////////////////////
   // Registered Model Data //
@@ -342,16 +339,16 @@ Controller
 ::CurrentPageChanged(int index)
 {
 
-  enum State requestedState = static_cast<enum State>(index);
-
-  if (requestedState <= this->State.GetCurrentState())
-    return;
-
-  QMessageBox alert;
-  alert.setText("This tab's analysis must be completed before proceeding.");
-  alert.exec();
-
-  this->ui->toolBox->setCurrentIndex( static_cast<int>(this->State.GetCurrentState()));
+//  enum State requestedState = static_cast<enum State>(index);
+//
+//  if (requestedState <= this->State.GetCurrentState())
+//    return;
+//
+//  QMessageBox alert;
+//  alert.setText("This tab's analysis must be completed before proceeding.");
+//  alert.exec();
+//
+//  this->ui->toolBox->setCurrentIndex( static_cast<int>(this->State.GetCurrentState()));
 
 }
 
@@ -408,20 +405,8 @@ Controller
 
 void
 Controller
-::UpdateAnnotations()
-{
-
-  if (this->State.GetCurrentState() == State::MODEL_POSITIONED)
-    {
-      if (this->GetCurrentFrame() == this->State.EDFrame)
-        {
-        this->window.SetPhaseAnnotation("End Diastole");
-        }
-      else
-        {
-        this->window.SetPhaseAnnotation("");
-        }
-    }
+::UpdateAnnotations() {
+  this->window.SetPhaseAnnotation(std::to_string(this->GetCurrentFrame()));
 }
 
 void
@@ -429,7 +414,7 @@ Controller
 ::UpdateModelTransform()
 {
 
-  if ( !(this->State.InitialModelDataExists && this->State.ModelHasBeenSetup) )
+  if ( !(this->DirectoryStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup) )
     {
     return;
     }
@@ -704,31 +689,24 @@ Controller
   if (this->State.ModelHasBeenSetup)
     return;
 
-  if (this->State.GetCurrentState() == State::REGISTERED)
-    {
+  if (this->DirectoryStructure.NumberOfRegistrationPasses() > 0) {
 
-    this->window.SetupModel(
-      this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-        this->State.NumberOfRegistrationPasses,
-        this->GetCurrentFrame()
-                                                       )
-                           );
+    const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+    const auto f = this->GetCurrentFrame();
+    const auto file = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p,f);
+    this->window.SetupModel(file);
 
     }
-  else if (this->State.GetCurrentState() == State::ORIENTATION_CAPTURED)
-    {
+  else {
 
-    if (!this->State.InitialModelDataExists)
-      {
-      std::cout << "Generating initial model...";
+    if (!this->DirectoryStructure.InitialModelDataExists()) {
       this->GenerateInitialModel();
-      std::cout << "done." << std::endl;
-      }
+    }
 
     // Setup.
     this->window.SetupModel( this->DirectoryStructure.InitialModel.c_str() );
 
-    }
+  }
 
   this->State.ModelHasBeenSetup = this->window.ModelHasBeenSetup;
 
@@ -736,7 +714,7 @@ Controller
   // Residuals //
   ///////////////
 
-  if (this->State.InitialModelDataExists && this->State.ModelHasBeenSetup)
+  if (this->DirectoryStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup)
     {
     const auto file = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
       this->State.NumberOfRegistrationPasses,

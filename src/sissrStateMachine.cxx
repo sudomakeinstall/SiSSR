@@ -17,37 +17,6 @@ StateMachine
   BoundaryCandidateDilationRadius(3)
 {}
 
-State
-StateMachine
-::GetCurrentState()
-{
-
-  State currentState = State::INITIALIZED;
-
-  if (!(this->CandidateDataExists))
-    return currentState;
-  else
-    currentState = State::CANDIDATES_SELECTED;
-
-  if (!this->EDFrameHasBeenSet)
-    return currentState;
-  else
-    currentState = State::ORIENTATION_CAPTURED;
-
-  if (!(this->InitialModelDataExists && this->ModelHasBeenSetup))
-    return currentState;
-  else
-    currentState = State::MODEL_POSITIONED;
-
-  if (!(this->NumberOfRegistrationPasses > 0 && this->ModelHasBeenSetup))
-    return currentState;
-  else
-    currentState = State::REGISTERED;
-
-  return currentState;
-
-}
-
 vtkSmartPointer<vtkFloatArray>
 StateMachine
 ::CalculateSQUEEZ(unsigned int frame)

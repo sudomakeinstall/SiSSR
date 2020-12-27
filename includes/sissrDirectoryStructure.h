@@ -59,6 +59,9 @@ public:
 
   size_t NumberOfRegistrationPasses() const;
   bool ResidualMeshDataExistsForPass(const size_t p) const;
+  bool InitialModelDataExists() {
+    return std::filesystem::exists(this->InitialModel);
+  }
 
 };
 
