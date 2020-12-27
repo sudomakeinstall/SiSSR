@@ -152,15 +152,6 @@ Controller
     return;
   }
 
-  ///////////////////////////
-  // Registered Model Data //
-  ///////////////////////////
-
-  std::cout << "Determining number of registration passes..." << std::flush;
-
-  this->State.NumberOfRegistrationPasses = this->DirectoryStructure.NumberOfRegistrationPasses();
-  std::cout << this->State.NumberOfRegistrationPasses << "." << std::endl;
-
   ////////////////////////////
   // Calculated Information //
   ////////////////////////////
@@ -421,13 +412,13 @@ Controller
     {
     const auto file
       = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
-          this->State.NumberOfRegistrationPasses,
+          this->DirectoryStructure.NumberOfRegistrationPasses(),
           this->GetCurrentFrame()
                                                   );
     this->window.UpdateResidualsSource( file );
     }
 
-  if (0 == this->State.NumberOfRegistrationPasses)
+  if (0 == this->DirectoryStructure.NumberOfRegistrationPasses())
     {
     this->window.SetModelVisible(true);
     this->window.SetColorbarVisible(false);
@@ -439,7 +430,7 @@ Controller
     {
     const auto file
       = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-          this->State.NumberOfRegistrationPasses - 1,
+          this->DirectoryStructure.NumberOfRegistrationPasses() - 1,
           this->GetCurrentFrame()
                                                          );
     this->window.UpdateModelSource( file );
@@ -582,7 +573,7 @@ Controller
     {
     const auto file
       = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
-          this->State.NumberOfRegistrationPasses,
+          this->DirectoryStructure.NumberOfRegistrationPasses(),
           this->GetCurrentFrame()
                                                   );
     this->window.UpdateResidualsSource( file );
@@ -707,7 +698,7 @@ Controller
   if (this->DirectoryStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup)
     {
     const auto file = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
-      this->State.NumberOfRegistrationPasses,
+      this->DirectoryStructure.NumberOfRegistrationPasses(),
       this->GetCurrentFrame()
                                                                  );
     this->window.SetupResiduals( file );
@@ -772,7 +763,7 @@ Controller
     if (!this->State.SurfaceAreas.empty())
       {
       std::string fileName
-        = this->DirectoryStructure.SurfaceAreaForPass(this->State.NumberOfRegistrationPasses - 1);
+        = this->DirectoryStructure.SurfaceAreaForPass(this->DirectoryStructure.NumberOfRegistrationPasses() - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       this->State.SerializeSurfaceArea(fileStream, this->State.SurfaceAreas);
@@ -784,7 +775,7 @@ Controller
     if (!this->State.costFunctionFrames.empty())
       {
       std::string fileName
-        = this->DirectoryStructure.ResidualsForPass(this->State.NumberOfRegistrationPasses - 1);
+        = this->DirectoryStructure.ResidualsForPass(this->DirectoryStructure.NumberOfRegistrationPasses() - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       this->State.SerializeResiduals(fileStream);
@@ -796,7 +787,7 @@ Controller
     if (this->State.RegistrationSummary != "")
       {
       std::string fileName
-        = this->DirectoryStructure.RegistrationSummaryForPass(this->State.NumberOfRegistrationPasses - 1);
+        = this->DirectoryStructure.RegistrationSummaryForPass(this->DirectoryStructure.NumberOfRegistrationPasses() - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       fileStream << this->State.RegistrationSummary;
@@ -831,7 +822,7 @@ Controller
 
     {
     const auto fileName
-      = this->DirectoryStructure.SurfaceAreaForPass( this->State.NumberOfRegistrationPasses - 1 );
+      = this->DirectoryStructure.SurfaceAreaForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
     if (std::filesystem::exists(fileName))
       {
       std::ifstream fileStream;
@@ -843,7 +834,7 @@ Controller
 
     {
     const auto fileName
-      = this->DirectoryStructure.ResidualsForPass( this->State.NumberOfRegistrationPasses - 1 );
+      = this->DirectoryStructure.ResidualsForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
     if (std::filesystem::exists(fileName))
       {
       std::ifstream fileStream;
@@ -966,7 +957,7 @@ Controller
 
   std::string dirToCreate =
     this->DirectoryStructure.RegisteredModelDirectory +
-    std::to_string(this->State.NumberOfRegistrationPasses);
+    std::to_string(this->DirectoryStructure.NumberOfRegistrationPasses());
 
   std::filesystem::create_directories( dirToCreate );
 
@@ -989,7 +980,7 @@ Controller
     locatorVector.emplace_back(locator_map);
 
     // Moving 
-    if (0 == this->State.NumberOfRegistrationPasses)
+    if (0 == this->DirectoryStructure.NumberOfRegistrationPasses())
       {
       const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
       reader->SetFileName( this->DirectoryStructure.InitialModel.c_str() );
@@ -1001,7 +992,7 @@ Controller
       {
       const auto file
         = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-          this->State.NumberOfRegistrationPasses - 1, i);
+          this->DirectoryStructure.NumberOfRegistrationPasses() - 1, i);
       const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
       reader->SetFileName( file.c_str() );
       reader->Update();
@@ -1031,7 +1022,7 @@ Controller
     {
     const auto file
       = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-        this->State.NumberOfRegistrationPasses, i);
+        this->DirectoryStructure.NumberOfRegistrationPasses(), i);
     const auto finalWriter = TMovingWriter::New();
     finalWriter->SetInput( movingVector.at(i) );
     finalWriter->SetFileName( file );
@@ -1045,9 +1036,6 @@ Controller
   // Calculate residuals/SQUEEZ //
   ////////////////////////////////
 
-  this->State.NumberOfRegistrationPasses += 1;
-
-  std::cout << "Calculating state variables..." << std::flush;
 
   this->State.RegistrationSummary = registerMesh.summaryString;
   this->State.costFunctionFrames  = registerMesh.costFunctionFrames;
@@ -1069,7 +1057,7 @@ Controller
   this->State.costFunctionResidualZ = residualZ;
 
   this->CalculateSurfaceAreas();
-  this->CalculateResidualsForPass(this->State.NumberOfRegistrationPasses);
+  this->CalculateResidualsForPass(this->DirectoryStructure.NumberOfRegistrationPasses());
 
   std::cout << "done." << std::endl;
 
@@ -1172,7 +1160,7 @@ Controller
     case CellData::SQUEEZ:
       {
 
-      if (this->State.NumberOfRegistrationPasses < 1)
+      if (this->DirectoryStructure.NumberOfRegistrationPasses() < 1)
         {
         std::cerr << "Warning: Surface areas cannot be calculated." << std::endl;
         this->window.modelCellData = nullptr;
@@ -1219,7 +1207,7 @@ Controller
       const auto modelReader = TVTKMeshReader::New();
       modelReader->SetFileName(
         this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-          this->State.NumberOfRegistrationPasses - 1, f ).c_str()
+          this->DirectoryStructure.NumberOfRegistrationPasses() - 1, f ).c_str()
                               );
       modelReader->Update();
   

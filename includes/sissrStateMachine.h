@@ -93,8 +93,6 @@ public:
   bool PlaneDataExists = false;
   bool SegmentationDataExists = false;
   bool CandidateDataExists = false;
-//  bool InitialModelDataExists = false;
-  unsigned int NumberOfRegistrationPasses = 0;
 
   PlaneWidgetState<vtkPlaneWidget> planeWidgetState;
   bool ImagePlanesHaveBeenSetup = false;
