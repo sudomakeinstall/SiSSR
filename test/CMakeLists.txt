@@ -15,6 +15,6 @@ foreach(MYTEST ${MYTESTS})
     MODULES ${VTK_LIBRARIES}
   )
 
-  add_test(NAME ${EXNAME} COMMAND ${EXNAME} ${CMAKE_SOURCE_DIR}/test/testdata/)
+  add_test(NAME ${EXNAME} COMMAND ${EXNAME} ${CMAKE_SOURCE_DIR}/test/testdata/ false)
 
 endforeach()

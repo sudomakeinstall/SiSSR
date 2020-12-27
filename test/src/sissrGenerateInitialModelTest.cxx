@@ -10,10 +10,13 @@
 
 int main(int argc, char** argv) {
 
-  const std::string test_dir(argv[1]);
-  std::cout << test_dir << std::endl;
+  itkAssertOrThrowMacro(argc == 3, "The test expects three arguments.");
 
+  const std::string test_dir(argv[1]);
   const std::string input_file_name = test_dir + "0.nii.gz";
+  std::stringstream ss(argv[2]);
+  bool show;
+  ss >> std::boolalpha >> show;
 
   const double sigma = 0.1;
   const unsigned int count = 1024;
@@ -47,11 +50,15 @@ int main(int argc, char** argv) {
   model->SetGeneralClosingRadius(gn_radius);
   model->Update();
 
-  const auto m = dv::ITKMeshToVTKPolyData< TMesh >( model->GetOutput() );
-  std::vector<vtkPolyData*> poly_data_vector;
-  poly_data_vector.emplace_back(m);
+  if (show) {
 
-  dv::QuickViewMultiplePolyData( poly_data_vector, true );
+    const auto m = dv::ITKMeshToVTKPolyData< TMesh >( model->GetOutput() );
+    std::vector<vtkPolyData*> poly_data_vector;
+    poly_data_vector.emplace_back(m);
+
+    dv::QuickViewMultiplePolyData( poly_data_vector, true );
+
+  }
 
   return EXIT_SUCCESS;
 
