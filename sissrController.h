@@ -67,6 +67,7 @@ protected slots:
   void DecrementFrame();
   void SetupModel();
   void Register();
+  void CalculateResiduals();
   void CalculateResidualsForPass(const unsigned int pass);
   void WriteScreenshots();
   void UpdateCellData();

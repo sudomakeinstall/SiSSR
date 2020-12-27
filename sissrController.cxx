@@ -131,8 +131,7 @@ Controller
 ::DetermineState()
 {
 
-  // Candidate Data
-
+  // Candidates
   std::cout << "Candidate data..." << std::flush;
   if (this->DirectoryStructure.CandidateDirectory.DataExists()) {
     std::cout << "found." << std::endl;
@@ -141,13 +140,12 @@ Controller
     this->CalculateBoundaryCandidates();
   }
 
-  // Initial Model Data
-
+  // Initial Model
   std::cout << "Initial model data..." << std::flush;
-
   if (this->DirectoryStructure.InitialModelDataExists()) {
     std::cout << "found." << std::endl;
   } else {
+    this->GenerateInitialModel();
     std::cout << "not found." << std::endl;
     return;
   }
@@ -156,14 +154,8 @@ Controller
   // Calculated Information //
   ////////////////////////////
 
-  for (unsigned int p = 0; p <= this->DirectoryStructure.NumberOfRegistrationPasses(); ++p)
-    {
-    if (!this->DirectoryStructure.ResidualMeshDataExistsForPass(p))
-      {
-      this->CalculateResidualsForPass(p);
-      }
-    }
-
+  this->CalculateResiduals();
+  
 }
 
 void
@@ -476,7 +468,35 @@ Controller
     }
 
   clock.Stop();
+
+  std::cout << "done." << std::endl;
   std::cout << "Time elapsed: " << clock.GetTotal() << std::endl;
+
+}
+
+void
+Controller
+::GenerateInitialModel() {
+
+  std::cout << "Generating initial model...";
+
+  itk::TimeProbe clock;
+  clock.Start();
+
+  dv::GenerateInitialModel(
+    this->DirectoryStructure.InitialModelSegmentation,
+    this->DirectoryStructure.InitialModel,
+    this->State.NumberOfFacesInDecimatedMesh,
+    this->State.DecimationNoiseSigma,
+    10
+    );
+
+  clock.Stop();
+
+  std::cout << "done." << std::endl;
+  std::cout << "Time elapsed: " << clock.GetTotal() << std::endl;
+
+  this->CalculateResiduals();
 
 }
 
@@ -716,21 +736,6 @@ Controller
 
 void
 Controller
-::GenerateInitialModel()
-{
-
-  dv::GenerateInitialModel(
-    this->DirectoryStructure.InitialModelSegmentation,
-    this->DirectoryStructure.InitialModel,
-    this->State.NumberOfFacesInDecimatedMesh,
-    this->State.DecimationNoiseSigma,
-    10
-    );
-
-}
-
-void
-Controller
 ::Serialize()
 {
 
@@ -856,8 +861,7 @@ Controller
 
 void
 Controller
-::CalculateResidualsForPass(const unsigned int pass)
-{
+::CalculateResidualsForPass(const unsigned int pass) {
 
   std::cout << "Calculating residuals for pass " << pass << "..." << std::endl;
   auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
@@ -920,6 +924,18 @@ Controller
 
       progress.UnitCompleted();
 
+    }
+
+}
+
+void
+Controller
+::CalculateResiduals() {
+
+  for (size_t p = 0; p <= this->DirectoryStructure.NumberOfRegistrationPasses(); ++p) {
+    if (!this->DirectoryStructure.ResidualMeshDataExistsForPass(p)) {
+      this->CalculateResidualsForPass(p);
+      }
     }
 
 }
