@@ -19,8 +19,7 @@ DirectoryStructure
   OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
   SegmentationDirectory  (IptDirectory + "seg-nii/"         , ".nii.gz"),
   ImageDirectory         (IptDirectory + "img-nii/"         , ".nii.gz", GetNumberOfFiles()),
-  CandidateMeshDirectory (IptDirectory + "candidate-meshes/", ".vtk"   , GetNumberOfFiles()),
-  CandidatePointDirectory(IptDirectory + "candidate-points/", ".txt"   , GetNumberOfFiles())
+  CandidateDirectory (IptDirectory + "candidates/", ".vtk"   , GetNumberOfFiles())
 {
 
   // Create directories

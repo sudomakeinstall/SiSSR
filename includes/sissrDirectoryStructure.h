@@ -23,8 +23,7 @@ public:
 
   const sissr::SequentialDirectory SegmentationDirectory;
   const sissr::SequentialDirectory ImageDirectory;
-  const sissr::SequentialDirectory CandidateMeshDirectory;
-  const sissr::SequentialDirectory CandidatePointDirectory;
+  const sissr::SequentialDirectory CandidateDirectory;
 
   const std::string InitialModelDirectory    = this->OptDirectory + "initial_models/";
   const std::string RegisteredModelDirectory = this->OptDirectory + "registered_models/";
@@ -49,8 +48,7 @@ public:
   std::string ResidualsForPass(const size_t p) const;
   std::string RegistrationSummaryForPass(const size_t p) const;
 
-  std::string CandidateMeshPathForFrame(const size_t f) const;
-  std::string CandidatePointPathForFrame(const size_t f) const;
+  std::string CandidatePathForFrame(const size_t f) const;
   std::string ScreenshotPathForFrame(const size_t f) const;
 
   std::string RegisteredModelPathForPassAndFrame(const size_t p, const size_t f) const;

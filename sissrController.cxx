@@ -131,20 +131,10 @@ Controller
 ::DetermineState()
 {
 
-  // Segmentation Data
-
-  std::cout << "Segmentation data..." << std::flush;
-  if (this->DirectoryStructure.GetNumberOfFiles() > 0) {
-    std::cout << "found (" << std::to_string(this->DirectoryStructure.GetNumberOfFiles()) << " files)." << std::endl;
-  } else {
-    std::cout << "not found." << std::endl;
-    return;
-  }
-
   // Candidate Data
 
   std::cout << "Candidate data..." << std::flush;
-  if (this->DirectoryStructure.CandidateMeshDirectory.DataExists() && this->DirectoryStructure.CandidatePointDirectory.DataExists()) {
+  if (this->DirectoryStructure.CandidateDirectory.DataExists()) {
     std::cout << "found." << std::endl;
   } else {
     std::cout << "not found." << std::endl;
@@ -376,7 +366,7 @@ Controller
 
   if (this->State.CandidatesAreVisible)
     {
-    this->window.UpdateCandidatesSource(this->DirectoryStructure.CandidateMeshDirectory.PathForFrame(value));
+    this->window.UpdateCandidatesSource(this->DirectoryStructure.CandidateDirectory.PathForFrame(value));
     }
 
   /*********
@@ -483,7 +473,7 @@ Controller
     {
 
     const auto input = this->DirectoryStructure.SegmentationDirectory.PathForFrame(file);
-    const auto output = this->DirectoryStructure.CandidatePointDirectory.PathForFrame(file);
+    const auto output = this->DirectoryStructure.CandidateDirectory.PathForFrame(file);
 
     dv::SegmentationToLabeledPointSet<3, unsigned short, double>(
       input,
@@ -534,7 +524,7 @@ Controller
 
   if (this->State.CandidatesAreVisible)
     {
-    const auto file = this->DirectoryStructure.CandidatePointDirectory.PathForFrame( this->GetCurrentFrame() );
+    const auto file = this->DirectoryStructure.CandidateDirectory.PathForFrame(this->GetCurrentFrame());
     this->window.UpdateCandidatesSource( file );
     }
 
@@ -669,7 +659,7 @@ Controller
     return;
 
   const auto frame = this->GetCurrentFrame();
-  const auto fileName = this->DirectoryStructure.CandidatePointDirectory.PathForFrame(frame);
+  const auto fileName = this->DirectoryStructure.CandidateDirectory.PathForFrame(frame);
 
   this->window.SetupCandidates(fileName);
 
@@ -911,7 +901,7 @@ Controller
     const auto locator = TLocator::New();
 
       {
-      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePointDirectory.PathForFrame(f) );
+      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidateDirectory.PathForFrame(f) );
       locator->SetPoints( points->GetPoints() );
 
       }
@@ -987,7 +977,7 @@ Controller
   for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
     {
 
-    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidatePointDirectory.PathForFrame(i) );
+    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidateDirectory.PathForFrame(i) );
     const auto pointset_map = dv::LabeledITKPointSetToPointSetMap<TMesh>(points);
     std::map<unsigned char, TLocator::Pointer> locator_map;
     for (const auto& pointset : pointset_map) {
