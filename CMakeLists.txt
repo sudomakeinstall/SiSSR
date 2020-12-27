@@ -85,6 +85,7 @@ find_package(CGAL QUIET REQUIRED)
 # VTK
 find_package(VTK REQUIRED
  COMPONENTS
+    CommonColor
     CommonCore
     CommonDataModel
     CommonMath
