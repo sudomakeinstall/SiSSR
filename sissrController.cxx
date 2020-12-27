@@ -935,7 +935,7 @@ Controller
     const auto r = residuals.Calculate();
 
     const std::string dir = this->DirectoryStructure.ResidualsDirectory + std::to_string(pass);
-    std::filesystem::create_directory(dir);
+    std::filesystem::create_directories(dir);
 
       {
       const auto writer = TWriter::New();
@@ -978,7 +978,7 @@ Controller
     this->DirectoryStructure.RegisteredModelDirectory +
     std::to_string(this->State.NumberOfRegistrationPasses);
 
-  std::filesystem::create_directory( dirToCreate );
+  std::filesystem::create_directories( dirToCreate );
 
   std::cout << "Preparing boundary candidates..." << std::endl;
 

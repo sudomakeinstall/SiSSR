@@ -25,11 +25,11 @@ DirectoryStructure
 
   // Create directories
   namespace fs = std::filesystem;
-  fs::create_directory(this->InitialModelDirectory);
-  fs::create_directory(this->RegisteredModelDirectory);
-  fs::create_directory(this->ResidualsDirectory);
-  fs::create_directory(this->SerializationDirectory);
-  fs::create_directory(this->ScreenshotDirectory);
+  fs::create_directories(this->InitialModelDirectory);
+  fs::create_directories(this->RegisteredModelDirectory);
+  fs::create_directories(this->ResidualsDirectory);
+  fs::create_directories(this->SerializationDirectory);
+  fs::create_directories(this->ScreenshotDirectory);
 
 };
   

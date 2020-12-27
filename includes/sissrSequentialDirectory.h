@@ -13,7 +13,7 @@ namespace sissr {
       Dir(dir),
       Ext(ext),
       NumberOfFiles(N) {
-        std::filesystem::create_directory(this->Dir);
+        std::filesystem::create_directories(this->Dir);
       }
 
     SequentialDirectory(const std::string& dir, const std::string& ext) :
