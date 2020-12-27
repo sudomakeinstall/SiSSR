@@ -13,7 +13,10 @@ namespace sissr {
 
 StateMachine
 ::StateMachine() :
-  NumberOfFacesInDecimatedMesh(1024),
+  InitialModelNumberOfFaces(512),
+  InitialModelSigma(0.1),
+  InitialModelLVClosingRadius(10),
+  InitialModelGeneralClosingRadius(5),
   BoundaryCandidateDilationRadius(3)
 {}
 
@@ -222,8 +225,18 @@ StateMachine
 ::SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer)
 {
 
-  writer.Key("NumberOfFacesInDecimatedMesh");
-  writer.Uint(this->NumberOfFacesInDecimatedMesh);
+  writer.Key("InitialModelNumberOfFaces");
+  writer.Uint(this->InitialModelNumberOfFaces);
+  writer.Key("InitialModelSigma");
+  writer.Uint(this->InitialModelSigma);
+  writer.Key("InitialModelLVClosingRadius");
+  writer.Uint(this->InitialModelLVClosingRadius);
+  writer.Key("InitialModelGeneralClosingRadius");
+  writer.Uint(this->InitialModelGeneralClosingRadius);
+  writer.Key("InitialModelGeneralClosingRadius");
+  writer.Uint(this->InitialModelGeneralClosingRadius);
+  writer.Key("BoundaryCandidateDilationRadius");
+  writer.Uint(this->BoundaryCandidateDilationRadius);
 
   if (this->EDFrameHasBeenSet)
     {
@@ -284,7 +297,11 @@ StateMachine
   dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
-  dv::check_and_set_uint(d, this->NumberOfFacesInDecimatedMesh, "NumberOfFacesInDecimatedMesh");
+   dv::check_and_set_uint(d, this->InitialModelNumberOfFaces, "InitialModelNumberOfFaces");
+   dv::check_and_set_double(d, this->InitialModelSigma, "InitialModelSigma");
+   dv::check_and_set_uint(d, this->InitialModelLVClosingRadius, "InitialModelLVClosingRadius");
+   dv::check_and_set_uint(d, this->InitialModelGeneralClosingRadius, "InitialModelGeneralClosingRadius");
+   dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
 
   dv::check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");
 

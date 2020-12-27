@@ -77,10 +77,11 @@ private:
   using TVTKMeshReader = vtkSmartPointer<vtkPolyDataReader>;
 
   void UpdateAnnotations();
-  typedef double TReal;
+  using TIntegral = unsigned char;
+  using TReal = double;
 
   // ITK typedefs
-  typedef itk::Image<short,3>                                              TImage;
+  typedef itk::Image<TIntegral,3>                                          TImage;
   typedef itk::Image<TReal,3>                                              TWorkImage;
   typedef itk::ImageFileReader< TImage >                                   TImageReader;
   typedef itk::ImageToVTKImageFilter< TImage >                             TITK2VTK;

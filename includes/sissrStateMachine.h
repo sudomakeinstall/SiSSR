@@ -61,10 +61,12 @@ public:
   ////////////////
 
   // Options
-  unsigned int NumberOfFacesInDecimatedMesh;
+  unsigned int InitialModelNumberOfFaces;
+  double       InitialModelSigma;
+  unsigned int InitialModelLVClosingRadius;
+  unsigned int InitialModelGeneralClosingRadius;
 
   unsigned int BoundaryCandidateDilationRadius;
-  const double DecimationNoiseSigma = 0.5;
 
   LossScaleFactors RegistrationWeights;
 

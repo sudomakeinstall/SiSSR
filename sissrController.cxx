@@ -38,6 +38,7 @@
 #include <dvSegmentationToLabeledPointSet.h>
 #include <dvLabeledITKPointSetReader.h>
 #include <dvLabeledITKPointSetToPointSetMap.h>
+#include <itkGenerateInitialModelImageToMeshFilter.h>
 #include <dvGenerateInitialModel.h>
 #include <dvVTKPolyDataToITKTriangleMesh.h>
 
@@ -150,12 +151,6 @@ Controller
     return;
   }
 
-  ////////////////////////////
-  // Calculated Information //
-  ////////////////////////////
-
-  this->CalculateResiduals();
-  
 }
 
 void
@@ -483,13 +478,32 @@ Controller
   itk::TimeProbe clock;
   clock.Start();
 
-  dv::GenerateInitialModel(
-    this->DirectoryStructure.InitialModelSegmentation,
-    this->DirectoryStructure.InitialModel,
-    this->State.NumberOfFacesInDecimatedMesh,
-    this->State.DecimationNoiseSigma,
-    10
-    );
+  using TReader = itk::ImageFileReader<TImage>;
+  using TModel = itk::GenerateInitialModelImageToMeshFilter<TImage,TQEMesh>;
+  using TWriter = itk::MeshFileWriter<TQEMesh>;
+
+  const auto reader = TReader::New();
+  reader->SetFileName(this->DirectoryStructure.InitialModelSegmentation);
+
+  const auto model = TModel::New();
+  model->SetInput(reader->GetOutput());
+  model->SetNumberOfCellsInDecimatedMesh(this->State.InitialModelNumberOfFaces);
+  model->SetMeshNoiseSigma(this->State.InitialModelSigma);
+  model->SetLVClosingRadius(this->State.InitialModelLVClosingRadius);
+  model->SetGeneralClosingRadius(this->State.InitialModelGeneralClosingRadius);
+
+  const auto writer = TWriter::New();
+  writer->SetInput(model->GetOutput());
+  writer->SetFileName(this->DirectoryStructure.InitialModel);
+  writer->Update();
+
+//  dv::GenerateInitialModel(
+//    this->DirectoryStructure.InitialModelSegmentation,
+//    this->DirectoryStructure.InitialModel,
+//    this->State.InitialModelNumberOfFaces,
+//    this->State.InitialModelSigma,
+//    10
+//    );
 
   clock.Stop();
 
