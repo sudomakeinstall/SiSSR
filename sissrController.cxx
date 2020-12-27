@@ -1064,9 +1064,9 @@ Controller
   this->State.costFunctionFrames  = registerMesh.costFunctionFrames;
   this->State.costFunctionCellIDs = registerMesh.costFunctionCellIDs;
 
-  std::vector<TReal> residualX;
-  std::vector<TReal> residualY;
-  std::vector<TReal> residualZ;
+  std::vector<double> residualX;
+  std::vector<double> residualY;
+  std::vector<double> residualZ;
 
   for (size_t i = 0; i < registerMesh.costFunctionResiduals.size();)
     {
@@ -1222,7 +1222,7 @@ Controller
     std::cout << "Calculating surface areas..." << std::endl;
     auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
   
-    vnl_matrix<TReal> sa;
+    vnl_matrix<double> sa;
   
     for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
       {

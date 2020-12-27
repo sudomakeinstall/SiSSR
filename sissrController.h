@@ -78,7 +78,7 @@ private:
 
   void UpdateAnnotations();
   using TIntegral = unsigned char;
-  using TReal = double;
+  using TReal = float;
 
   // ITK typedefs
   typedef itk::Image<TIntegral,3>                                          TImage;
