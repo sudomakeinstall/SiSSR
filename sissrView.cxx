@@ -182,34 +182,25 @@ View
 
 void
 View
-::SetupCandidates(std::string fileName)
-{
+::SetupCandidates(std::string fileName) {
 
-  // Error Checking
-
-  if (this->CandidatesHaveBeenSetup)
-    {
+  if (this->CandidatesHaveBeenSetup) {
     std::cerr << "WARNING: SetupCandidates() has already been called.\n"
               << "Returning." << std::endl;
     return;
-    }
+  }
 
-  // Logic
-// TODO
-//  this->candidateReader = TVTKMeshReader::New();
+  this->candidateReader = TVTKMeshReader::New();
   this->candidateMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
   this->candidateActor  = vtkSmartPointer<vtkActor>::New();
+  const auto lut = dv::LUT::Rainbow();
 
-// TODO
-//  this->candidateReader->SetFileName( fileName.c_str() );
-//  this->candidateReader->Update();
-//  this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
-  const auto candidates = dv::LabeledVTKPointSetReader( fileName );
-  this->candidateMapper->SetInputData( candidates );
+  this->candidateReader->SetFileName( fileName.c_str() );
+  this->candidateReader->Update();
+  this->candidateMapper->SetLookupTable( lut );
+  this->candidateMapper->SetScalarRange(0, 9);
+  this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
   this->candidateActor->SetMapper( this->candidateMapper );
-  this->candidateActor->GetProperty()->SetPointSize( 5 );
-
-  // Set Flag
 
   this->CandidatesHaveBeenSetup = true;
 
@@ -602,17 +593,10 @@ View
 
 void
 View
-::UpdateCandidatesSource(const std::string &fileName)
-{
+::UpdateCandidatesSource(const std::string &fileName) {
 
-//TODO
-//  itkAssertOrThrowMacro( (nullptr != this->candidateReader),
-//                         "ERROR: Candidate reader is null.");
-//
-//  this->candidateReader->SetFileName( fileName.c_str() );
-//  this->candidateReader->Update();
-  const auto candidates = dv::LabeledVTKPointSetReader( fileName );
-  this->candidateMapper->SetInputData( candidates );
+  this->candidateReader->SetFileName( fileName.c_str() );
+  this->candidateReader->Update();
 
 }
 

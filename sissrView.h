@@ -151,8 +151,7 @@ public:
   vtkSmartPointer<vtkActor> imageActor = nullptr;
 
   // Candidates
-// TODO
-//  TVTKMeshReader      candidateReader = nullptr;
+  TVTKMeshReader                     candidateReader = nullptr;
   vtkSmartPointer<vtkPolyDataMapper> candidateMapper = nullptr;
   vtkSmartPointer<vtkActor>          candidateActor = nullptr;
 

@@ -39,7 +39,6 @@
 #include <dvLabeledITKPointSetReader.h>
 #include <dvLabeledITKPointSetToPointSetMap.h>
 #include <itkGenerateInitialModelImageToMeshFilter.h>
-#include <dvGenerateInitialModel.h>
 #include <dvVTKPolyDataToITKTriangleMesh.h>
 
 // Custom
@@ -447,20 +446,41 @@ Controller
   itk::TimeProbe clock;
   clock.Start();
 
-  for (size_t file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file)
-    {
+  using TReader = itk::ImageFileReader<TImage>;
+  using TClean = itk::CleanSegmentationImageFilter<TImage>;
+  using TCuberille = itk::CuberilleImageToMeshFilter<TImage, TQEMesh>;
+  using TWriter = itk::MeshFileWriter<TQEMesh>;
+
+  for (size_t file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file) {
 
     const auto input = this->DirectoryStructure.SegmentationDirectory.PathForFrame(file);
     const auto output = this->DirectoryStructure.CandidateDirectory.PathForFrame(file);
 
-    dv::SegmentationToLabeledPointSet<3, unsigned short, double>(
-      input,
-      output
-    );
+    const auto reader = TReader::New();
+    reader->SetFileName(input);
+
+    const auto clean = TClean::New();
+    clean->SetInput( reader->GetOutput() );
+
+    const auto cuberille = TCuberille::New();
+    cuberille->SetInput(clean->GetOutput());
+    cuberille->GenerateTriangleFacesOff();
+    cuberille->RemoveProblematicPixelsOn();
+    cuberille->SavePixelAsCellDataOn();
+
+    const auto writer = TWriter::New();
+    writer->SetInput(cuberille->GetOutput());
+    writer->SetFileName(output);
+    writer->Update();
+
+//    dv::SegmentationToLabeledPointSet<3, unsigned short, double>(
+//      input,
+//      output
+//    );
 
     progress.UnitCompleted();
 
-    }
+  }
 
   clock.Stop();
 
@@ -670,11 +690,12 @@ Controller
     this->State.CandidatesAreVisible = false;
     this->State.CandidatesHaveBeenSetup = false;
     return;
-    }
+  }
 
   // GUARD: Don't setup again.
-  if (this->State.CandidatesHaveBeenSetup)
+  if (this->State.CandidatesHaveBeenSetup) {
     return;
+  }
 
   const auto frame = this->GetCurrentFrame();
   const auto fileName = this->DirectoryStructure.CandidateDirectory.PathForFrame(frame);
