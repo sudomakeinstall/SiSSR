@@ -18,7 +18,6 @@
 
 // ITK
 #include <itkLoopTriangleCellSubdivisionQuadEdgeMeshFilter.h>
-#include <itkMeshFileReader.h>
 #include <itkTimeProbe.h>
 #include <itkIterativeTriangleCellSubdivisionQuadEdgeMeshFilter.h>
 #include <itkQuadEdgeMesh.h>
@@ -27,18 +26,12 @@
 #include <itkSquaredEdgeLengthDecimationQuadEdgeMeshFilter.h>
 #include <itkSmoothingQuadEdgeMeshFilter.h>
 #include <itkQuadEdgeMeshParamMatrixCoefficients.h>
-#include <itkMeshFileReader.h>
-#include <itkMeshFileWriter.h>
 #include <itkAdditiveGaussianNoiseQuadEdgeMeshFilter.h>
 
 // DVCppUtils
 #include <dvProgress.h>
 #include <dvSignedDistanceToPlane.h>
 #include <dvCyclicMean.h>
-//#include <dvSegmentationToLabeledPointSet.h>
-//#include <dvLabeledITKPointSetReader.h>
-//#include <dvLabeledITKPointSetToPointSetMap.h>
-//#include <dvVTKPolyDataToITKTriangleMesh.h>
 #include <itkGenerateInitialModelImageToMeshFilter.h>
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
@@ -445,17 +438,15 @@ Controller
   itk::TimeProbe clock;
   clock.Start();
 
-  using TReader = itk::ImageFileReader<TImage>;
   using TClean = itk::CleanSegmentationImageFilter<TImage>;
   using TCuberille = itk::CuberilleImageToMeshFilter<TImage, TQEMesh>;
-  using TWriter = itk::MeshFileWriter<TQEMesh>;
 
   for (size_t file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file) {
 
     const auto input = this->DirectoryStructure.SegmentationDirectory.PathForFrame(file);
     const auto output = this->DirectoryStructure.CandidateDirectory.PathForFrame(file);
 
-    const auto reader = TReader::New();
+    const auto reader = TImageReader::New();
     reader->SetFileName(input);
 
     const auto clean = TClean::New();
@@ -467,7 +458,7 @@ Controller
     cuberille->RemoveProblematicPixelsOn();
     cuberille->SavePixelAsCellDataOn();
 
-    const auto writer = TWriter::New();
+    const auto writer = TQEMeshWriter::New();
     writer->SetInput(cuberille->GetOutput());
     writer->SetFileName(output);
     writer->Update();
@@ -497,11 +488,10 @@ Controller
   itk::TimeProbe clock;
   clock.Start();
 
-  using TReader = itk::ImageFileReader<TImage>;
   using TModel = itk::GenerateInitialModelImageToMeshFilter<TImage,TQEMesh>;
   using TWriter = itk::MeshFileWriter<TQEMesh>;
 
-  const auto reader = TReader::New();
+  const auto reader = TImageReader::New();
   reader->SetFileName(this->DirectoryStructure.InitialModelSegmentation);
 
   const auto model = TModel::New();

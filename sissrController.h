@@ -78,39 +78,40 @@ private:
   using TVTKMeshReader = vtkSmartPointer<vtkPolyDataReader>;
 
   void UpdateAnnotations();
+
   using TIntegral = unsigned char;
   using TReal = float;
+  static constexpr unsigned int Dimension = 3;
 
-  // ITK typedefs
-  typedef itk::Image<TIntegral,3>                                          TImage;
-  typedef itk::Image<TReal,3>                                              TWorkImage;
-  typedef itk::ImageFileReader< TImage >                                   TImageReader;
-  typedef itk::ImageToVTKImageFilter< TImage >                             TITK2VTK;
-  typedef itk::DefaultStaticMeshTraits< TReal,  // Pixel Type
-                                        3,      // Point Dimension
-                                        3,      // Max Topological Dimension
-                                        TReal,  // Coordinate Representation
-                                        TReal,  // Interpolation Weight
-                                        TReal > // Cell Pixel Type
-                                                TMeshTraits;
-  typedef itk::QuadEdgeMeshTraits< TReal,  // Pixel Type
-                                   3,      // Point Dimension
-                                   TReal,  // PData
-                                   TReal,  // DData
-                                   TReal,  // Coordinate Representation
-                                   TReal > // Interpolation Weight
-                                           TQEMeshTraits;
+  // Image typedefs
+  using TImage = itk::Image<TIntegral,Dimension>;
+  using TImageReader = itk::ImageFileReader<TImage>;
+  using TImageWriter = itk::ImageFileWriter<TImage>;
+  using TITK2VTK = itk::ImageToVTKImageFilter<TImage>;
+
+  using TMeshTraits = itk::DefaultStaticMeshTraits<
+    TReal,     // Pixel Type
+    Dimension, // Point Dimension
+    Dimension, // Max Topological Dimension
+    TReal,     // Coordinate Representation
+    TReal,     // Interpolation Weight
+    TReal >;   // Cell Pixel Type
+  using TQEMeshTraits = itk::QuadEdgeMeshTraits<
+    TReal,     // Pixel Type
+    Dimension, // Point Dimension
+    TReal,     // PData
+    TReal,     // DData
+    TReal,     // Coordinate Representation
+    TReal >;   // Interpolation Weight
 
   typedef itk::Mesh< TReal, 3, TMeshTraits >                         TMesh;
   typedef itk::QuadEdgeMesh< TReal, 3, TQEMeshTraits >               TQEMesh;
   typedef itk::LoopSubdivisionSurfaceMesh< TReal, 3, TQEMeshTraits > TLoopMesh;
 
-  typedef typename TMesh::CellType                     TCell;
-  typedef itk::VertexCell< TCell >                     TVertex;
-  typedef itk::ImageFileWriter< TImage >               TImageWriter;
   typedef itk::MeshFileReader< TMesh >                 TMeshReader;
   typedef itk::MeshFileReader< TQEMesh >               TQEMeshReader;
   typedef itk::MeshFileReader< TLoopMesh >             TLoopMeshReader;
+  typedef itk::MeshFileWriter< TQEMesh >               TQEMeshWriter;
   typedef itk::MeshFileWriter< TMesh >                 TMeshWriter;
   using TLocator = itk::PointsLocator< TMesh::PointsContainer >;
 
