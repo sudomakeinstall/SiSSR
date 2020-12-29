@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   using TCoordinate = float;
   using TImage = itk::Image<TPixel, Dimension>;
   using TMesh = itk::QuadEdgeMesh<TCoordinate, Dimension>;
-  using TMeshToKdMap = sissr::LabeledMeshToKdMap<TCoordinate, Dimension>;
+  using TMeshToKdMap = sissr::LabeledMeshToKdMap<TMesh>;
 
   using TReader = itk::ImageFileReader<TImage>;
   using TClean = itk::CleanSegmentationImageFilter<TImage>;
@@ -44,19 +44,11 @@ int main(int argc, char** argv) {
   cuberille->SavePixelAsCellDataOn();
   cuberille->Update();
 
-  //
-  //
-  //
-
   TMeshToKdMap mesh_to_kd_map;
   const auto kd_map = mesh_to_kd_map.Calculate(cuberille->GetOutput());
   for (auto &[label, kd] : kd_map) {
     std::cout << label << ':' << kd->GetPoints()->Size() << std::endl;
   }
-
-  //
-  //
-  //
 
   return EXIT_SUCCESS;
 

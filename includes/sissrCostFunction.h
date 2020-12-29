@@ -22,7 +22,7 @@ public ceres::CostFunction
   typedef typename TFixedMesh::PointsContainer TContainer;
 // TODO
 //  typedef itk::PointsLocator< TContainer > TLocator;
-  typedef typename std::map<unsigned char, typename itk::PointsLocator< TContainer >::Pointer> TLocatorMap;
+  typedef typename std::map<size_t, typename itk::PointsLocator< TContainer >::Pointer> TLocatorMap;
 
   CostFunction(
 // TODO

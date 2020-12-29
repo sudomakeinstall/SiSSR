@@ -41,7 +41,7 @@ public:
 
   typedef typename TFixedMesh::PointsContainer TContainer;
   typedef itk::PointsLocator< TContainer > TLocator;
-  typedef std::vector<std::map<unsigned char, typename TLocator::Pointer>> TLocatorVector;
+  typedef std::vector<std::map<size_t, typename TLocator::Pointer>> TLocatorVector;
 
   typedef std::vector<typename TMoving::Pointer> TMovingVector;
 

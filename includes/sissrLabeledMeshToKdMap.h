@@ -3,16 +3,17 @@
 
 namespace sissr {
 
-template<typename TCoordinate, unsigned int Dimension>
+template<typename TMesh>
 class LabeledMeshToKdMap {
   public:
 
-    using TMesh = itk::QuadEdgeMesh<TCoordinate, Dimension>;
+    using TCoordinate = typename TMesh::PixelType;
+    static constexpr unsigned int Dimension = TMesh::PointDimension;
     using TPointSet = itk::PointSet<TCoordinate, Dimension>;
-    using TLocator = itk::PointsLocator< typename TPointSet::PointsContainer >;
+    using TLocator = itk::PointsLocator<typename TPointSet::PointsContainer>;
     using TLocatorMap = std::map<size_t, typename TLocator::Pointer>;
 
-    TLocatorMap Calculate(typename TMesh::Pointer mesh) {
+    TLocatorMap Calculate(TMesh* mesh) {
 
       std::map<size_t, typename TPointSet::Pointer> pointset_map;
 

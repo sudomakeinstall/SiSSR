@@ -22,7 +22,7 @@
 
 // Custom
 #include <dvGetVTKTransformationMatrixFromITKImage.h>
-#include <dvLabeledVTKPointSetReader.h>
+//#include <dvLabeledVTKPointSetReader.h>
 #include <dvGetLookupTable.h>
 
 // SiSSR

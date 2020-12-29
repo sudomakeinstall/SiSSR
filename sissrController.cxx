@@ -35,19 +35,18 @@
 #include <dvProgress.h>
 #include <dvSignedDistanceToPlane.h>
 #include <dvCyclicMean.h>
-#include <dvSegmentationToLabeledPointSet.h>
-#include <dvLabeledITKPointSetReader.h>
-#include <dvLabeledITKPointSetToPointSetMap.h>
+//#include <dvSegmentationToLabeledPointSet.h>
+//#include <dvLabeledITKPointSetReader.h>
+//#include <dvLabeledITKPointSetToPointSetMap.h>
+//#include <dvVTKPolyDataToITKTriangleMesh.h>
 #include <itkGenerateInitialModelImageToMeshFilter.h>
-#include <dvVTKPolyDataToITKTriangleMesh.h>
-
-// Custom
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
 
 // SiSSR
 #include <sissrRegisterMeshToPointSet.h>
 #include <sissrCalculateResidualMesh.h>
+#include <sissrLabeledMeshToKdMap.h>
 
 namespace sissr {
 
@@ -904,44 +903,38 @@ Controller
   // Get the vectors
   typedef CalculateResidualMesh< TMesh, TLoopMesh, TMesh > TResidualCalculator;
 
-  typedef itk::MeshFileWriter< TMesh >     TWriter;
-
   const auto initial = TLoopMesh::New();
 
-  if (0 == pass)
-    {
-    const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-    reader->SetFileName( this->DirectoryStructure.InitialModel.c_str() );
+  if (0 == pass) {
+    const auto reader = TLoopMeshReader::New();
+    reader->SetFileName(this->DirectoryStructure.InitialModel);
     reader->Update();
-    const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
-    initial->Graft( mesh );
+    initial->Graft(reader->GetOutput());
     initial->Setup();
-    }
+  }
 
-  for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
-    {
+  for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f) {
 
     const auto locator = TLocator::New();
 
       {
-      const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidateDirectory.PathForFrame(f) );
-      locator->SetPoints( points->GetPoints() );
-
+        const auto reader = TMeshReader::New();
+        reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(f));
+        reader->Update();
+        locator->SetPoints( reader->GetOutput()->GetPoints() );
       }
 
     locator->Initialize();
 
-    if (0 != pass)
-      {
-      const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
+    if (0 != pass) {
       const auto file
-        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame( pass - 1, f );
-      reader->SetFileName( file.c_str() );
+        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(pass-1,f);
+      const auto reader = TLoopMeshReader::New();
+      reader->SetFileName(file);
       reader->Update();
-      const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
-    initial->Graft( mesh );
+      initial->Graft(reader->GetOutput());
       initial->Setup();
-      }
+    }
 
     TResidualCalculator residuals(locator, initial);
 
@@ -951,7 +944,7 @@ Controller
     std::filesystem::create_directories(dir);
 
       {
-      const auto writer = TWriter::New();
+      const auto writer = TMeshWriter::New();
       writer->SetInput(r);
       writer->SetFileName(this->DirectoryStructure.ResidualMeshPathForPassAndFrame(pass, f));
       writer->Update();
@@ -994,9 +987,11 @@ Controller
   typedef itk::PointsLocator< TMesh::PointsContainer > TLocator;
   typedef RegisterMeshToPointSet< TMesh, TLoopMesh > TRegister;
 
+  using TMeshToKdMap = sissr::LabeledMeshToKdMap<TMesh>;
+
   typedef itk::MeshFileWriter< TLoopMesh > TMovingWriter;
 
-  std::vector<std::map<unsigned char, TLocator::Pointer>> locatorVector;
+  std::vector<std::map<size_t, TLocator::Pointer>> locatorVector;
   std::vector<TLoopMesh::Pointer> movingVector;
 
   std::string dirToCreate =
@@ -1009,40 +1004,32 @@ Controller
 
   auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
-  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
-    {
+  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
 
-    const auto points = dv::LabeledITKPointSetReader<TMesh>( this->DirectoryStructure.CandidateDirectory.PathForFrame(i) );
-    const auto pointset_map = dv::LabeledITKPointSetToPointSetMap<TMesh>(points);
-    std::map<unsigned char, TLocator::Pointer> locator_map;
-    for (const auto& pointset : pointset_map) {
-      locator_map[pointset.first] = TLocator::New();
-      locator_map[pointset.first]->SetPoints( pointset.second->GetPoints() );
-      locator_map[pointset.first]->Initialize();
-    }
+    const auto reader = TMeshReader::New();
+    reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(i));
+    reader->Update();
+
+    TMeshToKdMap mesh_to_kd_map;
+    const auto locator_map = mesh_to_kd_map.Calculate(reader->GetOutput());
 
     locatorVector.emplace_back(locator_map);
 
     // Moving 
-    if (0 == this->DirectoryStructure.NumberOfRegistrationPasses())
-      {
-      const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-      reader->SetFileName( this->DirectoryStructure.InitialModel.c_str() );
+    if (0 == this->DirectoryStructure.NumberOfRegistrationPasses()) {
+      const auto reader = TLoopMeshReader::New();
+      reader->SetFileName(this->DirectoryStructure.InitialModel);
       reader->Update();
-      const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
-      movingVector.emplace_back( mesh );
-      }
-    else
-      {
+      movingVector.emplace_back(reader->GetOutput());
+    } else {
       const auto file
         = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
           this->DirectoryStructure.NumberOfRegistrationPasses() - 1, i);
-      const auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-      reader->SetFileName( file.c_str() );
-      reader->Update();
-      const auto mesh = dv::VTKPolyDataToITKTriangleMesh<TLoopMesh>( reader->GetOutput() );
+      const auto reader = TLoopMeshReader::New();
+      reader->SetFileName(file);
+
       const auto loop = TLoop::New();
-      loop->SetInput( mesh );
+      loop->SetInput(reader->GetOutput());
       loop->Update();
       movingVector.emplace_back(loop->GetOutput());
       }
@@ -1051,7 +1038,7 @@ Controller
 
     progress.UnitCompleted();
 
-    }
+  }
 
   TRegister registerMesh(this->State.EDFrame,
                          locatorVector,

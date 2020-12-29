@@ -12,6 +12,7 @@
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
 #include <itkImageToVTKImageFilter.h>
+#include <itkMeshFileReader.h>
 #include <itkMeshFileWriter.h>
 #include <itkVertexCell.h>
 #include <itkPointsLocator.h>
@@ -107,6 +108,9 @@ private:
   typedef typename TMesh::CellType                     TCell;
   typedef itk::VertexCell< TCell >                     TVertex;
   typedef itk::ImageFileWriter< TImage >               TImageWriter;
+  typedef itk::MeshFileReader< TMesh >                 TMeshReader;
+  typedef itk::MeshFileReader< TQEMesh >               TQEMeshReader;
+  typedef itk::MeshFileReader< TLoopMesh >             TLoopMeshReader;
   typedef itk::MeshFileWriter< TMesh >                 TMeshWriter;
   using TLocator = itk::PointsLocator< TMesh::PointsContainer >;
 
