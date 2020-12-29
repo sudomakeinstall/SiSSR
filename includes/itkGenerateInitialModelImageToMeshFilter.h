@@ -44,16 +44,20 @@ public:
   SetInput(const InputImageType * inputImage);
 
   itkSetMacro(GeneralClosingRadius, unsigned int);
-  itkGetMacro(GeneralClosingRadius, unsigned int);
+  itkGetConstMacro(GeneralClosingRadius, unsigned int);
 
   itkSetMacro(LVClosingRadius, unsigned int);
-  itkGetMacro(LVClosingRadius, unsigned int);
+  itkGetConstMacro(LVClosingRadius, unsigned int);
 
   itkSetMacro(MeshNoiseSigma, float);
-  itkGetMacro(MeshNoiseSigma, float);
+  itkGetConstMacro(MeshNoiseSigma, float);
 
   itkSetMacro(NumberOfCellsInDecimatedMesh, unsigned int);
-  itkGetMacro(NumberOfCellsInDecimatedMesh, unsigned int);
+  itkGetConstMacro(NumberOfCellsInDecimatedMesh, unsigned int);
+
+  itkSetMacro(PreserveEdges, bool);
+  itkGetConstMacro(PreserveEdges, bool);
+  itkBooleanMacro(PreserveEdges);
 
 protected:
   GenerateInitialModelImageToMeshFilter();
@@ -75,6 +79,7 @@ private:
   unsigned int m_LVClosingRadius;
   float        m_MeshNoiseSigma;
   unsigned int m_NumberOfCellsInDecimatedMesh;
+  bool         m_PreserveEdges = true;
 
 };
 } // namespace itk

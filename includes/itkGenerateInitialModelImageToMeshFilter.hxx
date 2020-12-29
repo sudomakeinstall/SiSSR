@@ -16,12 +16,15 @@
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_placement.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
 
 // Custom
 #include <itkCleanSegmentationImageFilter.h>
 #include <dvITKMeshToCGALSurfaceMesh.h>
 #include <dvCGALSurfaceMeshToITKMesh.h>
-#include <dvEdge_preserving_midpoint_placement.h>
+
+// SiSSR
+#include <sissrEdge_preserving_midpoint_placement.h>
 
 namespace itk
 {
@@ -71,7 +74,8 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   using TCGALPoint = typename TCGALKernel::Point_3;
   using TCGALMesh = CGAL::Surface_mesh<TCGALPoint>;
   namespace SMS = CGAL::Surface_mesh_simplification;
-  using TCGALPlacement = SMS::Bounded_normal_change_placement<SMS::Edge_preserving_midpoint_placement<TCGALMesh,typename OutputMeshType::PixelType>>;
+  using TCGALEdgePreservingPlacement = SMS::Bounded_normal_change_placement<SMS::Edge_preserving_midpoint_placement<TCGALMesh,typename OutputMeshType::PixelType>>;
+  using TCGALMidpointPlacement = SMS::Bounded_normal_change_placement<SMS::Midpoint_placement<TCGALMesh>>;
 
   TKernel closeKernel;
   closeKernel.SetRadius(this->GetGeneralClosingRadius());
@@ -116,11 +120,20 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   itkAssertOrThrowMacro(CGAL::is_triangle_mesh(surface_mesh), "Input geometry is not triangulated.")
 
   SMS::Count_stop_predicate<TCGALMesh> stop(this->GetNumberOfCellsInDecimatedMesh());
-  SMS::edge_collapse(
-    surface_mesh
-    , stop
-    , CGAL::parameters::get_placement(TCGALPlacement())
-  );
+
+  if (m_PreserveEdges) {
+    SMS::edge_collapse(
+      surface_mesh
+      , stop
+      , CGAL::parameters::get_placement(TCGALEdgePreservingPlacement())
+    );
+  } else {
+    SMS::edge_collapse(
+      surface_mesh
+      , stop
+      , CGAL::parameters::get_placement(TCGALMidpointPlacement())
+    );
+  }
 
   surface_mesh.collect_garbage();
 

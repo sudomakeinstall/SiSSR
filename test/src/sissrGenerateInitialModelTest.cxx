@@ -1,3 +1,6 @@
+// STD
+#include <filesystem>
+
 // ITK
 #include <itkImage.h>
 #include <itkImageFileReader.h>
@@ -12,8 +15,10 @@ int main(int argc, char** argv) {
 
   itkAssertOrThrowMacro(argc == 3, "The test expects three arguments.");
 
-  const std::string test_dir(argv[1]);
-  const std::string input_file_name = test_dir + "0.nii.gz";
+  namespace fs = std::filesystem;
+
+  const fs::path test_dir = argv[1];
+  const fs::path input_file_name = test_dir / "0.nii.gz";
   std::stringstream ss(argv[2]);
   bool show;
   ss >> std::boolalpha >> show;
@@ -42,19 +47,32 @@ int main(int argc, char** argv) {
   reader->SetFileName(input_file_name);
 
   using TModel = itk::GenerateInitialModelImageToMeshFilter<TImage,TMesh>;
-  const auto model = TModel::New();
-  model->SetInput(reader->GetOutput());
-  model->SetNumberOfCellsInDecimatedMesh(count);
-  model->SetMeshNoiseSigma(sigma);
-  model->SetLVClosingRadius(lv_radius);
-  model->SetGeneralClosingRadius(gn_radius);
-  model->Update();
+
+  const auto model0 = TModel::New();
+  model0->SetInput(reader->GetOutput());
+  model0->SetNumberOfCellsInDecimatedMesh(count);
+  model0->SetMeshNoiseSigma(sigma);
+  model0->SetLVClosingRadius(lv_radius);
+  model0->SetGeneralClosingRadius(gn_radius);
+  model0->PreserveEdgesOff();
+  model0->Update();
+
+  const auto model1 = TModel::New();
+  model1->SetInput(reader->GetOutput());
+  model1->SetNumberOfCellsInDecimatedMesh(count);
+  model1->SetMeshNoiseSigma(sigma);
+  model1->SetLVClosingRadius(lv_radius);
+  model1->SetGeneralClosingRadius(gn_radius);
+  model1->PreserveEdgesOn();
+  model1->Update();
 
   if (show) {
 
-    const auto m = dv::ITKMeshToVTKPolyData< TMesh >( model->GetOutput() );
+    const auto m0 = dv::ITKMeshToVTKPolyData<TMesh>( model0->GetOutput() );
+    const auto m1 = dv::ITKMeshToVTKPolyData<TMesh>( model1->GetOutput() );
     std::vector<vtkPolyData*> poly_data_vector;
-    poly_data_vector.emplace_back(m);
+    poly_data_vector.emplace_back(m0);
+    poly_data_vector.emplace_back(m1);
 
     dv::QuickViewMultiplePolyData( poly_data_vector, true );
 
