@@ -1,6 +1,13 @@
 #ifndef sissr_LabeledMeshToKdMap_h
 #define sissr_LabeledMeshToKdMap_h
 
+// STD
+#include <map>
+
+// ITK
+#include <itkPointSet.h>
+#include <itkPointsLocator.h>
+
 namespace sissr {
 
 template<typename TMesh>

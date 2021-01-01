@@ -1,6 +1,8 @@
 #ifndef sissr_ITKMeshToCGALSurfaceMesh_h
 #define sissr_ITKMeshToCGALSurfaceMesh_h
 
+#include <CGAL/Surface_mesh.h>
+
 namespace sissr {
 
 //

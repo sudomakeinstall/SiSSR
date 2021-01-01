@@ -1,6 +1,7 @@
 #ifndef sissr_CGALSurfaceMeshToITKMesh_h
 #define sissr_CGALSurfaceMeshToITKMesh_h
 
+#include <CGAL/Surface_mesh.h>
 #include <itkPolygonCell.h>
 
 namespace sissr {
