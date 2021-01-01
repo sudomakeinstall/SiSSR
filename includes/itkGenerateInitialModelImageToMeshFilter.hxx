@@ -20,11 +20,11 @@
 
 // Custom
 #include <itkCleanSegmentationImageFilter.h>
-#include <dvITKMeshToCGALSurfaceMesh.h>
-#include <dvCGALSurfaceMeshToITKMesh.h>
 
 // SiSSR
 #include <sissrEdge_preserving_midpoint_placement.h>
+#include <sissrITKMeshToCGALSurfaceMesh.h>
+#include <sissrCGALSurfaceMeshToITKMesh.h>
 
 namespace itk
 {
@@ -104,6 +104,9 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   closing_lv->SetInput( closing.back()->GetOutput() );
   closing_lv->SetKernel( lvCloseKernel );
   closing_lv->SetForegroundValue( 1 );
+  // DO NOT REMOVE CALL TO Update()
+  // Removing causes failures for a small subset of inputs
+  closing_lv->Update();
 
   const auto cuberille = TCuberille::New();
   cuberille->SetInput(closing_lv->GetOutput());
@@ -114,7 +117,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   cuberille->Update();
 
   // CONVERT ITK TO CGAL
-  auto surface_mesh = dv::ITKMeshToCGALSurfaceMesh<TOutputMesh, TCGALMesh>( cuberille->GetOutput() );
+  auto surface_mesh = sissr::ITKMeshToCGALSurfaceMesh<TOutputMesh, TCGALMesh>( cuberille->GetOutput() );
 
   // VERIFY AND DECIMATE
   itkAssertOrThrowMacro(CGAL::is_triangle_mesh(surface_mesh), "Input geometry is not triangulated.")
@@ -138,7 +141,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   surface_mesh.collect_garbage();
 
   // CONVERT CGAL TO ITK
-  const auto o_mesh = dv::CGALSurfaceMeshToITKMesh<TCGALMesh, TOutputMesh>(surface_mesh);
+  const auto o_mesh = sissr::CGALSurfaceMeshToITKMesh<TCGALMesh, TOutputMesh>(surface_mesh);
 
   const auto loop = TLoop::New();
   loop->SetInput( o_mesh );
