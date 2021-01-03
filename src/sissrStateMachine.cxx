@@ -269,10 +269,14 @@ StateMachine
   writer.Key("ModelIsVisible");
   writer.Bool(this->ModelIsVisible);
 
-  writer.Key("planeWidgetState.Origin");
-  writer.StartArray();
-  for (size_t i = 0; i < 3; ++i) writer.Double(this->planeWidgetState.Origin[i]);
-  writer.EndArray();
+  if (this->planeWidgetState.HasBeenCaptured) {
+    writer.Key("planeWidgetState.Origin");
+    writer.StartArray();
+    for (size_t i = 0; i < 3; ++i) {
+      writer.Double(this->planeWidgetState.Origin[i]);
+    }
+    writer.EndArray();
+  }
 
   writer.Key("planeWidgetState.Point1");
   writer.StartArray();
@@ -319,13 +323,12 @@ StateMachine
   dv::check_and_set_bool(d, this->CandidatesAreVisible,    "CandidatesAreVisible");
   dv::check_and_set_bool(d, this->ModelIsVisible,          "ModelIsVisible");
 
-  if (d.HasMember("planeWidgetState.Origin") && d.HasMember("planeWidgetState.Point1") && d.HasMember("planeWidgetState.Point2"))
-    {
+  if (d.HasMember("planeWidgetState.Origin") && d.HasMember("planeWidgetState.Point1") && d.HasMember("planeWidgetState.Point2")) {
     dv::check_and_set_double_array(d, this->planeWidgetState.Origin, "planeWidgetState.Origin");
     dv::check_and_set_double_array(d, this->planeWidgetState.Point1, "planeWidgetState.Point1");
     dv::check_and_set_double_array(d, this->planeWidgetState.Point2, "planeWidgetState.Point2");
     this->ImagePlaneHasBeenSet = true;
-    }
+  }
 
   if (d.HasMember("CellDataToDisplay") && d["CellDataToDisplay"].IsInt())
       this->CellDataToDisplay = static_cast<CellData>(d["CellDataToDisplay"].GetInt());

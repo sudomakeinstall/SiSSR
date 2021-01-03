@@ -5,16 +5,10 @@
 #include <iostream>
 #include <thread>
 
-// Qt
-#include <QMessageBox>
-
 // VTK
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkImageMapToWindowLevelColors.h>
 #include <vtkCamera.h>
-#include <vtkTriangle.h>
-#include <vtkLine.h>
-#include <vtkPlane.h>
 
 // ITK
 #include <itkLoopTriangleCellSubdivisionQuadEdgeMeshFilter.h>
@@ -46,11 +40,9 @@ namespace sissr {
 // CONSTRUCTOR
 Controller
 ::Controller(int argc, char **argv) :
-  DirectoryStructure(argv[1], argv[2])
-{
+  DirectoryStructure(argv[1], argv[2]) {
 
   // Determine current state
-  this->DetermineState();
   this->Deserialize();
 
   // Basic setup for Qt Widgets
@@ -65,8 +57,6 @@ Controller
   this->SetupSliderRanges();
   this->SetupValueLabels();
   this->SetupSlots();
-
-//  this->ui->toolBox->setCurrentIndex(static_cast<int>(this->State.GetCurrentState()));
 
   // Setup radio buttons
   this->ui->cellDataButtonNone->setChecked(false);
@@ -106,6 +96,11 @@ Controller
     this->CalculateBoundaryCandidates();
     }
 
+  if (arguments.find(std::string("--model")) != arguments.end())
+    {
+    this->GenerateInitialModel();
+    }
+
   if (arguments.find(std::string("--register")) != arguments.end())
     {
     this->Register();
@@ -117,32 +112,6 @@ Controller
     }
 
 };
-
-void
-Controller
-::DetermineState()
-{
-
-  // Candidates
-  std::cout << "Candidate data..." << std::flush;
-  if (this->DirectoryStructure.CandidateDirectory.DataExists()) {
-    std::cout << "found." << std::endl;
-  } else {
-    std::cout << "not found." << std::endl;
-    this->CalculateBoundaryCandidates();
-  }
-
-  // Initial Model
-  std::cout << "Initial model data..." << std::flush;
-  if (this->DirectoryStructure.InitialModelDataExists()) {
-    std::cout << "found." << std::endl;
-  } else {
-    this->GenerateInitialModel();
-    std::cout << "not found." << std::endl;
-    return;
-  }
-
-}
 
 void
 Controller
@@ -477,6 +446,8 @@ Controller
   std::cout << "done." << std::endl;
   std::cout << "Time elapsed: " << clock.GetTotal() << std::endl;
 
+  this->SetupCandidates();
+
 }
 
 void
@@ -506,14 +477,6 @@ Controller
   writer->SetFileName(this->DirectoryStructure.InitialModel);
   writer->Update();
 
-//  dv::GenerateInitialModel(
-//    this->DirectoryStructure.InitialModelSegmentation,
-//    this->DirectoryStructure.InitialModel,
-//    this->State.InitialModelNumberOfFaces,
-//    this->State.InitialModelSigma,
-//    10
-//    );
-
   clock.Stop();
 
   std::cout << "done." << std::endl;
@@ -527,6 +490,14 @@ void
 Controller
 ::ToggleImagePlanes()
 {
+
+  // GUARD: Make sure data exists
+  if (!this->DirectoryStructure.ImageDirectory.DataExists())
+    {
+    this->State.ImagePlanesAreVisible = false;
+    this->State.ImagePlanesHaveBeenSetup = false;
+    return;
+    }
 
   this->State.ImagePlanesAreVisible = !this->State.ImagePlanesAreVisible;
 
@@ -629,6 +600,14 @@ void
 Controller
 ::SetupImage()
 {
+  // GUARD: Make sure data exists
+  if (!this->DirectoryStructure.ImageDirectory.DataExists())
+    {
+    this->State.ImagePlanesAreVisible = false;
+    this->State.ImagePlanesHaveBeenSetup = false;
+    return;
+    }
+
   const auto imageFileName = this->DirectoryStructure.ImageDirectory.PathForFrame(this->GetCurrentFrame());
   const auto iren = this->ui->imageWindow->interactor();
 
@@ -642,31 +621,31 @@ Controller
 ::SetupImagePlanes()
 {
 
-  // GUARD: Make sure data exists
-  if (!this->DirectoryStructure.ImageDirectory.DataExists())
-    {
-    this->State.ImagePlanesAreVisible = false;
-    this->State.ImagePlanesHaveBeenSetup = false;
-    return;
-    }
-
-  // GUARD: Don't setup again.
-  if (this->State.ImagePlanesHaveBeenSetup)
-    return;
-
-  if (this->State.ImagePlaneHasBeenSet)
-    {
-    this->State.planeWidgetState.RestoreState(this->window.planeWidget);
-    this->window.PlaneWidgetDidMove();
-    }
-
-//  this->window.UpdatePlanesPlacement();
-
-  this->State.ImagePlanesHaveBeenSetup = true;
-
-  this->window.SetImagePlanesVisible( this->State.ImagePlanesAreVisible );
-
-  this->Render();
+//  // GUARD: Make sure data exists
+//  if (!this->DirectoryStructure.ImageDirectory.DataExists())
+//    {
+//    this->State.ImagePlanesAreVisible = false;
+//    this->State.ImagePlanesHaveBeenSetup = false;
+//    return;
+//    }
+//
+//  // GUARD: Don't setup again.
+//  if (this->State.ImagePlanesHaveBeenSetup)
+//    return;
+//
+//  if (this->State.ImagePlaneHasBeenSet)
+//    {
+//    this->State.planeWidgetState.RestoreState(this->window.planeWidget);
+//    this->window.PlaneWidgetDidMove();
+//    }
+//
+////  this->window.UpdatePlanesPlacement();
+//
+//  this->State.ImagePlanesHaveBeenSetup = true;
+//
+//  this->window.SetImagePlanesVisible( this->State.ImagePlanesAreVisible );
+//
+//  this->Render();
 
 }
 
@@ -715,14 +694,15 @@ Controller
     this->window.SetupModel(file);
 
     }
-  else {
-
-    if (!this->DirectoryStructure.InitialModelDataExists()) {
-      this->GenerateInitialModel();
-    }
+  else if (this->DirectoryStructure.InitialModelDataExists()) {
 
     // Setup.
     this->window.SetupModel( this->DirectoryStructure.InitialModel.c_str() );
+
+  } else {
+
+    std::cerr << "Initial model does not exist." << std::endl;
+    return;
 
   }
 
@@ -763,7 +743,9 @@ Controller
 ::Serialize()
 {
 
-  this->State.planeWidgetState.CaptureState(this->window.planeWidget);
+  if (nullptr != this->window.planeWidget) {
+    this->State.planeWidgetState.Capture(this->window.planeWidget);
+  }
 
   this->State.camera.CaptureState(this->window.renderer->GetActiveCamera());
 

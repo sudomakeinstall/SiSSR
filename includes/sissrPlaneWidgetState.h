@@ -13,13 +13,17 @@ public:
   double Point1[3];
   double Point2[3];
 
-  void CaptureState(PlaneWidget* plane)
+  bool HasBeenCaptured = false;
+  bool HasBeenRestored = false;
+
+  void Capture(PlaneWidget* plane)
   {
     plane->GetOrigin(this->Origin);
     plane->GetPoint1(this->Point1);
     plane->GetPoint2(this->Point2);
+    this->HasBeenCaptured = true;
   }
-  void RestoreState(PlaneWidget* plane)
+  void Restore(PlaneWidget* plane)
   {
     plane->SetOrigin(this->Origin[0],
                      this->Origin[1],
@@ -30,6 +34,7 @@ public:
     plane->SetPoint2(this->Point2[0],
                      this->Point2[1],
                      this->Point2[2]);
+    this->HasBeenRestored = true;
   }
 
 }; // end class

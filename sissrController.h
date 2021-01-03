@@ -126,7 +126,6 @@ private:
   void SetupSliderRanges();
   void SetupSlots();
 
-  void DetermineState();
   void Render();
   void UpdateCurrentIndex();
   void Serialize();
