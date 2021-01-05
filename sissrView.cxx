@@ -203,7 +203,6 @@ View
   this->candidateActor->SetMapper( this->candidateMapper );
 
   this->CandidatesHaveBeenSetup = true;
-
 }
 
 void

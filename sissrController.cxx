@@ -432,11 +432,6 @@ Controller
     writer->SetFileName(output);
     writer->Update();
 
-//    dv::SegmentationToLabeledPointSet<3, unsigned short, double>(
-//      input,
-//      output
-//    );
-
     progress.UnitCompleted();
 
   }

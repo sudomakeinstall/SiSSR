@@ -17,9 +17,11 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
 
 // Custom
 #include <itkCleanSegmentationImageFilter.h>
+#include <itkRefineValenceThreeVerticesQuadEdgeMeshFilter.h>
 
 // SiSSR
 #include <sissrEdge_preserving_midpoint_placement.h>
@@ -68,12 +70,14 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   using TClose = itk::BinaryMorphologicalClosingImageFilter<InputImageType, InputImageType, TKernel>;
   using TClean = itk::CleanSegmentationImageFilter<InputImageType>;
   using TCuberille = itk::CuberilleImageToMeshFilter< InputImageType, OutputMeshType >;
+  using TRefine = itk::RefineValenceThreeVerticesQuadEdgeMeshFilter<OutputMeshType>;
   using TLoop = itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter<OutputMeshType>;
 
   using TCGALKernel = CGAL::Simple_cartesian<typename TOutputMesh::PixelType>;
   using TCGALPoint = typename TCGALKernel::Point_3;
   using TCGALMesh = CGAL::Surface_mesh<TCGALPoint>;
   namespace SMS = CGAL::Surface_mesh_simplification;
+  namespace PMP = CGAL::Polygon_mesh_processing;
   using TCGALEdgePreservingPlacement = SMS::Bounded_normal_change_placement<SMS::Edge_preserving_midpoint_placement<TCGALMesh,typename OutputMeshType::PixelType>>;
   using TCGALMidpointPlacement = SMS::Bounded_normal_change_placement<SMS::Midpoint_placement<TCGALMesh>>;
 
@@ -138,13 +142,18 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
     );
   }
 
+  PMP::keep_largest_connected_components(surface_mesh, 1);
+
   surface_mesh.collect_garbage();
 
   // CONVERT CGAL TO ITK
   const auto o_mesh = sissr::CGALSurfaceMeshToITKMesh<TCGALMesh, TOutputMesh>(surface_mesh);
 
+  const auto refine = TRefine::New();
+  refine->SetInput( o_mesh );
+
   const auto loop = TLoop::New();
-  loop->SetInput( o_mesh );
+  loop->SetInput( refine->GetOutput() );
   loop->Update();
 
   mesh->Graft( loop->GetOutput() );
