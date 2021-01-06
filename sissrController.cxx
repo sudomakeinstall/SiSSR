@@ -9,6 +9,7 @@
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkImageMapToWindowLevelColors.h>
 #include <vtkCamera.h>
+#include <vtkRendererCollection.h>
 
 // ITK
 #include <itkLoopTriangleCellSubdivisionQuadEdgeMeshFilter.h>
@@ -109,6 +110,11 @@ Controller
   if (arguments.find(std::string("--areas")) != arguments.end())
     {
     this->CalculateSurfaceAreas();
+    }
+
+  if (arguments.find(std::string("--reset-camera")) != arguments.end())
+    {
+    this->ResetCamera();
     }
 
 };
@@ -387,6 +393,13 @@ Controller
   this->window.SetColorbarVisible(CellData::NONE != this->State.CellDataToDisplay &&
                                   this->State.ColorbarIsVisible);
 
+}
+
+void
+Controller
+::ResetCamera()
+{
+  this->ui->imageWindow->renderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
 }
 
 void

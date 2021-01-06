@@ -126,6 +126,7 @@ private:
   void SetupSliderRanges();
   void SetupSlots();
 
+  void ResetCamera();
   void Render();
   void UpdateCurrentIndex();
   void Serialize();
