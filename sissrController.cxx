@@ -117,6 +117,11 @@ Controller
     this->ResetCamera();
     }
 
+  if (arguments.find(std::string("--residuals")) != arguments.end())
+    {
+    this->CalculateResiduals();
+    }
+
 };
 
 void
@@ -895,16 +900,14 @@ Controller
 
   for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f) {
 
-    const auto locator = TLocator::New();
+      const auto target = TMesh::New();
 
       {
         const auto reader = TMeshReader::New();
         reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(f));
         reader->Update();
-        locator->SetPoints( reader->GetOutput()->GetPoints() );
+        target->Graft(reader->GetOutput());
       }
-
-    locator->Initialize();
 
     if (0 != pass) {
       const auto file
@@ -916,7 +919,7 @@ Controller
       initial->Setup();
     }
 
-    TResidualCalculator residuals(locator, initial);
+    TResidualCalculator residuals(target, initial);
 
     const auto r = residuals.Calculate();
 
