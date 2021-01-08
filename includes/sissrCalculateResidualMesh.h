@@ -61,6 +61,7 @@ public:
       line->SetPointId(1, 2*u+1);
 
       r->SetCell( u, line );
+      r->SetCellData( u, b.EuclideanDistanceTo(e) );
       }
 
     return r;
