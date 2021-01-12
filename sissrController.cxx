@@ -384,13 +384,11 @@ Controller
     }
 
   // Model Surface File
-  if (this->State.ModelSurfaceIsVisible || this->State.ModelWiresAreVisible)
-    {
+  if (this->State.ModelSurfaceIsVisible || this->State.ModelWiresAreVisible) {
+    const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+    const auto f = this->GetCurrentFrame();
     const auto file
-      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-          this->DirectoryStructure.NumberOfRegistrationPasses() - 1,
-          this->GetCurrentFrame()
-                                                         );
+      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1,f);
     this->window.UpdateModelSource( file );
     }
 
@@ -703,7 +701,7 @@ Controller
 
     const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
     const auto f = this->GetCurrentFrame();
-    const auto file = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p,f);
+    const auto file = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1,f);
     this->window.SetupModel(file);
 
     }
@@ -1005,9 +1003,9 @@ Controller
       reader->Update();
       movingVector.emplace_back(reader->GetOutput());
     } else {
+      const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
       const auto file
-        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-          this->DirectoryStructure.NumberOfRegistrationPasses() - 1, i);
+        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1, i);
       const auto reader = TLoopMeshReader::New();
       reader->SetFileName(file);
 
@@ -1032,16 +1030,14 @@ Controller
 
   std::cout << "Writing registered models..." << std::endl;
 
-  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
-    {
+  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
+    const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
     const auto file
-      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-        this->DirectoryStructure.NumberOfRegistrationPasses(), i);
+      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p, i);
     const auto finalWriter = TMovingWriter::New();
     finalWriter->SetInput( movingVector.at(i) );
     finalWriter->SetFileName( file );
     finalWriter->Update();
-
     }
 
   std::cout << "done." << std::endl;
@@ -1215,14 +1211,12 @@ Controller
   
     vnl_matrix<double> sa;
   
-    for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
-      {
+    for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f) {
   
+      const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
       const auto modelReader = TVTKMeshReader::New();
-      modelReader->SetFileName(
-        this->DirectoryStructure.RegisteredModelPathForPassAndFrame(
-          this->DirectoryStructure.NumberOfRegistrationPasses() - 1, f ).c_str()
-                              );
+      const auto file = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1, f);
+      modelReader->SetFileName(file.c_str());
       modelReader->Update();
   
       const auto modelLoop = vtkSmartPointer<vtkLoopSubdivisionFilter>::New();
