@@ -193,12 +193,13 @@ View
   this->candidateReader = TVTKMeshReader::New();
   this->candidateMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
   this->candidateActor  = vtkSmartPointer<vtkActor>::New();
+
   const auto lut = dv::LUT::Rainbow();
 
   this->candidateReader->SetFileName( fileName.c_str() );
   this->candidateReader->Update();
-  this->candidateMapper->SetLookupTable( lut );
   this->candidateMapper->SetScalarRange(0, 9);
+  this->candidateMapper->SetLookupTable( lut );
   this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
   this->candidateActor->SetMapper( this->candidateMapper );
 
@@ -558,7 +559,7 @@ View
 
   const auto lut = dv::LUT::Rainbow();
   this->modelLoopMapper->SetLookupTable( lut );
-  this->modelLoopMapper->SetScalarRange(0, 8);
+  this->modelLoopMapper->SetScalarRange(0, 9);
 
 //  this->modelLoopMapper->SetScalarRange(this->CB_State.Min,
 //                                        this->CB_State.Max);
