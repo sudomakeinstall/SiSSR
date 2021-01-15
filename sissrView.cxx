@@ -15,6 +15,7 @@
 #include <vtkDataSetMapper.h>
 #include <vtkTransformFilter.h>
 #include <vtkProbeFilter.h>
+#include <vtkWindowedSincPolyDataFilter.h>
 
 // VNL
 #include <vnl/vnl_cross.h>
@@ -22,7 +23,6 @@
 
 // Custom
 #include <dvGetVTKTransformationMatrixFromITKImage.h>
-//#include <dvLabeledVTKPointSetReader.h>
 #include <dvGetLookupTable.h>
 
 // SiSSR
@@ -198,9 +198,15 @@ View
 
   this->candidateReader->SetFileName( fileName.c_str() );
   this->candidateReader->Update();
+
+  const auto smooth = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
+  smooth->SetInputConnection(this->candidateReader->GetOutputPort());
+  smooth->BoundarySmoothingOff();
+  smooth->FeatureEdgeSmoothingOff();
+
   this->candidateMapper->SetScalarRange(0, 9);
   this->candidateMapper->SetLookupTable( lut );
-  this->candidateMapper->SetInputConnection( this->candidateReader->GetOutputPort() );
+  this->candidateMapper->SetInputConnection( smooth->GetOutputPort() );
   this->candidateActor->SetMapper( this->candidateMapper );
 
   this->CandidatesHaveBeenSetup = true;
@@ -537,8 +543,6 @@ View
   this->modelLUT->SetNumberOfTableValues(N);
   this->modelLUT->SetTableRange(this->CB_State.Min,
                                 this->CB_State.Max);
-//  this->modelLUT->UseAboveRangeColorOn();
-//  this->modelLUT->UseBelowRangeColorOn();
   this->modelLUT->Build();
  
   for(size_t i = 0; i < N; ++i)
