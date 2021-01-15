@@ -49,7 +49,10 @@ public:
   std::string RegistrationSummaryForPass(const size_t p) const;
 
   std::string CandidatePathForFrame(const size_t f) const;
-  std::string ScreenshotPathForFrame(const size_t f) const;
+
+  std::vector<std::string> ScreenshotDirectories;
+  void AddScreenshotDirectory();
+  std::string ScreenshotPathForFrame(const size_t f);
 
   std::string RegisteredModelPathForPassAndFrame(const size_t p, const size_t f) const;
   std::string ResidualMeshPathForPassAndFrame(const size_t p, const size_t f) const;

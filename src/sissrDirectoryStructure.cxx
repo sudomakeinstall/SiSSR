@@ -6,6 +6,7 @@
 
 // Custom
 #include <dvStringOperations.h>
+#include <dvGetTimeString.h>
 
 // STD
 #include <sissrDirectoryStructure.h>
@@ -17,7 +18,7 @@ DirectoryStructure
                      const std::string _OptDirectory) :
   IptDirectory(dv::AppendCharacterIfAbsent(_IptDirectory, '/')),
   OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
-  SegmentationDirectory  (IptDirectory + "seg-nii/"         , ".nii.gz"),
+  SegmentationDirectory  (IptDirectory + "seg-nii-sm/"      , ".nii.gz"),
   ImageDirectory         (IptDirectory + "img-nii/"         , ".nii.gz", GetNumberOfFiles()),
   CandidateDirectory (IptDirectory + "candidates/", ".vtk"   , GetNumberOfFiles())
 {
@@ -80,10 +81,27 @@ DirectoryStructure
   return this->ResidualsDirectory + std::to_string(p) + "/" + std::to_string(f) + this->MeshSuffix;
 }
 
+void
+DirectoryStructure
+::AddScreenshotDirectory() {
+  const auto dirname = dv::GetTimeString() + "/";
+  this->ScreenshotDirectories.push_back(dirname);
+  namespace fs = std::filesystem;
+  const auto full = this->ScreenshotDirectory
+    + this->ScreenshotDirectories.back();
+  fs::create_directories(full);
+}
+
 std::string
 DirectoryStructure
-::ScreenshotPathForFrame(const size_t f) const {
-  return this->ScreenshotDirectory + std::to_string(f) + this->ScreenshotSuffix;
+::ScreenshotPathForFrame(const size_t f) {
+  if (this->ScreenshotDirectories.empty()) {
+    this->AddScreenshotDirectory();
+  }
+  const auto p = this->ScreenshotDirectory
+    + this->ScreenshotDirectories.back()
+    + std::to_string(f) + this->ScreenshotSuffix;
+  return p;
 }
 
 size_t

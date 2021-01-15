@@ -30,6 +30,7 @@
 #include <itkGenerateInitialModelImageToMeshFilter.h>
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
+#include <dvGetTimeString.h>
 
 // SiSSR
 #include <sissrRegisterMeshToPointSet.h>
@@ -1085,6 +1086,8 @@ Controller
 
   std::cout << "Writing screenshots..." << std::endl;
   auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
+
+  this->DirectoryStructure.AddScreenshotDirectory();
 
   for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
     {
