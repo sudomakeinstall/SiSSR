@@ -17,6 +17,7 @@ StateMachine
   InitialModelSigma(0.1),
   InitialModelLVClosingRadius(10),
   InitialModelGeneralClosingRadius(5),
+  InitialModelPreserveEdges(true),
   BoundaryCandidateDilationRadius(3)
 {}
 
@@ -235,6 +236,9 @@ StateMachine
   writer.Uint(this->InitialModelGeneralClosingRadius);
   writer.Key("InitialModelGeneralClosingRadius");
   writer.Uint(this->InitialModelGeneralClosingRadius);
+  writer.Key("InitialModelPreserveEdges");
+  writer.Bool(this->InitialModelPreserveEdges);
+
   writer.Key("BoundaryCandidateDilationRadius");
   writer.Uint(this->BoundaryCandidateDilationRadius);
 
@@ -305,6 +309,7 @@ StateMachine
    dv::check_and_set_double(d, this->InitialModelSigma, "InitialModelSigma");
    dv::check_and_set_uint(d, this->InitialModelLVClosingRadius, "InitialModelLVClosingRadius");
    dv::check_and_set_uint(d, this->InitialModelGeneralClosingRadius, "InitialModelGeneralClosingRadius");
+   dv::check_and_set_bool(d, this->InitialModelPreserveEdges, "InitialModelPreserveEdges");
    dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
 
   dv::check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");

@@ -483,6 +483,7 @@ Controller
   model->SetMeshNoiseSigma(this->State.InitialModelSigma);
   model->SetLVClosingRadius(this->State.InitialModelLVClosingRadius);
   model->SetGeneralClosingRadius(this->State.InitialModelGeneralClosingRadius);
+  model->SetPreserveEdges(this->State.InitialModelPreserveEdges);
 
   const auto writer = TWriter::New();
   writer->SetInput(model->GetOutput());
