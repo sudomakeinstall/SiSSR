@@ -124,7 +124,7 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   solverOptions.max_solver_time_in_seconds = MaximumSolverTimeInSeconds;
   solverOptions.num_threads = threads * 4;
   solverOptions.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
-  solverOptions.dynamic_sparsity = false;
+  solverOptions.dynamic_sparsity = this->DynamicSparsity;
   solverOptions.minimizer_type = ceres::TRUST_REGION;
   ceres::Solver::Summary summary;
   ceres::Solve(solverOptions, &problem, &summary);

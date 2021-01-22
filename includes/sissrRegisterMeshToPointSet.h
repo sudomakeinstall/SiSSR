@@ -33,6 +33,7 @@ public:
   int MaximumSolverTimeInSeconds = 60 * 60; // Default is 1e6
   double FunctionTolerance = 1e-2;
   double ParameterTolerance = 1e-2;
+  bool DynamicSparsity = false;
 
   LossScaleFactors RegistrationWeights;
 
