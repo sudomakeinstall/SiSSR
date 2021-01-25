@@ -42,8 +42,10 @@ public:
 
   typedef typename TFixedMesh::PointsContainer TContainer;
   typedef itk::PointsLocator< TContainer > TLocator;
-  typedef std::vector<std::map<size_t, typename TLocator::Pointer>> TLocatorVector;
+  typedef std::vector<typename TLocator::Pointer> TLocatorVector;
+  typedef std::vector<std::map<size_t, typename TLocator::Pointer>> TLocatorMapVector;
 
+  typedef std::vector<typename TFixed::Pointer> TFixedVector;
   typedef std::vector<typename TMoving::Pointer> TMovingVector;
 
   typedef NearestPointLabeledCostFunction<TFixed,TMoving> TCost;
@@ -55,11 +57,12 @@ public:
   using TParameterVector = std::vector<std::vector<double*>>;
 
   RegisterMeshToPointSet(const unsigned int& _EDFrame,
-                         const TLocatorVector &_locatorVector,
+                         const TFixedVector &_fixedVector,
                          const TMovingVector &_movingVector);
 
   const unsigned int EDFrame;
   const TLocatorVector locatorVector;
+  TLocatorMapVector locatorMapVector;
   const TMovingVector movingVector;
 
   void SanityCheck();
@@ -96,4 +99,3 @@ public:
 #include "sissrRegisterMeshToPointSet.hxx"
 
 #endif
-

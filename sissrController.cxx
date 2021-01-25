@@ -35,7 +35,6 @@
 // SiSSR
 #include <sissrRegisterMeshToPointSet.h>
 #include <sissrCalculateResidualMesh.h>
-#include <sissrLabeledMeshToKdMap.h>
 
 namespace sissr {
 
@@ -969,13 +968,7 @@ Controller
   typedef itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter< TLoopMesh, TLoopMesh > TLoop;
   typedef itk::PointsLocator< TMesh::PointsContainer > TLocator;
   typedef RegisterMeshToPointSet< TMesh, TLoopMesh > TRegister;
-
-  using TMeshToKdMap = sissr::LabeledMeshToKdMap<TMesh>;
-
   typedef itk::MeshFileWriter< TLoopMesh > TMovingWriter;
-
-  std::vector<std::map<size_t, TLocator::Pointer>> locatorVector;
-  std::vector<TLoopMesh::Pointer> movingVector;
 
   std::string dirToCreate =
     this->DirectoryStructure.RegisteredModelDirectory +
@@ -987,22 +980,31 @@ Controller
 
   auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
+  // Fixed
+
+  std::vector<TMesh::Pointer> fixedVector;
+
   for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
 
     const auto reader = TMeshReader::New();
     reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(i));
     reader->Update();
 
-    TMeshToKdMap mesh_to_kd_map;
-    const auto locator_map = mesh_to_kd_map.Calculate(reader->GetOutput());
+    fixedVector.emplace_back(reader->GetOutput());
 
-    locatorVector.emplace_back(locator_map);
+  }
 
-    // Moving 
+  // Moving
+
+  std::vector<TLoopMesh::Pointer> movingVector;
+
+  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
+
     if (0 == this->DirectoryStructure.NumberOfRegistrationPasses()) {
       const auto reader = TLoopMeshReader::New();
       reader->SetFileName(this->DirectoryStructure.InitialModel);
       reader->Update();
+      reader->GetOutput()->Setup();
       movingVector.emplace_back(reader->GetOutput());
     } else {
       const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
@@ -1014,17 +1016,16 @@ Controller
       const auto loop = TLoop::New();
       loop->SetInput(reader->GetOutput());
       loop->Update();
+      loop->GetOutput()->Setup();
       movingVector.emplace_back(loop->GetOutput());
       }
-
-    for (auto moving : movingVector) moving->Setup();
 
     progress.UnitCompleted();
 
   }
 
   TRegister registerMesh(this->State.EDFrame,
-                         locatorVector,
+                         fixedVector,
                          movingVector);
   registerMesh.RegistrationWeights = this->State.RegistrationWeights;
 

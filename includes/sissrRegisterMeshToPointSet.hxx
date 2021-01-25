@@ -10,21 +10,31 @@
 #include <ceres/ceres.h>
 #include <glog/logging.h>
 
+// SiSSR
+#include <sissrLabeledMeshToKdTreeMap.h>
+
 namespace sissr {
 
 template < typename TFixedMesh, typename TMovingMesh >
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 ::RegisterMeshToPointSet(const unsigned int& _EDFrame,
-                         const TLocatorVector &_locatorVector,
+                         const TFixedVector &_fixedVector,
                          const TMovingVector &_movingVector) :
   EDFrame(_EDFrame),
-  locatorVector(_locatorVector),
   movingVector(_movingVector),
   NumberOfFrames(this->CalculateNumberOfFrames()),
   NumberOfControlPoints(this->CalculateNumberOfControlPoints()),
   NumberOfSurfacePoints(this->CalculateNumberOfSurfacePoints()),
   NumberOfCells(this->CalculateNumberOfCells())
 {
+  using TMeshToKdMap = sissr::LabeledMeshToKdTreeMap<TFixedMesh>;
+
+  for (const auto& fixed : _fixedVector) {
+    TMeshToKdMap mesh_to_kd_map;
+    const auto locator_map = mesh_to_kd_map.Calculate(fixed);
+    this->locatorMapVector.emplace_back(locator_map);
+  }
+
   this->SanityCheck();
 }
 
@@ -185,9 +195,9 @@ void
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 ::SanityCheck()
 {
-  itkAssertOrThrowMacro(this->locatorVector.size() > 0, "");
+  itkAssertOrThrowMacro(this->locatorMapVector.size() > 0, "");
   itkAssertOrThrowMacro(this->movingVector.size() > 0, "");
-  itkAssertOrThrowMacro(this->locatorVector.size() == this->movingVector.size(), "");
+  itkAssertOrThrowMacro(this->locatorMapVector.size() == this->movingVector.size(), "");
 
   for (const auto& moving : movingVector) {
     for (auto it = moving->GetCellData()->Begin(); it != moving->GetCellData()->End(); ++it) {
@@ -201,8 +211,8 @@ unsigned int
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 ::CalculateNumberOfFrames() const
 {
-  itkAssertOrThrowMacro(this->locatorVector.size() == this->movingVector.size(), "");
-  return this->locatorVector.size();
+  itkAssertOrThrowMacro(this->locatorMapVector.size() == this->movingVector.size(), "");
+  return this->locatorMapVector.size();
 }
 
 template < typename TFixedMesh, typename TMovingMesh >
@@ -264,7 +274,7 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
       {
 
       ceres::CostFunction* cost_function = new TCost(
-                                                     this->locatorVector.at(frame),
+                                                     this->locatorMapVector.at(frame),
                                                      this->movingVector.at(frame),
                                                      this->initialPointsVector.at(frame),
                                                      index

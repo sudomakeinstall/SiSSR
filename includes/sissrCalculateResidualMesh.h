@@ -9,7 +9,7 @@
 #include <itkLineCell.h>
 
 // SiSSR
-#include <sissrLabeledMeshToKdMap.h>
+#include <sissrLabeledMeshToKdTreeMap.h>
 
 namespace sissr {
 
@@ -19,7 +19,7 @@ class CalculateResidualMesh
 
   using TKd = itk::PointsLocator< typename TLabeledMesh::PointsContainer >;
   using TKdMap = std::map<size_t, typename TKd::Pointer>;
-  using TLabeledMeshToKdMap = LabeledMeshToKdMap<TLabeledMesh>;
+  using TLabeledMeshToKdMap = LabeledMeshToKdTreeMap<TLabeledMesh>;
   using CellAutoPointer = typename TMesh::CellType::CellAutoPointer;
   using LineType = itk::LineCell<typename TMesh::CellType>;
 

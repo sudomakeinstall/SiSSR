@@ -1,5 +1,5 @@
-#ifndef sissr_LabeledMeshToKdMap_h
-#define sissr_LabeledMeshToKdMap_h
+#ifndef sissr_LabeledMeshToKdTreeMap_h
+#define sissr_LabeledMeshToKdTreeMap_h
 
 // STD
 #include <map>
@@ -11,7 +11,7 @@
 namespace sissr {
 
 template<typename TMesh>
-class LabeledMeshToKdMap {
+class LabeledMeshToKdTreeMap {
   public:
 
     using TCoordinate = typename TMesh::PixelType;

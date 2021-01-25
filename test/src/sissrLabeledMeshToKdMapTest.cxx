@@ -8,7 +8,7 @@
 
 // Custom
 #include <itkCleanSegmentationImageFilter.h>
-#include <sissrLabeledMeshToKdMap.h>
+#include <sissrLabeledMeshToKdTreeMap.h>
 
 int main(int argc, char** argv) {
 
@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   using TCoordinate = float;
   using TImage = itk::Image<TPixel, Dimension>;
   using TMesh = itk::QuadEdgeMesh<TCoordinate, Dimension>;
-  using TMeshToKdMap = sissr::LabeledMeshToKdMap<TMesh>;
+  using TMeshToKdMap = sissr::LabeledMeshToKdTreeMap<TMesh>;
 
   using TReader = itk::ImageFileReader<TImage>;
   using TClean = itk::CleanSegmentationImageFilter<TImage>;
