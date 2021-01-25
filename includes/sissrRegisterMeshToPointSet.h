@@ -19,7 +19,7 @@
 #include <sissrTriangleAspectRatioRegularizer.h>
 #include <sissrThinPlateRegularizer.h>
 #include <sissrLossScaleFactors.h>
-#include <sissrCostFunction.h>
+#include <sissrNearestPointLabeledCostFunction.h>
 
 namespace sissr {
 
@@ -46,7 +46,7 @@ public:
 
   typedef std::vector<typename TMoving::Pointer> TMovingVector;
 
-  typedef CostFunction<TFixed,TMoving> TCost;
+  typedef NearestPointLabeledCostFunction<TFixed,TMoving> TCost;
   typedef VelocityRegularizer<TMoving> TVelocityRegularizer;
   typedef AccelerationRegularizer<TMoving> TAccelerationRegularizer;
   typedef ThinPlateRegularizer<TMoving> TThinPlateRegularizer;

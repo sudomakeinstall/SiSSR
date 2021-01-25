@@ -1,40 +1,13 @@
-#ifndef sissr_CostFunction_hxx
-#define sissr_CostFunction_hxx
+#ifndef sissr_CostFunctionBase_hxx
+#define sissr_CostFunctionBase_hxx
 
-#include <sissrCostFunction.h>
+#include <sissrCostFunctionBase.h>
 
 namespace sissr {
 
 template<class TFixedMesh, class TMovingMesh>
-CostFunction<TFixedMesh, TMovingMesh>
-::CostFunction(
-               const TLocatorMap
-                 &_locator,
-               const typename TMovingMesh::Pointer
-                 &_moving,
-               const typename TMovingMesh::PointsContainer::Pointer
-                 &_initialPoints,
-               unsigned int _index)
-  :
-    locator(_locator),
-    moving(_moving),
-    initialPoints(_initialPoints),
-    index(_index),
-    param(this->moving->GetSurfaceParameterList().at(this->index)),
-    residual(this->moving->GetResidualBlock(this->param.first,this->param.second)),
-    L(this->moving->GetPointListForCell(this->param.first))
-{
-  for (size_t i = 0; i < this->L.size(); ++i)
-    {
-    this->mutable_parameter_block_sizes()->push_back(3);
-    }
-
-  this->set_num_residuals(3);
-}
-
-template<class TFixedMesh, class TMovingMesh>
 bool
-CostFunction<TFixedMesh, TMovingMesh>
+CostFunctionBase<TFixedMesh, TMovingMesh>
 ::Evaluate(const double* const* parameters,
            double* residuals,
            double** jacobians) const
@@ -58,8 +31,7 @@ CostFunction<TFixedMesh, TMovingMesh>
   const auto cellID = std::get<0>(this->moving->GetSurfaceParameter(this->index));
   const auto label = this->moving->GetCellData()->ElementAt(cellID);
   itkAssertOrThrowMacro(label != 0, "Label == 0");
-  const auto fixedPointID = this->locator.at(label)->FindClosestPoint(movingPoint);
-  const auto fixedPoint = this->locator.at(label)->GetPoints()->ElementAt(fixedPointID);
+  const auto fixedPoint = this->GetClosestPoint(movingPoint, label);
   const auto error = movingPoint.GetVnlVector() - fixedPoint.GetVnlVector();
 
   for (unsigned int d = 0; d < 3; ++d) residuals[d] = error[d];
