@@ -250,6 +250,8 @@ StateMachine
   writer.Key("CurrentFrame");
   writer.Uint(this->CurrentFrame);
 
+  writer.Key("RegistrationUseLabels");
+  writer.Bool(this->RegistrationUseLabels);
   writer.Key("RegistrationWeights.Robust");
   writer.Double(this->RegistrationWeights.Robust);
   writer.Key("RegistrationWeights.Velocity");
@@ -305,15 +307,16 @@ StateMachine
   dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
-   dv::check_and_set_uint(d, this->InitialModelNumberOfFaces, "InitialModelNumberOfFaces");
-   dv::check_and_set_double(d, this->InitialModelSigma, "InitialModelSigma");
-   dv::check_and_set_uint(d, this->InitialModelLVClosingRadius, "InitialModelLVClosingRadius");
-   dv::check_and_set_uint(d, this->InitialModelGeneralClosingRadius, "InitialModelGeneralClosingRadius");
-   dv::check_and_set_bool(d, this->InitialModelPreserveEdges, "InitialModelPreserveEdges");
-   dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
+  dv::check_and_set_uint(d, this->InitialModelNumberOfFaces, "InitialModelNumberOfFaces");
+  dv::check_and_set_double(d, this->InitialModelSigma, "InitialModelSigma");
+  dv::check_and_set_uint(d, this->InitialModelLVClosingRadius, "InitialModelLVClosingRadius");
+  dv::check_and_set_uint(d, this->InitialModelGeneralClosingRadius, "InitialModelGeneralClosingRadius");
+  dv::check_and_set_bool(d, this->InitialModelPreserveEdges, "InitialModelPreserveEdges");
+  dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
 
   dv::check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");
 
+  dv::check_and_set_bool(d, this->RegistrationUseLabels, "RegistrationUseLabels");
   dv::check_and_set_double(d, this->RegistrationWeights.Robust, "RegistrationWeights.Robust");
   dv::check_and_set_double(d, this->RegistrationWeights.Velocity, "RegistrationWeights.Velocity");
   dv::check_and_set_double(d, this->RegistrationWeights.Acceleration, "RegistrationWeights.Acceleration");

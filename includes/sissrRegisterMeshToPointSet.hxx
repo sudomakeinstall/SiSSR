@@ -12,6 +12,7 @@
 
 // SiSSR
 #include <sissrLabeledMeshToKdTreeMap.h>
+#include <sissrMeshToKdTree.h>
 
 namespace sissr {
 
@@ -19,20 +20,33 @@ template < typename TFixedMesh, typename TMovingMesh >
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 ::RegisterMeshToPointSet(const unsigned int& _EDFrame,
                          const TFixedVector &_fixedVector,
-                         const TMovingVector &_movingVector) :
+                         const TMovingVector &_movingVector,
+                         const bool &_UseLabels) :
   EDFrame(_EDFrame),
   movingVector(_movingVector),
+  UseLabels(_UseLabels),
   NumberOfFrames(this->CalculateNumberOfFrames()),
   NumberOfControlPoints(this->CalculateNumberOfControlPoints()),
   NumberOfSurfacePoints(this->CalculateNumberOfSurfacePoints()),
   NumberOfCells(this->CalculateNumberOfCells())
 {
-  using TMeshToKdMap = sissr::LabeledMeshToKdTreeMap<TFixedMesh>;
+  if (this->UseLabels) {
+   using TMeshToKdMap = sissr::LabeledMeshToKdTreeMap<TFixedMesh>;
 
-  for (const auto& fixed : _fixedVector) {
-    TMeshToKdMap mesh_to_kd_map;
-    const auto locator_map = mesh_to_kd_map.Calculate(fixed);
-    this->locatorMapVector.emplace_back(locator_map);
+    for (const auto& fixed : _fixedVector) {
+      TMeshToKdMap mesh_to_kd_map;
+      const auto locator_map = mesh_to_kd_map.Calculate(fixed);
+      this->locatorMapVector.emplace_back(locator_map);
+    }
+  } else {
+    using TMeshToKd = sissr::MeshToKdTree<TFixedMesh>;
+
+    for (const auto& fixed : _fixedVector) {
+      TMeshToKd mesh_to_kd;
+      typename TMeshToKd::TLocator::Pointer locator = TMeshToKd::TLocator::New();
+      mesh_to_kd.Calculate(fixed, locator);
+      this->locatorVector.emplace_back(locator);
+    }
   }
 
   this->SanityCheck();
@@ -93,30 +107,28 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   // Minimize distance between surface points and boundary candidates
   //
 
-  if (this->RegistrationWeights.Robust > 1e-6)
-    {
-    this->AddPrimaryCost(problem, parameterVector);
+  if (this->RegistrationWeights.Robust > 1e-6) {
+    if (this->UseLabels) {
+      this->AddLabeledPrimaryResidual(problem, parameterVector);
+    } else {
+      this->AddUnlabeledPrimaryResidual(problem, parameterVector);
     }
-  if ((this->RegistrationWeights.Velocity > 1e-6) && (this->NumberOfFrames > 1))
-    {
+  }
+  if ((this->RegistrationWeights.Velocity > 1e-6) && (this->NumberOfFrames > 1)) {
     this->AddVelocityRegularizer(problem, parameterVector);
-    }
-  if ((this->RegistrationWeights.Acceleration) > 1e-6 && (this->NumberOfFrames > 2))
-    {
+  }
+  if ((this->RegistrationWeights.Acceleration) > 1e-6 && (this->NumberOfFrames > 2)) {
     this->AddAccelerationRegularizer(problem, parameterVector);
-    }
-  if (this->RegistrationWeights.ThinPlate > 1e-6)
-    {
+  }
+  if (this->RegistrationWeights.ThinPlate > 1e-6) {
     this->AddThinPlateRegularizer(problem, parameterVector);
-    }
-  if (this->RegistrationWeights.TriangleAspectRatio > 1e-6)
-    {
+  }
+  if (this->RegistrationWeights.TriangleAspectRatio > 1e-6) {
     this->AddTriangleAspectRatioRegularizer(problem, parameterVector);
-    }
-  if (this->RegistrationWeights.EdgeLength > 1e-6)
-    {
+  }
+  if (this->RegistrationWeights.EdgeLength > 1e-6) {
     this->AddEdgeLengthRegularizer(problem, parameterVector);
-    }
+  }
 
   ///////////
   // Solve //
@@ -132,9 +144,9 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   solverOptions.function_tolerance = this->FunctionTolerance;
   solverOptions.parameter_tolerance = this->ParameterTolerance;
   solverOptions.max_solver_time_in_seconds = MaximumSolverTimeInSeconds;
-  solverOptions.num_threads = threads * 4;
+//  solverOptions.num_threads = threads * 4;
   solverOptions.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
-  solverOptions.dynamic_sparsity = this->DynamicSparsity;
+//  solverOptions.dynamic_sparsity = this->DynamicSparsity;
   solverOptions.minimizer_type = ceres::TRUST_REGION;
   ceres::Solver::Summary summary;
   ceres::Solve(solverOptions, &problem, &summary);
@@ -195,9 +207,12 @@ void
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 ::SanityCheck()
 {
-  itkAssertOrThrowMacro(this->locatorMapVector.size() > 0, "");
   itkAssertOrThrowMacro(this->movingVector.size() > 0, "");
-  itkAssertOrThrowMacro(this->locatorMapVector.size() == this->movingVector.size(), "");
+  if (this->UseLabels) {
+    itkAssertOrThrowMacro(this->locatorMapVector.size() == this->movingVector.size(), "");
+  } else {
+    itkAssertOrThrowMacro(this->locatorVector.size() == this->movingVector.size(), "");
+  }
 
   for (const auto& moving : movingVector) {
     for (auto it = moving->GetCellData()->Begin(); it != moving->GetCellData()->End(); ++it) {
@@ -211,8 +226,7 @@ unsigned int
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 ::CalculateNumberOfFrames() const
 {
-  itkAssertOrThrowMacro(this->locatorMapVector.size() == this->movingVector.size(), "");
-  return this->locatorMapVector.size();
+  return this->movingVector.size();
 }
 
 template < typename TFixedMesh, typename TMovingMesh >
@@ -254,10 +268,10 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 template < typename TFixedMesh, typename TMovingMesh >
 void
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
-::AddPrimaryCost(ceres::Problem& problem, TParameterVector& parameterVector)
+::AddLabeledPrimaryResidual(ceres::Problem& problem, TParameterVector& parameterVector)
 {
 
-  std::cout << "Adding primary cost function to problem..." << std::endl;
+  std::cout << "Adding labeled primary residual to problem..." << std::endl;
 
   auto progress = dv::Progress(this->NumberOfFrames);
 
@@ -273,12 +287,67 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
          ++index)
       {
 
-      ceres::CostFunction* cost_function = new TCost(
+      ceres::CostFunction* cost_function = new TLabeledPrimaryResidual(
                                                      this->locatorMapVector.at(frame),
                                                      this->movingVector.at(frame),
                                                      this->initialPointsVector.at(frame),
                                                      index
                                                     );
+
+      std::vector<double*> params;
+
+      const auto u = this->movingVector.at(frame)->GetSurfaceParameterList().at(index);
+      const auto cellList = this->movingVector.at(frame)->GetPointListForCell(u.first);
+      for (const auto &cell : cellList)
+        {
+        params.push_back(parameterVector.at(frame).at(cell));
+        }
+      const auto id = problem.AddResidualBlock(
+                                               cost_function,
+                                               cost_loss,
+                                               params
+                                              );
+
+      costFunctionResidualIDs.emplace_back(id);
+      costFunctionFrames.emplace_back(frame);
+      const auto cellID = std::get<0>(movingVector.at(frame)->GetSurfaceParameter(index));
+      costFunctionCellIDs.emplace_back(cellID);
+      }
+
+    progress.UnitCompleted();
+
+    }
+
+}
+
+template < typename TFixedMesh, typename TMovingMesh >
+void
+RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
+::AddUnlabeledPrimaryResidual(ceres::Problem& problem, TParameterVector& parameterVector)
+{
+
+  std::cout << "Adding unlabeled primary residual to problem..." << std::endl;
+
+  auto progress = dv::Progress(this->NumberOfFrames);
+
+  ceres::LossFunction* cost_loss = new ceres::ScaledLoss(nullptr,
+                                         this->RegistrationWeights.Robust,
+                                         ceres::DO_NOT_TAKE_OWNERSHIP);
+
+  for (unsigned int frame = 0; frame < this->NumberOfFrames; ++frame)
+    {
+
+    for (unsigned int index = 0;
+         index < this->NumberOfSurfacePoints;
+         ++index)
+      {
+
+      ceres::CostFunction* cost_function = new TUnlabeledPrimaryResidual(
+         this->locatorVector.at(frame),
+         this->movingVector.at(frame),
+         this->initialPointsVector.at(frame),
+         index
+        );
 
       std::vector<double*> params;
 

@@ -69,6 +69,7 @@ public:
 
   unsigned int BoundaryCandidateDilationRadius;
 
+  bool RegistrationUseLabels = true;
   LossScaleFactors RegistrationWeights;
 
   bool EDFrameHasBeenSet = false;

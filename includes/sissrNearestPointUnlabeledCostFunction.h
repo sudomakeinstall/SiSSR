@@ -32,7 +32,7 @@ namespace sissr {
 
   private:
 
-  const TLocator &locator;
+  const TLocatorPointer &locator;
   TFixedPoint GetClosestPoint(const TMovingPoint &point, const TMovingLabel &label) const {
     const auto fixedPointID = this->locator->FindClosestPoint(point);
     const auto fixedPoint = this->locator->GetPoints()->ElementAt(fixedPointID);

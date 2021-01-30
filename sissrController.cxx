@@ -1024,9 +1024,12 @@ Controller
 
   }
 
-  TRegister registerMesh(this->State.EDFrame,
-                         fixedVector,
-                         movingVector);
+  TRegister registerMesh(
+      this->State.EDFrame,
+      fixedVector,
+      movingVector,
+      this->State.RegistrationUseLabels);
+
   registerMesh.RegistrationWeights = this->State.RegistrationWeights;
 
   registerMesh.Register();

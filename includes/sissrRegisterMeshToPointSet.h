@@ -20,6 +20,7 @@
 #include <sissrThinPlateRegularizer.h>
 #include <sissrLossScaleFactors.h>
 #include <sissrNearestPointLabeledCostFunction.h>
+#include <sissrNearestPointUnlabeledCostFunction.h>
 
 namespace sissr {
 
@@ -34,6 +35,7 @@ public:
   double FunctionTolerance = 1e-2;
   double ParameterTolerance = 1e-2;
   bool DynamicSparsity = false;
+  const bool UseLabels;
 
   LossScaleFactors RegistrationWeights;
 
@@ -48,7 +50,8 @@ public:
   typedef std::vector<typename TFixed::Pointer> TFixedVector;
   typedef std::vector<typename TMoving::Pointer> TMovingVector;
 
-  typedef NearestPointLabeledCostFunction<TFixed,TMoving> TCost;
+  typedef NearestPointLabeledCostFunction<TFixed,TMoving> TLabeledPrimaryResidual;
+  typedef NearestPointUnlabeledCostFunction<TFixed,TMoving> TUnlabeledPrimaryResidual;
   typedef VelocityRegularizer<TMoving> TVelocityRegularizer;
   typedef AccelerationRegularizer<TMoving> TAccelerationRegularizer;
   typedef ThinPlateRegularizer<TMoving> TThinPlateRegularizer;
@@ -58,10 +61,11 @@ public:
 
   RegisterMeshToPointSet(const unsigned int& _EDFrame,
                          const TFixedVector &_fixedVector,
-                         const TMovingVector &_movingVector);
+                         const TMovingVector &_movingVector,
+                         const bool &_UseLabels);
 
   const unsigned int EDFrame;
-  const TLocatorVector locatorVector;
+  TLocatorVector locatorVector;
   TLocatorMapVector locatorMapVector;
   const TMovingVector movingVector;
 
@@ -78,7 +82,8 @@ public:
   const unsigned int NumberOfCells;
 
   void Register();
-  void AddPrimaryCost(ceres::Problem&, TParameterVector&);
+  void AddLabeledPrimaryResidual(ceres::Problem&, TParameterVector&);
+  void AddUnlabeledPrimaryResidual(ceres::Problem&, TParameterVector&);
   void AddVelocityRegularizer(ceres::Problem&, TParameterVector&);
   void AddAccelerationRegularizer(ceres::Problem&, TParameterVector&);
   void AddThinPlateRegularizer(ceres::Problem&, TParameterVector&);
