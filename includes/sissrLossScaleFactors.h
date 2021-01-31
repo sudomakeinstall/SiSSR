@@ -24,9 +24,9 @@ struct LossScaleFactors
   LossScaleFactors() :
     Robust(1.0),
     Velocity(0.0),
-    Acceleration(0.1),
-    ThinPlate(0.1),
-    TriangleAspectRatio(10.0),
+    Acceleration(0.0),
+    ThinPlate(0.0),
+    TriangleAspectRatio(0.0),
     EdgeLength(0.0) {};
   double Robust;
   double Velocity;
