@@ -45,15 +45,22 @@ class Controller
 public:
 
   // Constructor/Destructor
-  Controller(int,char**);
+  Controller(int argc, char** argv);
   ~Controller();
 
-protected slots:
+  void ResetCamera();
+  void CalculateResiduals();
+  StateMachine State;
+
+public slots:
+
+  void CalculateBoundaryCandidates();
+  void GenerateInitialModel();
+  void Register();
 
   void FrameValueChanged(int);
   void EDButtonPressed();
   void JumpToEDButtonPressed();
-  void CalculateBoundaryCandidates();
 
   void ToggleImagePlanes();
   void ToggleCandidates();
@@ -67,8 +74,6 @@ protected slots:
   void IncrementFrame();
   void DecrementFrame();
   void SetupModel();
-  void Register();
-  void CalculateResiduals();
   void CalculateResidualsForPass(const unsigned int pass);
   void WriteScreenshots();
   void UpdateCellData();
@@ -126,12 +131,10 @@ private:
   void SetupSliderRanges();
   void SetupSlots();
 
-  void ResetCamera();
   void Render();
   void UpdateCurrentIndex();
   void Serialize();
   void Deserialize();
-  void GenerateInitialModel();
   unsigned int GetCurrentFrame();
   void UpdateModelTransform();
   void CalculateSurfaceAreas();
@@ -139,7 +142,6 @@ private:
   // Other properties
   DirectoryStructure DirectoryStructure;
 
-  StateMachine State;
   View window;
 
 };

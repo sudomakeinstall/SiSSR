@@ -40,7 +40,7 @@ namespace sissr {
 
 // CONSTRUCTOR
 Controller
-::Controller(int argc, char **argv) :
+::Controller(int argc, char** argv) :
   DirectoryStructure(argv[1], argv[2]) {
 
   // Determine current state
@@ -85,42 +85,6 @@ Controller
   this->ui->frameSlider->setValue(this->State.CurrentFrame);
 
   this->Render();
-
-  std::set<std::string> arguments;
-  for (int i = 2; i < argc; ++i)
-    {
-    arguments.emplace( std::string(argv[i]) );
-    }
-
-  if (arguments.find(std::string("--candidates")) != arguments.end())
-    {
-    this->CalculateBoundaryCandidates();
-    }
-
-  if (arguments.find(std::string("--model")) != arguments.end())
-    {
-    this->GenerateInitialModel();
-    }
-
-  if (arguments.find(std::string("--register")) != arguments.end())
-    {
-    this->Register();
-    }
-
-  if (arguments.find(std::string("--areas")) != arguments.end())
-    {
-    this->CalculateSurfaceAreas();
-    }
-
-  if (arguments.find(std::string("--reset-camera")) != arguments.end())
-    {
-    this->ResetCamera();
-    }
-
-  if (arguments.find(std::string("--residuals")) != arguments.end())
-    {
-    this->CalculateResiduals();
-    }
 
 };
 

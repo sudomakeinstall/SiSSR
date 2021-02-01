@@ -115,6 +115,12 @@ find_package(VTK REQUIRED
 find_package(RapidJSON REQUIRED)
 include_directories(${RapidJSON_INCLUDE_DIRS})
 
+# Boost
+
+find_package(Boost QUIET REQUIRED COMPONENTS
+  program_options
+)
+
 # dv-commandline-utils
 
 find_package(dv-commandline-utils REQUIRED)
@@ -171,6 +177,7 @@ target_link_libraries(dv-sissr-dependencies INTERFACE
   ceres
   dv-commandline-utils::dv-commandline-utils
   CGAL::CGAL
+  Boost::program_options
   )
 
 add_executable(dv-sissr ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
