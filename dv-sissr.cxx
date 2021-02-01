@@ -106,11 +106,11 @@ main(int argc, char** argv)
   if (vm.count("register")) {
     controller.Register();
   }
-  if (vm.count("reset-camera")) {
-    controller.ResetCamera();
-  }
   if (vm.count("residuals")) {
     controller.CalculateResiduals();
+  }
+  if (vm.count("reset-camera")) {
+    controller.ResetCamera();
   }
   if (vm.count("quit")) {
       application.quit();
