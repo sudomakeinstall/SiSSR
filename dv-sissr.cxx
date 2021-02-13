@@ -26,6 +26,7 @@ main(int argc, char** argv)
     ("help", "Print usage information.")
     ("input-dir", po::value<std::string>()->required(), "Input directory.")
     ("output-dir", po::value<std::string>()->required(), "Output directory.")
+    ("weight-ew", po::value<double>(), "Edge weight multipler.")
     ("weight-tp", po::value<double>(), "Thin plate energy weight.")
     ("weight-ac", po::value<double>(), "Acceleration weight.")
     ("weight-vc", po::value<double>(), "Velocity weight.")
@@ -71,6 +72,9 @@ main(int argc, char** argv)
 
   if (vm.count("model-num-faces")) {
     controller.State.InitialModelNumberOfFaces = vm["model-num-faces"].as<unsigned int>();
+  }
+  if (vm.count("weight-ew")) {
+    controller.State.RegistrationWeights.EdgeWeight = vm["weight-ew"].as<double>();
   }
   if (vm.count("weight-tp")) {
     controller.State.RegistrationWeights.ThinPlate = vm["weight-tp"].as<double>();

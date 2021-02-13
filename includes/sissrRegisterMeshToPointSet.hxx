@@ -14,6 +14,9 @@
 #include <sissrLabeledMeshToKdTreeMap.h>
 #include <sissrMeshToKdTree.h>
 
+// dv-cli
+#include <dvCalculateBorderCells.h>
+
 namespace sissr {
 
 template < typename TFixedMesh, typename TMovingMesh >
@@ -107,7 +110,7 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   // Minimize distance between surface points and boundary candidates
   //
 
-  if (this->RegistrationWeights.Robust > 1e-6) {
+  if (this->RegistrationWeights.Primary > 1e-6) {
     if (this->UseLabels) {
       this->AddLabeledPrimaryResidual(problem, parameterVector);
     } else {
@@ -275,9 +278,19 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   auto progress = dv::Progress(this->NumberOfFrames);
 
-  ceres::LossFunction* cost_loss = new ceres::ScaledLoss(nullptr,
-                                         this->RegistrationWeights.Robust,
-                                         ceres::DO_NOT_TAKE_OWNERSHIP);
+  ceres::LossFunction* cost_loss_body = new ceres::ScaledLoss(
+      nullptr,
+      this->RegistrationWeights.Primary,
+      ceres::DO_NOT_TAKE_OWNERSHIP
+      );
+
+  ceres::LossFunction* cost_loss_edge = new ceres::ScaledLoss(
+      nullptr,
+      this->RegistrationWeights.Primary*this->RegistrationWeights.EdgeWeight,
+      ceres::DO_NOT_TAKE_OWNERSHIP
+      );
+
+  const auto border_cells = dv::CalculateBorderCells<TMovingMesh>(this->movingVector.at(0));
 
   for (unsigned int frame = 0; frame < this->NumberOfFrames; ++frame)
     {
@@ -302,13 +315,23 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
         {
         params.push_back(parameterVector.at(frame).at(cell));
         }
-      const auto id = problem.AddResidualBlock(
-                                               cost_function,
-                                               cost_loss,
-                                               params
-                                              );
 
-      costFunctionResidualIDs.emplace_back(id);
+      if (border_cells.count(u.first)) {
+        const auto id = problem.AddResidualBlock(
+                                                 cost_function,
+                                                 cost_loss_edge,
+                                                 params
+                                                );
+        costFunctionResidualIDs.emplace_back(id);
+      } else {
+        const auto id = problem.AddResidualBlock(
+                                                 cost_function,
+                                                 cost_loss_body,
+                                                 params
+                                                );
+        costFunctionResidualIDs.emplace_back(id);
+      }
+
       costFunctionFrames.emplace_back(frame);
       const auto cellID = std::get<0>(movingVector.at(frame)->GetSurfaceParameter(index));
       costFunctionCellIDs.emplace_back(cellID);
@@ -331,7 +354,7 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
   auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* cost_loss = new ceres::ScaledLoss(nullptr,
-                                         this->RegistrationWeights.Robust,
+                                         this->RegistrationWeights.Primary,
                                          ceres::DO_NOT_TAKE_OWNERSHIP);
 
   for (unsigned int frame = 0; frame < this->NumberOfFrames; ++frame)

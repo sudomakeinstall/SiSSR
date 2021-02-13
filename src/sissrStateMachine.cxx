@@ -252,8 +252,10 @@ StateMachine
 
   writer.Key("RegistrationUseLabels");
   writer.Bool(this->RegistrationUseLabels);
-  writer.Key("RegistrationWeights.Robust");
-  writer.Double(this->RegistrationWeights.Robust);
+  writer.Key("RegistrationWeights.Primary");
+  writer.Double(this->RegistrationWeights.Primary);
+  writer.Key("RegistrationWeights.EdgeWeight");
+  writer.Double(this->RegistrationWeights.EdgeWeight);
   writer.Key("RegistrationWeights.Velocity");
   writer.Double(this->RegistrationWeights.Velocity);
   writer.Key("RegistrationWeights.Acceleration");
@@ -317,7 +319,8 @@ StateMachine
   dv::check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");
 
   dv::check_and_set_bool(d, this->RegistrationUseLabels, "RegistrationUseLabels");
-  dv::check_and_set_double(d, this->RegistrationWeights.Robust, "RegistrationWeights.Robust");
+  dv::check_and_set_double(d, this->RegistrationWeights.Primary, "RegistrationWeights.Primary");
+  dv::check_and_set_double(d, this->RegistrationWeights.EdgeWeight, "RegistrationWeights.EdgeWeight");
   dv::check_and_set_double(d, this->RegistrationWeights.Velocity, "RegistrationWeights.Velocity");
   dv::check_and_set_double(d, this->RegistrationWeights.Acceleration, "RegistrationWeights.Acceleration");
   dv::check_and_set_double(d, this->RegistrationWeights.ThinPlate, "RegistrationWeights.ThinPlate");
