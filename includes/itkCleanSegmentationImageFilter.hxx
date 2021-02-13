@@ -36,18 +36,32 @@ CleanSegmentationImageFilter<TInputImage, TOutputImage>
   using TConnected = itk::ExtractConnectedComponentsImageFilter<InputImageType>;
   using TPad = itk::ConstantPadImageFilter<TInputImage, TInputImage>;
 
-  const auto enforce0 = TEnforce::New();
-  enforce0->SetInput( this->GetInput() );
-  enforce0->SetLabels1({4, 5});
-  enforce0->SetLabels2({2, 3, 6, 7, 8, 9});
+  using TLabels = std::set<typename TInputImage::PixelType>;
+  using TLabelsPair = std::pair<TLabels,TLabels>;
+  using TLabelsPairVector = std::vector<TLabelsPair>;
 
-  const auto enforce1 = TEnforce::New();
-  enforce1->SetInput( enforce0->GetOutput() );
-  enforce1->SetLabels1({3});
-  enforce1->SetLabels2({1, 6, 7, 8, 9});
+  TLabelsPairVector labels_pair_vector;
+  labels_pair_vector.push_back(std::make_pair<TLabels,TLabels>(TLabels({2}),TLabels({3})));
+
+  std::vector<typename TEnforce::Pointer> enforce;
+
+  for (size_t i = 0; i < labels_pair_vector.size(); ++i) {
+    enforce.push_back(TEnforce::New());
+    enforce[i]->SetLabels1( labels_pair_vector[i].first );
+    enforce[i]->SetLabels2( labels_pair_vector[i].second );
+    if (enforce.size() > 1) {
+      enforce[i]->SetInput( enforce[i - 1]->GetOutput() );
+    } else {
+      enforce[i]->SetInput( this->GetInput() );
+    }
+  }
 
   const auto connected = TConnected::New();
-  connected->SetInput( enforce1->GetOutput() );
+  if (enforce.size() > 0) {
+    connected->SetInput( enforce.back()->GetOutput() );
+  } else {
+    connected->SetInput( this->GetInput() );
+  }
 
   typename TInputImage::SizeType padding;
   padding.Fill(1);
