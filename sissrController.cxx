@@ -458,8 +458,6 @@ Controller
   std::cout << "done." << std::endl;
   std::cout << "Time elapsed: " << clock.GetTotal() << std::endl;
 
-  this->CalculateResiduals();
-
 }
 
 void
