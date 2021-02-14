@@ -33,8 +33,10 @@ main(int argc, char** argv)
     ("weight-el", po::value<double>(), "Edge length weight.")
     ("weight-ar", po::value<double>(), "Aspect ratio weight.")
     ("model-num-faces", po::value<unsigned int>(), "Model initial number of faces.")
-    ("use-labels", "Use labels in registration.")
-    ("ignore-labels", "Ignore labels in registration.")
+    ("model-use-labels", "Use labels in initial model.")
+    ("model-ignore-labels", "Ignore labels in initial model.")
+    ("registration-use-labels", "Use labels in registration.")
+    ("registration-ignore-labels", "Ignore labels in registration.")
     ("candidates", "Calculate boundary candidates.")
     ("model", "Calculate initial model.")
     ("register", "Register mesh to candidates.")
@@ -91,14 +93,24 @@ main(int argc, char** argv)
   if (vm.count("weight-ar")) {
     controller.State.RegistrationWeights.TriangleAspectRatio = vm["weight-ar"].as<double>();
   }
-  if (vm.count("use-labels") && vm.count("ignore-labels")) {
-    std::cerr << "Setting both 'use-labels' and 'ignore-labels' is disallowed." << std::endl;
+  if (vm.count("model-use-labels") && vm.count("model-ignore-labels")) {
+    std::cerr << "Setting both 'model-use-labels' and 'model-ignore-labels' is disallowed." << std::endl;
     return EXIT_FAILURE;
   }
-  if (vm.count("use-labels")) {
+  if (vm.count("model-use-labels")) {
+    controller.State.InitialModelPreserveEdges = true;
+  }
+  if (vm.count("model-ignore-labels")) {
+    controller.State.InitialModelPreserveEdges = false;
+  }
+  if (vm.count("registration-use-labels") && vm.count("registration-ignore-labels")) {
+    std::cerr << "Setting both 'registration-use-labels' and 'registration-ignore-labels' is disallowed." << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (vm.count("registration-use-labels")) {
     controller.State.RegistrationUseLabels = true;
   }
-  if (vm.count("ignore-labels")) {
+  if (vm.count("registration-ignore-labels")) {
     controller.State.RegistrationUseLabels = false;
   }
   if (vm.count("candidates")) {
