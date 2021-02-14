@@ -203,6 +203,7 @@ View
   smooth->SetInputConnection(this->candidateReader->GetOutputPort());
   smooth->BoundarySmoothingOff();
   smooth->FeatureEdgeSmoothingOff();
+  smooth->SetNumberOfIterations(20);
 
   this->candidateMapper->SetScalarRange(0, 9);
   this->candidateMapper->SetLookupTable( lut );
