@@ -205,8 +205,8 @@ View
   smooth->FeatureEdgeSmoothingOff();
   smooth->SetNumberOfIterations(20);
 
-  this->candidateMapper->SetScalarRange(0, 9);
   this->candidateMapper->SetLookupTable( lut );
+  this->candidateMapper->UseLookupTableScalarRangeOn();
   this->candidateMapper->SetInputConnection( smooth->GetOutputPort() );
   this->candidateActor->SetMapper( this->candidateMapper );
 
@@ -259,8 +259,8 @@ View
   this->modelTubes->SetInputConnection(      this->modelEdges->GetOutputPort()  );
   this->modelWireMapper->SetInputConnection( this->modelTubes->GetOutputPort()  );
   this->modelWireActor->SetMapper(           this->modelWireMapper              );
-
   this->modelWireActor->GetProperty()->SetColor( this->WireframeColor );
+  this->modelWireActor->GetMapper()->ScalarVisibilityOff();
 
   this->modelVertices->SetInputConnection(           this->modelReader->GetOutputPort() );
   this->modelVerticesMapper->SetInputConnection(     this->modelVertices->GetOutputPort() );
@@ -332,6 +332,7 @@ View
   this->modelResidualsMapper->SetInputConnection( this->modelResidualsTubes->GetOutputPort() );
   this->modelResidualsActor->SetMapper( this->modelResidualsMapper );
   this->modelResidualsActor->GetProperty()->SetColor( this->ResidualsColor );
+  this->modelResidualsActor->GetMapper()->ScalarVisibilityOff();
   this->modelResidualsReader->Update();
 
   this->modelResidualsVertices    = vtkSmartPointer<vtkGlyph3D>::New();
@@ -486,7 +487,6 @@ View
 
   if (visible)
     {
-    this->modelColorbarActor->SetLookupTable( this->modelLUT );
     this->renderer->AddActor2D( this->modelColorbarActor );
     }
   else
@@ -522,60 +522,20 @@ View
 // FIXME
 void
 View
-::UpdateLookupTable()
+::UpdateLookupTable(vtkLookupTable* lut)
 {
-  if (!this->ModelHasBeenSetup)
-    {
+  if (!this->ModelHasBeenSetup) {
+    std::cerr << "WARNING: Model as not been set up." << std::endl;
     return;
-    }
+  }
 
-  if (nullptr == this->modelLUT)
-    {
-    this->modelLUT = vtkSmartPointer<vtkLookupTable>::New();
-    }
+//  const auto lut = dv::LUT::Rainbow();
 
-  ///////////////////////////////////////////////
-  // Build Lookup Table From Transfer Function //
-  ///////////////////////////////////////////////
-
-  const auto ctf = this->CalculateMeshTransferFunction();
-
-  const size_t N = 256; 
-  this->modelLUT->SetNumberOfTableValues(N);
-  this->modelLUT->SetTableRange(this->CB_State.Min,
-                                this->CB_State.Max);
-  this->modelLUT->Build();
- 
-  for(size_t i = 0; i < N; ++i)
-    {
-    double *rgb;
-    rgb = ctf->GetColor(static_cast<double>(i)/N);
-    this->modelLUT->SetTableValue(i,rgb[0], rgb[1], rgb[2]);
-    }
-
-  const double gray = 0.3;
-
-  this->modelLUT->SetBelowRangeColor( gray, gray, gray, 1.0 ); // Gray
-  this->modelLUT->SetAboveRangeColor( gray, gray, gray, 1.0 ); // Gray
-
-  /////////////////
-  // Loop Mapper //
-  /////////////////
-
-  const auto lut = dv::LUT::Rainbow();
   this->modelLoopMapper->SetLookupTable( lut );
-  this->modelLoopMapper->SetScalarRange(0, 9);
-
-//  this->modelLoopMapper->SetScalarRange(this->CB_State.Min,
-//                                        this->CB_State.Max);
-//  this->modelLoopMapper->SetLookupTable( this->modelLUT );
-
-  ///////////
-  // Actor //
-  ///////////
+  this->modelLoopMapper->UseLookupTableScalarRangeOn();
 
   this->modelColorbarActor->SetTitle(this->CB_State.Title.c_str());
-  this->modelColorbarActor->SetLookupTable( this->modelLUT );
+  this->modelColorbarActor->SetLookupTable( lut );
 
 }
 
@@ -619,7 +579,6 @@ View
   if (nullptr != this->modelCellData)
     {
     this->modelLoop->GetOutput()->GetCellData()->SetScalars( this->modelCellData );
-    this->UpdateLookupTable();
     }
 
 }

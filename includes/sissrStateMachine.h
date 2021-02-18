@@ -125,7 +125,7 @@ public:
   const std::map<CellData, ColorbarState> ColorbarState =
     {
       { CellData::NONE, {"", 0.0, 0.0} },
-      { CellData::SQUEEZ, {"SQUEEZ", 0.70, 1.05} },
+      { CellData::SQUEEZ, {"SQUEEZ", 0.7, 1.3} },
       { CellData::RESIDUALS, {"Residuals", 0.0, 10.0} },
     };
 

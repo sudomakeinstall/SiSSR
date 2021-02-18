@@ -31,6 +31,7 @@
 #include <dvCalculateSurfaceAreas.h>
 #include <dvCalculateTriangleCenters.h>
 #include <dvGetTimeString.h>
+#include <dvGetLookupTable.h>
 
 // SiSSR
 #include <sissrRegisterMeshToPointSet.h>
@@ -1106,36 +1107,14 @@ Controller
     return;
     }
 
-  // Update Colorbar
-  this->window.CB_State = this->State.ColorbarState.at(this->State.CellDataToDisplay);
-  this->window.UpdateLookupTable();
-
   // Update the display based on the updated state.
   switch (this->State.CellDataToDisplay)
     {
     case CellData::NONE:
       {
       this->window.modelCellData = nullptr;
+      this->window.UpdateLookupTable(dv::LUT::Rainbow());
       return;
-      }
-    case CellData::RESIDUALS:
-      {
-
-      if (
-          this->State.costFunctionResidualX.empty() ||
-          this->State.costFunctionResidualX.size() != this->State.costFunctionResidualY.size() ||
-          this->State.costFunctionResidualX.size() != this->State.costFunctionResidualZ.size()
-         )
-        {
-        std::cout << "Residual block is not the correct size." << std::endl;
-        this->window.modelCellData = nullptr;
-        return;
-        }
-
-      this->window.modelCellData
-        = this->State.CalculateResidualsForFrame(this->GetCurrentFrame());
-
-      break;
       }
     case CellData::SQUEEZ:
       {
@@ -1154,6 +1133,28 @@ Controller
         }
 
       this->window.modelCellData = this->State.SQUEEZ[this->GetCurrentFrame()];
+      const auto cbrange = this->State.ColorbarState.at(this->State.CellDataToDisplay);
+      const auto lut = dv::LUT::SQUEEZ(cbrange.Min, cbrange.Max);
+      this->window.UpdateLookupTable(lut);
+
+      break;
+      }
+    case CellData::RESIDUALS:
+      {
+
+      if (
+          this->State.costFunctionResidualX.empty() ||
+          this->State.costFunctionResidualX.size() != this->State.costFunctionResidualY.size() ||
+          this->State.costFunctionResidualX.size() != this->State.costFunctionResidualZ.size()
+         )
+        {
+        std::cout << "Residual block is not the correct size." << std::endl;
+        this->window.modelCellData = nullptr;
+        return;
+        }
+
+      this->window.modelCellData
+        = this->State.CalculateResidualsForFrame(this->GetCurrentFrame());
 
       break;
       }

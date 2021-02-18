@@ -108,7 +108,7 @@ public:
   // Update
   //
 
-  void UpdateLookupTable();
+  void UpdateLookupTable(vtkLookupTable* lut);
   void UpdatePlanesSource(const std::string &);
   void UpdateCandidatesSource(const std::string &);
   void UpdateModelSource(const std::string &);
@@ -156,7 +156,6 @@ public:
   vtkSmartPointer<vtkActor>          candidateActor = nullptr;
 
   // Model
-  vtkSmartPointer<vtkLookupTable>           modelLUT = nullptr;
   TVTKMeshReader             modelReader = nullptr;
   vtkSmartPointer<vtkExtractEdges>          modelEdges = nullptr;
   vtkSmartPointer<vtkTubeFilter>            modelTubes = nullptr;
@@ -203,7 +202,7 @@ public:
   double ValueRangeMinimum = 0.8;
   double ValueRangeMaximum = 0.8;
 
-  double WireframeColor[3] = {1.0, 0.5, 0.5};
+  double WireframeColor[3] = {0.8, 0.8, 0.8};
   double WireframeEdgeRadius = 0.25;
   double WireframeVertexRadius = 0.5;
   int WireframeNumberOfSides = 5;
