@@ -18,8 +18,8 @@ cmake_policy(SET CMP0074 NEW)
 project("dv-sissr" LANGUAGES CXX C)
 
 set(${PROJECT_NAME}_VERSION_MAJOR "2021")
-set(${PROJECT_NAME}_VERSION_MINOR "01")
-set(${PROJECT_NAME}_VERSION_PATCH "08")
+set(${PROJECT_NAME}_VERSION_MINOR "02")
+set(${PROJECT_NAME}_VERSION_PATCH "22")
 set(${PROJECT_NAME}_VERSION
   "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
@@ -46,10 +46,6 @@ set(CMAKE_CXX_STANDARD 17)
 ## Third Party Packages ##
 ##########################
 
-# Find a threading package
-
-find_package(OpenMP REQUIRED)
-
 # Ceres
 
 find_package(Ceres REQUIRED)
@@ -69,6 +65,7 @@ find_package(ITK REQUIRED COMPONENTS
   ITKVtkGlue
   ITKImageIO
   ITKMeshIO
+  ITKTestKernel
   ITKDVUtilities
   SubdivisionQuadEdgeMeshFilter
   MeshNoise
@@ -171,7 +168,6 @@ qt5_wrap_ui(UI_Srcs ${UIs})
 add_library(dv-sissr-dependencies INTERFACE)
 target_link_libraries(dv-sissr-dependencies INTERFACE
   ${QT_LIBRARIES}
-  OpenMP::OpenMP_CXX
   ${VTK_LIBRARIES}
   ${ITK_LIBRARIES}
   ceres
