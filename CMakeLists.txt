@@ -46,6 +46,11 @@ set(CMAKE_CXX_STANDARD 17)
 ## Third Party Packages ##
 ##########################
 
+# LAPACKE
+
+find_package(LAPACKE REQUIRED)
+include_directories(${LAPACKE_INCLUDE_DIRS})
+
 # Ceres
 
 find_package(Ceres REQUIRED)
@@ -66,7 +71,7 @@ find_package(ITK REQUIRED COMPONENTS
   ITKImageIO
   ITKMeshIO
   ITKTestKernel
-  ITKDVUtilities
+  ITKBinaryMathematicalMorphology
   SubdivisionQuadEdgeMeshFilter
   MeshNoise
   IOMeshSTL
@@ -174,6 +179,7 @@ target_link_libraries(dv-sissr-dependencies INTERFACE
   dv-commandline-utils::dv-commandline-utils
   CGAL::CGAL
   Boost::program_options
+  ${LAPACKE_LIBRARIES}
   )
 
 add_executable(dv-sissr ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs})
