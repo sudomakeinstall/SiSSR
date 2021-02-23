@@ -19,7 +19,7 @@
 #include "itkMacro.h"
 
 // Custom
-#include "dvUtilities.h"
+#include "dvMath.h"
 #include "dv_sylvester.h"
 
 namespace itk
