@@ -5,6 +5,7 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_profile.h>
 
 namespace CGAL {
+
 namespace Surface_mesh_simplification {
 
 template<class TM_, typename TData>
@@ -22,20 +23,17 @@ public:
 
     bool uniform_around_vertex = true;
 
-    typename Profile::halfedge_descriptor i = edge;
-
     const auto f = profile.surface_mesh().face(edge);
     const auto d = property[f];
 
-    do {
-      i = profile.surface_mesh().next_around_source(i);
+    for (const auto& i : halfedges_around_source(edge, profile.surface_mesh())) {
       const auto fn = profile.surface_mesh().face(i);
       const auto dn = property[fn];
       if (d != dn) {
         uniform_around_vertex = false;
         break;
       }
-    } while (i != edge);
+    }
 
     return uniform_around_vertex;
 
@@ -49,7 +47,7 @@ public:
     bool uniform_around_source = this->labels_uniform_around_vertex<Profile>(profile, profile.v0_v1());
     bool uniform_around_target = this->labels_uniform_around_vertex<Profile>(profile, profile.v1_v0());
 
-    typedef boost::optional<typename Profile::Point>              result_type;
+    using result_type = boost::optional<typename Profile::Point>;
 
     if (uniform_around_source && uniform_around_target) {
       return result_type(profile.geom_traits().construct_midpoint_3_object()(profile.p0(), profile.p1()));
@@ -58,7 +56,8 @@ public:
     } else if (uniform_around_target) {
       return result_type(profile.p0());
     } else {
-      return result_type();
+      return result_type(profile.p0());
+//      return result_type();
     }
 
   }
