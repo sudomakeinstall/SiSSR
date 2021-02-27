@@ -439,7 +439,7 @@ Controller
   using TWriter = itk::MeshFileWriter<TQEMesh>;
 
   const auto reader = TImageReader::New();
-  reader->SetFileName(this->DirectoryStructure.InitialModelSegmentation);
+  reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(this->State.InitialModelFrame));
 
   const auto model = TModel::New();
   model->SetInput(reader->GetOutput());

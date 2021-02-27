@@ -66,6 +66,7 @@ public:
   unsigned int InitialModelLVClosingRadius;
   unsigned int InitialModelGeneralClosingRadius;
   bool         InitialModelPreserveEdges;
+  unsigned int InitialModelFrame;
 
   unsigned int BoundaryCandidateDilationRadius;
 

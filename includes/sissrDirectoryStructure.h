@@ -36,10 +36,7 @@ public:
   const std::string PointSuffix = ".txt";
   const std::string ScreenshotSuffix = ".png";
 
-  const std::string InitialModelSegmentation =
-    this->IptDirectory +
-    "initial_model_segmentation" + ImageSuffix;
-  const std::string InitialModel           = this->InitialModelDirectory + "initial_model" + MeshSuffix;
+  const std::string InitialModel = this->InitialModelDirectory + "initial_model" + MeshSuffix;
 
   const std::string ParametersJSON = this->SerializationDirectory + "parameters.json";
 
@@ -47,8 +44,6 @@ public:
 
   std::string ResidualsForPass(const size_t p) const;
   std::string RegistrationSummaryForPass(const size_t p) const;
-
-  std::string CandidatePathForFrame(const size_t f) const;
 
   std::vector<std::string> ScreenshotDirectories;
   void AddScreenshotDirectory();

@@ -32,6 +32,7 @@ main(int argc, char** argv)
     ("weight-vc", po::value<double>(), "Velocity weight.")
     ("weight-el", po::value<double>(), "Edge length weight.")
     ("weight-ar", po::value<double>(), "Aspect ratio weight.")
+    ("model-frame", po::value<unsigned int>(), "Frame from which to generate the template mesh.")
     ("model-num-faces", po::value<unsigned int>(), "Model initial number of faces.")
     ("model-use-labels", "Use labels in initial model.")
     ("model-ignore-labels", "Ignore labels in initial model.")
@@ -72,6 +73,9 @@ main(int argc, char** argv)
   sissr::Controller controller(argc, argv);
   controller.show();
 
+  if (vm.count("model-frame")) {
+    controller.State.InitialModelFrame = vm["model-frame"].as<unsigned int>();
+  }
   if (vm.count("model-num-faces")) {
     controller.State.InitialModelNumberOfFaces = vm["model-num-faces"].as<unsigned int>();
   }

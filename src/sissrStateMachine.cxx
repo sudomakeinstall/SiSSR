@@ -13,6 +13,7 @@ namespace sissr {
 
 StateMachine
 ::StateMachine() :
+  InitialModelFrame(0),
   InitialModelNumberOfFaces(512),
   InitialModelSigma(0.1),
   InitialModelLVClosingRadius(10),
@@ -226,6 +227,8 @@ StateMachine
 ::SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer)
 {
 
+  writer.Key("InitialModelFrame");
+  writer.Uint(this->InitialModelFrame);
   writer.Key("InitialModelNumberOfFaces");
   writer.Uint(this->InitialModelNumberOfFaces);
   writer.Key("InitialModelSigma");
@@ -309,6 +312,7 @@ StateMachine
   dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
+  dv::check_and_set_uint(d, this->InitialModelFrame, "InitialModelFrame");
   dv::check_and_set_uint(d, this->InitialModelNumberOfFaces, "InitialModelNumberOfFaces");
   dv::check_and_set_double(d, this->InitialModelSigma, "InitialModelSigma");
   dv::check_and_set_uint(d, this->InitialModelLVClosingRadius, "InitialModelLVClosingRadius");
