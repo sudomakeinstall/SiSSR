@@ -26,18 +26,25 @@ main(int argc, char** argv)
     ("help", "Print usage information.")
     ("input-dir", po::value<std::string>()->required(), "Input directory.")
     ("output-dir", po::value<std::string>()->required(), "Output directory.")
+
+    // Initial Model
+    ("model-frame", po::value<unsigned int>(), "Frame from which to generate the template mesh.")
+    ("model-num-faces", po::value<unsigned int>(), "Model initial number of faces.")
+    ("model-use-labels", "Use labels in initial model (should not be used with --model-ignore-labels).")
+    ("model-ignore-labels", "Ignore labels in initial model (should not be used with --model-use-labels).")
+
+    // SiSSR Registration
     ("weight-ew", po::value<double>(), "Edge weight multipler.")
     ("weight-tp", po::value<double>(), "Thin plate energy weight.")
     ("weight-ac", po::value<double>(), "Acceleration weight.")
     ("weight-vc", po::value<double>(), "Velocity weight.")
     ("weight-el", po::value<double>(), "Edge length weight.")
     ("weight-ar", po::value<double>(), "Aspect ratio weight.")
-    ("model-frame", po::value<unsigned int>(), "Frame from which to generate the template mesh.")
-    ("model-num-faces", po::value<unsigned int>(), "Model initial number of faces.")
-    ("model-use-labels", "Use labels in initial model.")
-    ("model-ignore-labels", "Ignore labels in initial model.")
     ("registration-use-labels", "Use labels in registration.")
     ("registration-ignore-labels", "Ignore labels in registration.")
+
+    // Misc
+    ("ed-frame", po::value<unsigned int>(), "ED frame.")
     ("candidates", "Calculate boundary candidates.")
     ("model", "Calculate initial model.")
     ("register", "Register mesh to candidates.")
@@ -64,21 +71,33 @@ main(int argc, char** argv)
   std::cout << "Input directory: " << IDir << std::endl;
   std::cout << "Output directory: " << ODir << std::endl;
 
-  // QT Stuff
+  // Qt Stuff
   vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
   QSurfaceFormat::setDefaultFormat(QVTKOpenGLStereoWidget::defaultFormat());
 
   QApplication application(argc,argv);
 
   sissr::Controller controller(argc, argv);
-  controller.show();
 
+  // Model
   if (vm.count("model-frame")) {
     controller.State.InitialModelFrame = vm["model-frame"].as<unsigned int>();
   }
   if (vm.count("model-num-faces")) {
     controller.State.InitialModelNumberOfFaces = vm["model-num-faces"].as<unsigned int>();
   }
+  if (vm.count("model-use-labels") && vm.count("model-ignore-labels")) {
+    std::cerr << "Setting both 'model-use-labels' and 'model-ignore-labels' is disallowed." << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (vm.count("model-use-labels")) {
+    controller.State.InitialModelPreserveEdges = true;
+  }
+  if (vm.count("model-ignore-labels")) {
+    controller.State.InitialModelPreserveEdges = false;
+  }
+
+  // SiSSR Registration
   if (vm.count("weight-ew")) {
     controller.State.RegistrationWeights.EdgeWeight = vm["weight-ew"].as<double>();
   }
@@ -97,16 +116,6 @@ main(int argc, char** argv)
   if (vm.count("weight-ar")) {
     controller.State.RegistrationWeights.TriangleAspectRatio = vm["weight-ar"].as<double>();
   }
-  if (vm.count("model-use-labels") && vm.count("model-ignore-labels")) {
-    std::cerr << "Setting both 'model-use-labels' and 'model-ignore-labels' is disallowed." << std::endl;
-    return EXIT_FAILURE;
-  }
-  if (vm.count("model-use-labels")) {
-    controller.State.InitialModelPreserveEdges = true;
-  }
-  if (vm.count("model-ignore-labels")) {
-    controller.State.InitialModelPreserveEdges = false;
-  }
   if (vm.count("registration-use-labels") && vm.count("registration-ignore-labels")) {
     std::cerr << "Setting both 'registration-use-labels' and 'registration-ignore-labels' is disallowed." << std::endl;
     return EXIT_FAILURE;
@@ -116,6 +125,11 @@ main(int argc, char** argv)
   }
   if (vm.count("registration-ignore-labels")) {
     controller.State.RegistrationUseLabels = false;
+  }
+
+  // Misc
+  if (vm.count("ed-frame")) {
+    controller.State.EDFrame = vm["ed-frame"].as<unsigned int>();
   }
   if (vm.count("candidates")) {
     controller.CalculateBoundaryCandidates();
@@ -136,6 +150,8 @@ main(int argc, char** argv)
       application.quit();
       return EXIT_SUCCESS;
   }
+
+  controller.show();
 
   return application.exec();
 
