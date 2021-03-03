@@ -32,6 +32,8 @@ main(int argc, char** argv)
     ("model-num-faces", po::value<unsigned int>(), "Model initial number of faces.")
     ("model-use-labels", "Use labels in initial model (should not be used with --model-ignore-labels).")
     ("model-ignore-labels", "Ignore labels in initial model (should not be used with --model-use-labels).")
+    ("model-midpoint", "Use the midpoint decimation algorithm (should not be used with --model-lindstromturk).")
+    ("model-lindstromturk", "Use the Lindstrom Turk decimation algorithm (should not be used with --model-midpoint).")
 
     // SiSSR Registration
     ("weight-ew", po::value<double>(), "Edge weight multipler.")
@@ -95,6 +97,16 @@ main(int argc, char** argv)
   }
   if (vm.count("model-ignore-labels")) {
     controller.State.InitialModelPreserveEdges = false;
+  }
+  if (vm.count("model-midpoint") && vm.count("model-lindstromturk")) {
+    std::cerr << "Setting both 'model-midpoint' and 'model-lindstromturk' is disallowed." << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (vm.count("model-midpoint")) {
+    controller.State.InitialModelDecimationTechnique = sissr::DecimationTechnique::Midpoint;
+  }
+  if (vm.count("model-lindstromturk")) {
+    controller.State.InitialModelDecimationTechnique = sissr::DecimationTechnique::LindstromTurk;
   }
 
   // SiSSR Registration

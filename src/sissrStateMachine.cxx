@@ -19,6 +19,7 @@ StateMachine
   InitialModelLVClosingRadius(10),
   InitialModelGeneralClosingRadius(5),
   InitialModelPreserveEdges(true),
+  InitialModelDecimationTechnique(DecimationTechnique::LindstromTurk),
   BoundaryCandidateDilationRadius(3)
 {}
 

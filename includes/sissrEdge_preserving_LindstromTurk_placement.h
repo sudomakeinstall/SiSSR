@@ -1,10 +1,10 @@
-#ifndef dv_Edge_preserving_midpoint_placement_h
-#define dv_Edge_preserving_midpoint_placement_h
+#ifndef dv_Edge_preserving_LindstromTurk_placement_h
+#define dv_Edge_preserving_LindstromTurk_placement_h
 
 #include <CGAL/license/Surface_mesh_simplification.h>
 
 #include <CGAL/Surface_mesh_simplification/internal/Common.h>
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_profile.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/internal/Lindstrom_Turk_core.h>
 
 #include <sissrEdge_preserving_base_placement.h>
 
@@ -13,15 +13,18 @@ namespace CGAL {
 namespace Surface_mesh_simplification {
 
 template<class TM_, typename TData>
-class Edge_preserving_midpoint_placement :
+class Edge_preserving_LindstromTurk_placement :
   public Edge_preserving_base_placement<TM_, TData>
 {
 public:
   typedef TM_ TM;
+  typedef internal::LindstromTurk_params LindstromTurk_params;
 
   const std::string data_tag = "f:data";
 
-  Edge_preserving_midpoint_placement() {}
+  Edge_preserving_LindstromTurk_placement(const LindstromTurk_params& LT_params = LindstromTurk_params())
+    : m_LT_params(LT_params)
+  {}
 
   template <typename Profile>
   boost::optional<typename Profile::Point> operator()(const Profile& profile) const
@@ -59,9 +62,11 @@ public:
   boost::optional<typename Profile::Point> contract_edge(const Profile& profile) const
   {
     using result_type = boost::optional<typename Profile::Point>;
-    return result_type(profile.geom_traits().construct_midpoint_3_object()(profile.p0(), profile.p1()));
+    return result_type(internal::LindstromTurkCore<TM,Profile>(m_LT_params, profile).compute_placement());
   }
 
+private:
+  LindstromTurk_params m_LT_params;
 };
 
 }

@@ -30,6 +30,7 @@
 #include <sissrColorbarState.h>
 #include <sissrPlaneWidgetState.h>
 #include <sissrLossScaleFactors.h>
+#include <sissrDecimationTechnique.h>
 
 namespace sissr {
 
@@ -67,6 +68,7 @@ public:
   unsigned int InitialModelGeneralClosingRadius;
   bool         InitialModelPreserveEdges;
   unsigned int InitialModelFrame;
+  DecimationTechnique InitialModelDecimationTechnique;
 
   unsigned int BoundaryCandidateDilationRadius;
 

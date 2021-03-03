@@ -448,6 +448,7 @@ Controller
   model->SetLVClosingRadius(this->State.InitialModelLVClosingRadius);
   model->SetGeneralClosingRadius(this->State.InitialModelGeneralClosingRadius);
   model->SetPreserveEdges(this->State.InitialModelPreserveEdges);
+  model->SetDecimationTechnique(this->State.InitialModelDecimationTechnique);
 
   const auto writer = TWriter::New();
   writer->SetInput(model->GetOutput());

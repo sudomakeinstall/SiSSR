@@ -17,6 +17,8 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_cost.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_placement.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 
 // Custom
@@ -24,6 +26,7 @@
 #include <itkRefineValenceThreeVerticesQuadEdgeMeshFilter.h>
 
 // SiSSR
+#include <sissrEdge_preserving_LindstromTurk_placement.h>
 #include <sissrEdge_preserving_midpoint_placement.h>
 #include <sissrITKMeshToCGALSurfaceMesh.h>
 #include <sissrCGALSurfaceMeshToITKMesh.h>
@@ -38,6 +41,8 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   this->SetNumberOfRequiredInputs(1);
   this->m_LVClosingRadius = 3;
   this->m_GeneralClosingRadius = 3;
+  this->m_DecimationTechnique = sissr::DecimationTechnique::LindstromTurk;
+  this->m_PreserveEdges = true;
 }
 
 template <typename TInputImage, typename TOutputMesh>
@@ -78,8 +83,11 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   using TCGALMesh = CGAL::Surface_mesh<TCGALPoint>;
   namespace SMS = CGAL::Surface_mesh_simplification;
   namespace PMP = CGAL::Polygon_mesh_processing;
-  using TCGALEdgePreservingPlacement = SMS::Bounded_normal_change_placement<SMS::Edge_preserving_midpoint_placement<TCGALMesh,typename OutputMeshType::PixelType>>;
-  using TCGALMidpointPlacement = SMS::Bounded_normal_change_placement<SMS::Midpoint_placement<TCGALMesh>>;
+  using TCGALEPMPPlacement = SMS::Bounded_normal_change_placement<SMS::Edge_preserving_midpoint_placement<TCGALMesh,typename OutputMeshType::PixelType>>;
+  using TCGALEPLTPlacement = SMS::Bounded_normal_change_placement<SMS::Edge_preserving_LindstromTurk_placement<TCGALMesh,typename OutputMeshType::PixelType>>;
+  using TCGALMPPlacement = SMS::Bounded_normal_change_placement<SMS::Midpoint_placement<TCGALMesh>>;
+  using TCGALLTPlacement = SMS::Bounded_normal_change_placement<SMS::LindstromTurk_placement<TCGALMesh>>;
+  using TCGALLTCost = SMS::LindstromTurk_cost<TCGALMesh>;
 
   TKernel closeKernel;
   closeKernel.SetRadius(this->GetGeneralClosingRadius());
@@ -129,17 +137,65 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   SMS::Count_stop_predicate<TCGALMesh> stop(this->GetNumberOfCellsInDecimatedMesh());
 
   if (m_PreserveEdges) {
-    SMS::edge_collapse(
-      surface_mesh
-      , stop
-      , CGAL::parameters::get_placement(TCGALEdgePreservingPlacement())
-    );
+
+    switch (this->m_DecimationTechnique) {
+
+      case sissr::DecimationTechnique::Midpoint:
+
+        SMS::edge_collapse(
+          surface_mesh
+          , stop
+          , CGAL::parameters::get_placement(TCGALEPMPPlacement())
+        );
+        break;
+
+      case sissr::DecimationTechnique::LindstromTurk:
+
+        SMS::edge_collapse(
+            surface_mesh,
+            stop,
+            CGAL::parameters::get_cost(TCGALLTCost())
+            .get_placement(TCGALEPLTPlacement())
+            );
+        break;
+
+      default:
+
+        itkAssertOrThrowMacro(false, "Unrecognized decimation technique.");
+        break;
+
+    }
+
   } else {
-    SMS::edge_collapse(
-      surface_mesh
-      , stop
-      , CGAL::parameters::get_placement(TCGALMidpointPlacement())
-    );
+
+    switch (this->m_DecimationTechnique) {
+
+      case sissr::DecimationTechnique::Midpoint:
+
+        SMS::edge_collapse(
+          surface_mesh
+          , stop
+          , CGAL::parameters::get_placement(TCGALMPPlacement())
+        );
+        break;
+
+      case sissr::DecimationTechnique::LindstromTurk:
+
+        SMS::edge_collapse(
+            surface_mesh,
+            stop,
+            CGAL::parameters::get_cost(TCGALLTCost())
+            .get_placement(TCGALLTPlacement())
+            );
+        break;
+
+      default:
+
+        itkAssertOrThrowMacro(false, "Unrecognized decimation technique.");
+        break;
+
+    }
+
   }
 
   PMP::keep_largest_connected_components(surface_mesh, 1);

@@ -1,7 +1,10 @@
 #ifndef itkGenerateInitialModelImageToMeshFilter_h
 #define itkGenerateInitialModelImageToMeshFilter_h
 
-#include "itkImageToMeshFilter.h"
+// ITK
+#include <itkImageToMeshFilter.h> 
+// SiSSR
+#include <sissrDecimationTechnique.h>
 
 namespace itk
 {
@@ -43,6 +46,11 @@ public:
   virtual void
   SetInput(const InputImageType * inputImage);
 
+  using DecimationTechnique = sissr::DecimationTechnique;
+
+  itkSetEnumMacro(DecimationTechnique, DecimationTechnique);
+  itkGetEnumMacro(DecimationTechnique, DecimationTechnique);
+
   itkSetMacro(GeneralClosingRadius, unsigned int);
   itkGetConstMacro(GeneralClosingRadius, unsigned int);
 
@@ -79,7 +87,8 @@ private:
   unsigned int m_LVClosingRadius;
   float        m_MeshNoiseSigma;
   unsigned int m_NumberOfCellsInDecimatedMesh;
-  bool         m_PreserveEdges = true;
+  bool         m_PreserveEdges;
+  sissr::DecimationTechnique m_DecimationTechnique;
 
 };
 } // namespace itk
