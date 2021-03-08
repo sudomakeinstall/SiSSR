@@ -56,40 +56,40 @@ public QuadEdgeMesh< TReal, VDimension, TTraits >
 public:
 
   /** Standard typedefs. */
-  typedef LoopSubdivisionSurfaceMesh                 Self;
-  typedef QuadEdgeMesh< TReal, VDimension, TTraits > Superclass;
-  typedef SmartPointer< Self >                       Pointer;
-  typedef SmartPointer< const Self >                 ConstPointer;
+  using Self = LoopSubdivisionSurfaceMesh;
+  using Superclass = QuadEdgeMesh<TReal, VDimension, TTraits>;
+  using Pointer = SmartPointer<Self>;
+  using ConstPointer = SmartPointer<const Self>;
 
-  typedef TReal RealType;
+  using RealType = TReal;
 
   // Points
-  typedef typename Superclass::PointIdentifier              PointIdentifier;
-  typedef typename Superclass::PointType                    PointType;
-  typedef typename Superclass::PointsContainer              PointsContainer;
-  typedef typename Superclass::PointsContainerConstIterator PointsContainerConstIterator;
-  typedef typename Superclass::PointsContainerIterator      PointsContainerIterator;
+  using PointIdentifier = typename Superclass::PointIdentifier;
+  using PointType = typename Superclass::PointType;
+  using PointsContainer = typename Superclass::PointsContainer;
+  using PointsContainerConstIterator = typename Superclass::PointsContainerConstIterator;
+  using PointsContainerIterator = typename Superclass::PointsContainerIterator;
 
   // Cells
-  typedef typename Superclass::CellIdentifier              CellIdentifier;
-  typedef typename Superclass::CellType                    CellType;
-  typedef typename Superclass::CellAutoPointer             CellAutoPointer;
-  typedef typename Superclass::CellsContainer              CellsContainer;
-  typedef typename Superclass::CellsContainerConstIterator CellsContainerConstIterator;
-  typedef typename Superclass::CellsContainerIterator      CellsContainerIterator;
+  using CellIdentifier = typename Superclass::CellIdentifier;
+  using CellType = typename Superclass::CellType;
+  using CellAutoPointer = typename Superclass::CellAutoPointer;
+  using CellsContainer = typename Superclass::CellsContainer;
+  using CellsContainerConstIterator = typename Superclass::CellsContainerConstIterator;
+  using CellsContainerIterator = typename Superclass::CellsContainerIterator;
 
   // Edges
-  typedef typename Superclass::QEPrimal QEPrimal;
+  using QEPrimal = typename Superclass::QEPrimal;
 
   /** Real type, minimum N, maximum N. */
 //  typedef LoopSubdivisionSurfaceMatrices< TReal, 4, 25 >        TMatrices;
-  typedef LoopSubdivisionSurfaceMatrices< TReal, 3, 25 >        TMatrices;
-  typedef typename TMatrices::TParameters                       TParameters;
-  typedef std::map<CellIdentifier, unsigned int>                TNMap;
-  typedef std::map<PointIdentifier, unsigned int >              TValencyMap;
-  typedef std::pair<CellIdentifier, TParameters>                TSurfaceParameter;
-  typedef std::vector<TSurfaceParameter>                        TSurfaceParameterList;
-  typedef std::map<CellIdentifier, vnl_vector<PointIdentifier>> TOneRingMap;
+  using TMatrices = LoopSubdivisionSurfaceMatrices<TReal, 3, 25>;
+  using TParameters = typename TMatrices::TParameters;
+  using TNMap = std::map<CellIdentifier, unsigned int>;
+  using TValencyMap = std::map<PointIdentifier, unsigned int>;
+  using TSurfaceParameter = std::pair<CellIdentifier, TParameters>;
+  using TSurfaceParameterList = std::vector<TSurfaceParameter>;
+  using TOneRingMap = std::map<CellIdentifier, vnl_vector<PointIdentifier>>;
 
   /** Basic Object interface. */
   itkNewMacro(Self);

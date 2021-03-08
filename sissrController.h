@@ -109,15 +109,15 @@ private:
     TReal,     // Coordinate Representation
     TReal >;   // Interpolation Weight
 
-  typedef itk::Mesh< TReal, 3, TMeshTraits >                         TMesh;
-  typedef itk::QuadEdgeMesh< TReal, 3, TQEMeshTraits >               TQEMesh;
-  typedef itk::LoopSubdivisionSurfaceMesh< TReal, 3, TQEMeshTraits > TLoopMesh;
+  using TMesh = itk::Mesh<TReal, 3, TMeshTraits>;
+  using TQEMesh = itk::QuadEdgeMesh<TReal, 3, TQEMeshTraits>;
+  using TLoopMesh = itk::LoopSubdivisionSurfaceMesh<TReal, 3, TQEMeshTraits>;
 
-  typedef itk::MeshFileReader< TMesh >                 TMeshReader;
-  typedef itk::MeshFileReader< TQEMesh >               TQEMeshReader;
-  typedef itk::MeshFileReader< TLoopMesh >             TLoopMeshReader;
-  typedef itk::MeshFileWriter< TQEMesh >               TQEMeshWriter;
-  typedef itk::MeshFileWriter< TMesh >                 TMeshWriter;
+  using TMeshReader = itk::MeshFileReader<TMesh>;
+  using TQEMeshReader = itk::MeshFileReader<TQEMesh>;
+  using TLoopMeshReader = itk::MeshFileReader<TLoopMesh>;
+  using TQEMeshWriter = itk::MeshFileWriter<TQEMesh>;
+  using TMeshWriter = itk::MeshFileWriter<TMesh>;
   using TLocator = itk::PointsLocator< TMesh::PointsContainer >;
 
   // Qt Properties

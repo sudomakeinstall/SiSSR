@@ -17,8 +17,8 @@ class Edge_preserving_LindstromTurk_placement :
   public Edge_preserving_base_placement<TM_, TData>
 {
 public:
-  typedef TM_ TM;
-  typedef internal::LindstromTurk_params LindstromTurk_params;
+  using TM = TM_;
+  using LindstromTurk_params = internal::LindstromTurk_params;
 
   const std::string data_tag = "f:data";
 

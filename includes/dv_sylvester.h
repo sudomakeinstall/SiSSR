@@ -27,8 +27,8 @@ class
 dv_sylvester
 {
 
-typedef dv_schur_decomposition<TValue> TSchur;
-typedef dv_sylvester_tri<TValue> TSylvester;
+using TSchur = dv_schur_decomposition<TValue>;
+using TSylvester = dv_sylvester_tri<TValue>;
 
 public:
   vnl_matrix<TValue> X;

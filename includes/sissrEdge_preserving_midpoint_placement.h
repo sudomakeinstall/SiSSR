@@ -17,7 +17,7 @@ class Edge_preserving_midpoint_placement :
   public Edge_preserving_base_placement<TM_, TData>
 {
 public:
-  typedef TM_ TM;
+  using TM = TM_;
 
   const std::string data_tag = "f:data";
 

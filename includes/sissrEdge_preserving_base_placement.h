@@ -14,7 +14,7 @@ template<class TM_, typename TData>
 class Edge_preserving_base_placement
 {
 public:
-  typedef TM_ TM;
+  using TM = TM_;
 
   const std::string data_tag = "f:data";
 

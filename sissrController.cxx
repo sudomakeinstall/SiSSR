@@ -849,7 +849,7 @@ Controller
   auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
 
   // Get the vectors
-  typedef CalculateResidualMesh< TMesh, TLoopMesh, TMesh > TResidualCalculator;
+  using TResidualCalculator = CalculateResidualMesh<TMesh, TLoopMesh, TMesh>;
 
   const auto initial = TLoopMesh::New();
 
@@ -929,10 +929,10 @@ Controller
   clock.Start();
 
   // Get the vectors
-  typedef itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter< TLoopMesh, TLoopMesh > TLoop;
-  typedef itk::PointsLocator< TMesh::PointsContainer > TLocator;
-  typedef RegisterMeshToPointSet< TMesh, TLoopMesh > TRegister;
-  typedef itk::MeshFileWriter< TLoopMesh > TMovingWriter;
+  using TLoop = itk::LoopTriangleCellSubdivisionQuadEdgeMeshFilter<TLoopMesh, TLoopMesh>;
+  using TLocator = itk::PointsLocator<TMesh::PointsContainer>;
+  using TRegister = RegisterMeshToPointSet<TMesh, TLoopMesh>;
+  using TMovingWriter = itk::MeshFileWriter<TLoopMesh>;
 
   std::string dirToCreate =
     this->DirectoryStructure.RegisteredModelDirectory +

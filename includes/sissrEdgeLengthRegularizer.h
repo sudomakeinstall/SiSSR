@@ -13,7 +13,7 @@ class EdgeLengthRegularizer : public ceres::CostFunction
 {
 
 public:
-  typedef typename TMesh::CoordRepType TReal;
+  using TReal = typename TMesh::CoordRepType;
 
   EdgeLengthRegularizer(
     const typename TMesh::Pointer& _moving,

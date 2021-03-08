@@ -22,7 +22,7 @@ public ceres::CostFunction
 
   public:
 
-  typedef typename TMesh::CoordRepType TReal;
+  using TReal = typename TMesh::CoordRepType;
 
   ThinPlateRegularizer(
     const typename TMesh::Pointer

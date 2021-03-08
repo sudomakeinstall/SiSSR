@@ -39,24 +39,24 @@ public:
 
   LossScaleFactors RegistrationWeights;
 
-  typedef TFixedMesh TFixed;
-  typedef TMovingMesh TMoving;
+  using TFixed = TFixedMesh;
+  using TMoving = TMovingMesh;
 
-  typedef typename TFixedMesh::PointsContainer TContainer;
-  typedef itk::PointsLocator< TContainer > TLocator;
-  typedef std::vector<typename TLocator::Pointer> TLocatorVector;
-  typedef std::vector<std::map<size_t, typename TLocator::Pointer>> TLocatorMapVector;
+  using TContainer = typename TFixedMesh::PointsContainer;
+  using TLocator = itk::PointsLocator<TContainer>;
+  using TLocatorVector = std::vector<typename TLocator::Pointer>;
+  using TLocatorMapVector = std::vector<std::map<size_t, typename TLocator::Pointer>>;
 
-  typedef std::vector<typename TFixed::Pointer> TFixedVector;
-  typedef std::vector<typename TMoving::Pointer> TMovingVector;
+  using TFixedVector = std::vector<typename TFixed::Pointer>;
+  using TMovingVector = std::vector<typename TMoving::Pointer>;
 
-  typedef NearestPointLabeledCostFunction<TFixed,TMoving> TLabeledPrimaryResidual;
-  typedef NearestPointUnlabeledCostFunction<TFixed,TMoving> TUnlabeledPrimaryResidual;
-  typedef VelocityRegularizer<TMoving> TVelocityRegularizer;
-  typedef AccelerationRegularizer<TMoving> TAccelerationRegularizer;
-  typedef ThinPlateRegularizer<TMoving> TThinPlateRegularizer;
-  typedef TriangleAspectRatioRegularizer<TMoving> TTriangleAspectRatioRegularizer;
-  typedef EdgeLengthRegularizer<TMoving> TEdgeLengthRegularizer;
+  using TLabeledPrimaryResidual = NearestPointLabeledCostFunction<TFixed, TMoving>;
+  using TUnlabeledPrimaryResidual = NearestPointUnlabeledCostFunction<TFixed, TMoving>;
+  using TVelocityRegularizer = VelocityRegularizer<TMoving>;
+  using TAccelerationRegularizer = AccelerationRegularizer<TMoving>;
+  using TThinPlateRegularizer = ThinPlateRegularizer<TMoving>;
+  using TTriangleAspectRatioRegularizer = TriangleAspectRatioRegularizer<TMoving>;
+  using TEdgeLengthRegularizer = EdgeLengthRegularizer<TMoving>;
   using TParameterVector = std::vector<std::vector<double*>>;
 
   RegisterMeshToPointSet(const unsigned int& _EDFrame,

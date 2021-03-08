@@ -902,7 +902,7 @@ LoopSubdivisionSurfaceMatrices<TReal,MinN,MaxN>
 ::CalculateS11Eigenvectors(const unsigned int& N)
 {
 
-  typedef dv_sylvester<TReal> TSylvester;
+  using TSylvester = dv_sylvester<TReal>;
 
   const auto sigma = Self::CalculateSEigenvalues(N);
   const auto s12   = Self::CalculateS12();
@@ -962,8 +962,8 @@ LoopSubdivisionSurfaceMatrices<TReal,MinN,MaxN>
 ::CalculateSortedEigensystem(const unsigned int &N)
 {
 
-  typedef unsigned int                   TIndex;
-  typedef vnl_index_sort<TReal, TIndex > TSort;
+  using TIndex = unsigned int;
+  using TSort = vnl_index_sort<TReal, TIndex>;
 
   const auto rightEigenvectors = Self::CalculateAEigenvectors(N);
   const auto eigenvalues       = Self::CalculateAEigenvalues(N);

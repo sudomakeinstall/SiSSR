@@ -11,9 +11,9 @@
 // SiSSR
 #include <sissrTriangleAspectRatioRegularizer.h>
 
-typedef itk::Mesh<double, 3> TMesh;
-typedef itk::TriangleCell<TMesh::CellType> TTriangle;
-typedef sissr::TriangleAspectRatioRegularizer<TMesh> TReg;
+using TMesh = itk::Mesh<double, 3>;
+using TTriangle = itk::TriangleCell<TMesh::CellType>;
+using TReg = sissr::TriangleAspectRatioRegularizer<TMesh>;
 
 int
 main(int, char**)

@@ -69,8 +69,8 @@ static_assert(MinN >= 3,
 static_assert(MaxN >= 6,
               "The maximum N may not be less than 6.");
 
-  typedef LoopSubdivisionSurfaceMatrices   Self;
-  typedef std::array<vnl_matrix<TReal>, 3> TPickers;
+  using Self = LoopSubdivisionSurfaceMatrices;
+  using TPickers = std::array<vnl_matrix<TReal>, 3>;
 
 public:
 
@@ -83,8 +83,8 @@ public:
   static constexpr unsigned int MinimumValency = MinN;
   static constexpr unsigned int MaximumValency = MaxN;
 
-  typedef std::pair< TReal, TReal > TParameters;
-  typedef std::complex< TReal >     TComplex;
+  using TParameters = std::pair<TReal, TReal>;
+  using TComplex = std::complex<TReal>;
 
   /////////////////////
   // Access Matrices //
