@@ -20,7 +20,8 @@ StateMachine
   InitialModelGeneralClosingRadius(5),
   InitialModelPreserveEdges(true),
   InitialModelDecimationTechnique(DecimationTechnique::LindstromTurk),
-  BoundaryCandidateDilationRadius(3)
+  BoundaryCandidateDilationRadius(3),
+  RegistrationSamplingDensity(2)
 {}
 
 vtkSmartPointer<vtkFloatArray>
@@ -270,6 +271,8 @@ StateMachine
   writer.Double(this->RegistrationWeights.TriangleAspectRatio);
   writer.Key("RegistrationWeights.EdgeLength");
   writer.Double(this->RegistrationWeights.EdgeLength);
+  writer.Key("RegistrationSamplingDensity");
+  writer.Uint(this->RegistrationSamplingDensity);
 
   // Camera
   this->camera.SerializeJSON(writer);
@@ -331,6 +334,7 @@ StateMachine
   dv::check_and_set_double(d, this->RegistrationWeights.ThinPlate, "RegistrationWeights.ThinPlate");
   dv::check_and_set_double(d, this->RegistrationWeights.TriangleAspectRatio, "RegistrationWeights.TriangleAspectRatio");
   dv::check_and_set_double(d, this->RegistrationWeights.EdgeLength, "RegistrationWeights.EdgeLength");
+  dv::check_and_set_uint(d, this->RegistrationSamplingDensity, "RegistrationSamplingDensity");
 
   this->camera.DeserializeJSON(d);
 

@@ -82,7 +82,6 @@ public:
   using QEPrimal = typename Superclass::QEPrimal;
 
   /** Real type, minimum N, maximum N. */
-//  typedef LoopSubdivisionSurfaceMatrices< TReal, 4, 25 >        TMatrices;
   using TMatrices = LoopSubdivisionSurfaceMatrices<TReal, 3, 25>;
   using TParameters = typename TMatrices::TParameters;
   using TNMap = std::map<CellIdentifier, unsigned int>;

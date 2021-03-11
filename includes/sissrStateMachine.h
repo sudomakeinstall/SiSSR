@@ -74,6 +74,7 @@ public:
 
   bool RegistrationUseLabels = true;
   LossScaleFactors RegistrationWeights;
+  unsigned int RegistrationSamplingDensity;
 
   bool EDFrameHasBeenSet = false;
   unsigned int  EDFrame;

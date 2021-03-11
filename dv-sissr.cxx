@@ -44,6 +44,7 @@ main(int argc, char** argv)
     ("weight-ar", po::value<double>(), "Aspect ratio weight.")
     ("registration-use-labels", "Use labels in registration.")
     ("registration-ignore-labels", "Ignore labels in registration.")
+    ("registration-sampling-density", po::value<unsigned int>(), "Sampling density for points on the template mesh.")
 
     // Misc
     ("ed-frame", po::value<unsigned int>(), "ED frame.")
@@ -137,6 +138,9 @@ main(int argc, char** argv)
   }
   if (vm.count("registration-ignore-labels")) {
     controller.State.RegistrationUseLabels = false;
+  }
+  if (vm.count("registration-sampling-density")) {
+    controller.State.RegistrationSamplingDensity = vm["registration-sampling-density"].as<unsigned int>();
   }
 
   // Misc

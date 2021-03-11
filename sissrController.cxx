@@ -968,6 +968,7 @@ Controller
       const auto reader = TLoopMeshReader::New();
       reader->SetFileName(this->DirectoryStructure.InitialModel);
       reader->Update();
+      reader->GetOutput()->SetSurfaceSampleDensity(this->State.RegistrationSamplingDensity);
       reader->GetOutput()->Setup();
       movingVector.emplace_back(reader->GetOutput());
     } else {

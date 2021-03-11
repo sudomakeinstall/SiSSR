@@ -123,9 +123,9 @@ LoopSubdivisionSurfaceMesh<TReal,VDimension,TTraits>
             it != this->GetCells()->End();
           ++it)
     {
-    for (TReal s = StepSize/2; s <= 1.0; s += StepSize)
+    for (TReal s = StepSize/2; s < 1.0; s += StepSize)
       {
-      for (TReal t = StepSize/2; t <= 1.0-s; t += StepSize)
+      for (TReal t = StepSize/2; t < 1.0-s; t += StepSize)
         {
         const auto p = std::make_pair(s, t);
         const auto u = std::make_pair(it.Index(), p);
