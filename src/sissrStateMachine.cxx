@@ -310,6 +310,22 @@ StateMachine
 
 void
 StateMachine
+::DeserializeJSON(const std::string &fileName)
+{
+      std::ifstream fileStream;
+      fileStream.open(fileName);
+      std::stringstream buffer;
+      buffer << fileStream.rdbuf();
+      fileStream.close();
+
+      rapidjson::Document d;
+      d.Parse(buffer.str().c_str());
+
+      this->DeserializeJSON(d);
+}
+
+void
+StateMachine
 ::DeserializeJSON(const rapidjson::Document &d)
 {
 

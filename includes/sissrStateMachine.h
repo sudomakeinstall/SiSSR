@@ -92,6 +92,8 @@ public:
   bool ResidualsAreVisible     = true;
 
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer);
+
+  void DeserializeJSON(const std::string &fileName);
   void DeserializeJSON(const rapidjson::Document &d);
 
   PlaneWidgetState<vtkPlaneWidget> planeWidgetState;

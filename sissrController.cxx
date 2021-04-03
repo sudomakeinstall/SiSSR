@@ -784,18 +784,8 @@ Controller
 
     {
     const auto fileName = this->DirectoryStructure.ParametersJSON;
-    if (std::filesystem::exists(fileName))
-      {
-      std::ifstream fileStream;
-      fileStream.open(fileName);
-      std::stringstream buffer;
-      buffer << fileStream.rdbuf();
-      fileStream.close();
-
-      rapidjson::Document d;
-      d.Parse(buffer.str().c_str());
-
-      this->State.DeserializeJSON(d);
+    if (std::filesystem::exists(fileName)) {
+      this->State.DeserializeJSON(fileName);
       this->State.camera.RestoreState(this->window.renderer->GetActiveCamera());
       }
     }
