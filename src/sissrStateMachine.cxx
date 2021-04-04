@@ -13,13 +13,15 @@ namespace sissr {
 
 StateMachine
 ::StateMachine() :
-  InitialModelFrame(0),
-  InitialModelNumberOfFaces(512),
-  InitialModelSigma(0.1),
-  InitialModelLVClosingRadius(10),
-  InitialModelGeneralClosingRadius(5),
-  InitialModelPreserveEdges(true),
-  InitialModelDecimationTechnique(DecimationTechnique::LindstromTurk),
+  InitialModelParams(
+      512, // Number of faces
+      0.1, // Sigma
+      10, // LV closing radius
+      5, // General closing radius
+      true, // Preserve edges
+      0, // Frame
+      CGALDecimationTechnique::LindstromTurk // Decimation technique
+      ),
   BoundaryCandidateDilationRadius(3),
   RegistrationSamplingDensity(2)
 {}
@@ -230,19 +232,19 @@ StateMachine
 {
 
   writer.Key("InitialModelFrame");
-  writer.Uint(this->InitialModelFrame);
+  writer.Uint(this->InitialModelParams.Frame);
   writer.Key("InitialModelNumberOfFaces");
-  writer.Uint(this->InitialModelNumberOfFaces);
+  writer.Uint(this->InitialModelParams.NumberOfFaces);
   writer.Key("InitialModelSigma");
-  writer.Uint(this->InitialModelSigma);
+  writer.Uint(this->InitialModelParams.Sigma);
   writer.Key("InitialModelLVClosingRadius");
-  writer.Uint(this->InitialModelLVClosingRadius);
+  writer.Uint(this->InitialModelParams.LVClosingRadius);
   writer.Key("InitialModelGeneralClosingRadius");
-  writer.Uint(this->InitialModelGeneralClosingRadius);
+  writer.Uint(this->InitialModelParams.GeneralClosingRadius);
   writer.Key("InitialModelGeneralClosingRadius");
-  writer.Uint(this->InitialModelGeneralClosingRadius);
+  writer.Uint(this->InitialModelParams.GeneralClosingRadius);
   writer.Key("InitialModelPreserveEdges");
-  writer.Bool(this->InitialModelPreserveEdges);
+  writer.Bool(this->InitialModelParams.PreserveEdges);
 
   writer.Key("BoundaryCandidateDilationRadius");
   writer.Uint(this->BoundaryCandidateDilationRadius);
@@ -332,12 +334,13 @@ StateMachine
   dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
-  dv::check_and_set_uint(d, this->InitialModelFrame, "InitialModelFrame");
-  dv::check_and_set_uint(d, this->InitialModelNumberOfFaces, "InitialModelNumberOfFaces");
-  dv::check_and_set_double(d, this->InitialModelSigma, "InitialModelSigma");
-  dv::check_and_set_uint(d, this->InitialModelLVClosingRadius, "InitialModelLVClosingRadius");
-  dv::check_and_set_uint(d, this->InitialModelGeneralClosingRadius, "InitialModelGeneralClosingRadius");
-  dv::check_and_set_bool(d, this->InitialModelPreserveEdges, "InitialModelPreserveEdges");
+  dv::check_and_set_uint(d, this->InitialModelParams.Frame, "InitialModelFrame");
+  dv::check_and_set_uint(d, this->InitialModelParams.NumberOfFaces, "InitialModelNumberOfFaces");
+  dv::check_and_set_double(d, this->InitialModelParams.Sigma, "InitialModelSigma");
+  dv::check_and_set_uint(d, this->InitialModelParams.LVClosingRadius, "InitialModelLVClosingRadius");
+  dv::check_and_set_uint(d, this->InitialModelParams.GeneralClosingRadius, "InitialModelGeneralClosingRadius");
+  dv::check_and_set_bool(d, this->InitialModelParams.PreserveEdges, "InitialModelPreserveEdges");
+
   dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
 
   dv::check_and_set_uint(d, this->CurrentFrame,      "CurrentFrame");

@@ -4,7 +4,7 @@
 // ITK
 #include <itkImageToMeshFilter.h> 
 // SiSSR
-#include <sissrDecimationTechnique.h>
+#include <sissrCGALDecimationTechnique.h>
 
 namespace itk
 {
@@ -46,10 +46,10 @@ public:
   virtual void
   SetInput(const InputImageType * inputImage);
 
-  using DecimationTechnique = sissr::DecimationTechnique;
+  using CGALDecimationTechnique = sissr::CGALDecimationTechnique;
 
-  itkSetEnumMacro(DecimationTechnique, DecimationTechnique);
-  itkGetEnumMacro(DecimationTechnique, DecimationTechnique);
+  itkSetEnumMacro(DecimationTechnique, CGALDecimationTechnique);
+  itkGetEnumMacro(DecimationTechnique, CGALDecimationTechnique);
 
   itkSetMacro(GeneralClosingRadius, unsigned int);
   itkGetConstMacro(GeneralClosingRadius, unsigned int);
@@ -88,7 +88,7 @@ private:
   float        m_MeshNoiseSigma;
   unsigned int m_NumberOfCellsInDecimatedMesh;
   bool         m_PreserveEdges;
-  sissr::DecimationTechnique m_DecimationTechnique;
+  CGALDecimationTechnique m_DecimationTechnique;
 
 };
 } // namespace itk

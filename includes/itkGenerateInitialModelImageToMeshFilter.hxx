@@ -41,7 +41,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   this->SetNumberOfRequiredInputs(1);
   this->m_LVClosingRadius = 3;
   this->m_GeneralClosingRadius = 3;
-  this->m_DecimationTechnique = sissr::DecimationTechnique::LindstromTurk;
+  this->m_DecimationTechnique = CGALDecimationTechnique::LindstromTurk;
   this->m_PreserveEdges = true;
 }
 
@@ -140,7 +140,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
 
     switch (this->m_DecimationTechnique) {
 
-      case sissr::DecimationTechnique::Midpoint:
+      case CGALDecimationTechnique::Midpoint:
 
         SMS::edge_collapse(
           surface_mesh
@@ -149,7 +149,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
         );
         break;
 
-      case sissr::DecimationTechnique::LindstromTurk:
+      case CGALDecimationTechnique::LindstromTurk:
 
         SMS::edge_collapse(
             surface_mesh,
@@ -170,7 +170,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
 
     switch (this->m_DecimationTechnique) {
 
-      case sissr::DecimationTechnique::Midpoint:
+      case CGALDecimationTechnique::Midpoint:
 
         SMS::edge_collapse(
           surface_mesh
@@ -179,7 +179,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
         );
         break;
 
-      case sissr::DecimationTechnique::LindstromTurk:
+      case CGALDecimationTechnique::LindstromTurk:
 
         SMS::edge_collapse(
             surface_mesh,
