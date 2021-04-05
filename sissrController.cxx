@@ -439,16 +439,16 @@ Controller
   using TWriter = itk::MeshFileWriter<TQEMesh>;
 
   const auto reader = TImageReader::New();
-  reader->SetFileName(this->DirectoryStructure.SegmentationDirectory.PathForFrame(this->State.InitialModelParams.Frame));
+  reader->SetFileName(this->DirectoryStructure.SegmentationDirectory.PathForFrame(this->State.InitialModelParams.GetFrame()));
 
   const auto model = TModel::New();
   model->SetInput(reader->GetOutput());
-  model->SetNumberOfCellsInDecimatedMesh(this->State.InitialModelParams.NumberOfFaces);
-  model->SetMeshNoiseSigma(this->State.InitialModelParams.Sigma);
-  model->SetLVClosingRadius(this->State.InitialModelParams.LVClosingRadius);
-  model->SetGeneralClosingRadius(this->State.InitialModelParams.GeneralClosingRadius);
-  model->SetPreserveEdges(this->State.InitialModelParams.PreserveEdges);
-  model->SetDecimationTechnique(this->State.InitialModelParams.DecimationTechnique);
+  model->SetNumberOfCellsInDecimatedMesh(this->State.InitialModelParams.GetFaces());
+  model->SetMeshNoiseSigma(this->State.InitialModelParams.GetSigma());
+  model->SetLVClosingRadius(this->State.InitialModelParams.GetLVClosingRadius());
+  model->SetGeneralClosingRadius(this->State.InitialModelParams.GetGeneralClosingRadius());
+  model->SetPreserveEdges(this->State.InitialModelParams.GetPreserveEdges());
+  model->SetDecimationTechnique(this->State.InitialModelParams.GetDecimationTechnique());
 
   const auto writer = TWriter::New();
   writer->SetInput(model->GetOutput());

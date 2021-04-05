@@ -83,31 +83,31 @@ main(int argc, char** argv)
   sissr::Controller controller(argc, argv);
 
   // Model
-  if (vm.count("model-frame")) {
-    controller.State.InitialModelParams.Frame = vm["model-frame"].as<unsigned int>();
-  }
   if (vm.count("model-num-faces")) {
-    controller.State.InitialModelParams.NumberOfFaces = vm["model-num-faces"].as<unsigned int>();
+    controller.State.InitialModelParams.SetFaces(vm["model-num-faces"].as<unsigned int>());
   }
   if (vm.count("model-use-labels") && vm.count("model-ignore-labels")) {
     std::cerr << "Setting both 'model-use-labels' and 'model-ignore-labels' is disallowed." << std::endl;
     return EXIT_FAILURE;
   }
   if (vm.count("model-use-labels")) {
-    controller.State.InitialModelParams.PreserveEdges = true;
+    controller.State.InitialModelParams.SetPreserveEdges(true);
   }
   if (vm.count("model-ignore-labels")) {
-    controller.State.InitialModelParams.PreserveEdges = false;
+    controller.State.InitialModelParams.SetPreserveEdges(false);
   }
   if (vm.count("model-midpoint") && vm.count("model-lindstromturk")) {
     std::cerr << "Setting both 'model-midpoint' and 'model-lindstromturk' is disallowed." << std::endl;
     return EXIT_FAILURE;
   }
+  if (vm.count("model-frame")) {
+    controller.State.InitialModelParams.SetFrame(vm["model-frame"].as<unsigned int>());
+  }
   if (vm.count("model-midpoint")) {
-    controller.State.InitialModelParams.DecimationTechnique = sissr::CGALDecimationTechnique::Midpoint;
+    controller.State.InitialModelParams.SetDecimationTechnique(sissr::CGALDecimationTechnique::Midpoint);
   }
   if (vm.count("model-lindstromturk")) {
-    controller.State.InitialModelParams.DecimationTechnique = sissr::CGALDecimationTechnique::LindstromTurk;
+    controller.State.InitialModelParams.SetDecimationTechnique(sissr::CGALDecimationTechnique::LindstromTurk);
   }
 
   // SiSSR Registration

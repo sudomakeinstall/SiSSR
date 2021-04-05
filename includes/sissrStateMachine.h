@@ -62,16 +62,7 @@ public:
   // Parameters //
   ////////////////
 
-  // Options
   InitialModelParameters InitialModelParams;
-    
-//  unsigned int InitialModelNumberOfFaces;
-//  double       InitialModelSigma;
-//  unsigned int InitialModelLVClosingRadius;
-//  unsigned int InitialModelGeneralClosingRadius;
-//  bool         InitialModelPreserveEdges;
-//  unsigned int InitialModelFrame;
-//  CGALDecimationTechnique InitialModelDecimationTechnique;
 
   unsigned int BoundaryCandidateDilationRadius;
 

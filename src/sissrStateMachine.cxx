@@ -231,20 +231,7 @@ StateMachine
 ::SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer)
 {
 
-  writer.Key("InitialModelFrame");
-  writer.Uint(this->InitialModelParams.Frame);
-  writer.Key("InitialModelNumberOfFaces");
-  writer.Uint(this->InitialModelParams.NumberOfFaces);
-  writer.Key("InitialModelSigma");
-  writer.Uint(this->InitialModelParams.Sigma);
-  writer.Key("InitialModelLVClosingRadius");
-  writer.Uint(this->InitialModelParams.LVClosingRadius);
-  writer.Key("InitialModelGeneralClosingRadius");
-  writer.Uint(this->InitialModelParams.GeneralClosingRadius);
-  writer.Key("InitialModelGeneralClosingRadius");
-  writer.Uint(this->InitialModelParams.GeneralClosingRadius);
-  writer.Key("InitialModelPreserveEdges");
-  writer.Bool(this->InitialModelParams.PreserveEdges);
+  this->InitialModelParams.SerializeJSON(writer);
 
   writer.Key("BoundaryCandidateDilationRadius");
   writer.Uint(this->BoundaryCandidateDilationRadius);
@@ -334,12 +321,7 @@ StateMachine
   dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
 
-  dv::check_and_set_uint(d, this->InitialModelParams.Frame, "InitialModelFrame");
-  dv::check_and_set_uint(d, this->InitialModelParams.NumberOfFaces, "InitialModelNumberOfFaces");
-  dv::check_and_set_double(d, this->InitialModelParams.Sigma, "InitialModelSigma");
-  dv::check_and_set_uint(d, this->InitialModelParams.LVClosingRadius, "InitialModelLVClosingRadius");
-  dv::check_and_set_uint(d, this->InitialModelParams.GeneralClosingRadius, "InitialModelGeneralClosingRadius");
-  dv::check_and_set_bool(d, this->InitialModelParams.PreserveEdges, "InitialModelPreserveEdges");
+  this->InitialModelParams.DeserializeJSON(d);
 
   dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
 
