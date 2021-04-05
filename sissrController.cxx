@@ -725,19 +725,7 @@ Controller
 
   this->State.camera.CaptureState(this->window.renderer->GetActiveCamera());
 
-    {
-    rapidjson::StringBuffer sb;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-    writer.StartObject();
-    this->State.SerializeJSON(writer);
-    writer.EndObject();
-
-    std::string fileName = this->DirectoryStructure.ParametersJSON;
-    std::ofstream fileStream;
-    fileStream.open(fileName);
-    fileStream << sb.GetString();
-    fileStream.close();
-    }
+  this->State.SerializeJSON(this->DirectoryStructure.ParametersJSON);
 
     {
     if (!this->State.SurfaceAreas.empty())

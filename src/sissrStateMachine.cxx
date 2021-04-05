@@ -228,6 +228,23 @@ StateMachine
 
 void
 StateMachine
+::SerializeJSON(const std::string &fileName) {
+
+  rapidjson::StringBuffer sb;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+  writer.StartObject();
+  this->SerializeJSON(writer);
+  writer.EndObject();
+
+  std::ofstream fileStream;
+  fileStream.open(fileName);
+  fileStream << sb.GetString();
+  fileStream.close();
+
+}
+
+void
+StateMachine
 ::SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer)
 {
 

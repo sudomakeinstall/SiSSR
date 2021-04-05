@@ -85,6 +85,7 @@ public:
   bool ColorbarIsVisible       = true;
   bool ResidualsAreVisible     = true;
 
+  void SerializeJSON(const std::string &fileName);
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer);
 
   void DeserializeJSON(const std::string &fileName);
