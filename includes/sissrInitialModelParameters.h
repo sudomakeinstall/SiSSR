@@ -21,42 +21,31 @@ struct InitialModelParameters
       unsigned int        _GeneralClosingRadius,
       bool                _PreserveEdges,
       unsigned int        _Frame,
-      CGALDecimationTechnique _DecimationTechnique) :
-    m_Faces({"Faces", _Faces}),
-    m_Sigma({"Sigma", _Sigma}),
-    m_LVClosingRadius({"LVClosingRadius", _LVClosingRadius}),
-    m_GeneralClosingRadius({"GeneralClosingRadius", _GeneralClosingRadius}),
-    m_PreserveEdges({"PreserveEdges", _PreserveEdges}),
-    m_Frame({"Frame", _Frame}),
-    m_DecimationTechnique({"DecimationTechnique", static_cast<unsigned int>(_DecimationTechnique)}) {}
+      CGALDecimationTechnique _DecimationTechnique);
 
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer);
   void DeserializeJSON(const rapidjson::Document& d);
 
-  unsigned int GetFaces() const { return this->m_Faces.second; }
-  void SetFaces(const unsigned int faces) { this->m_Faces.second = faces; }
+  unsigned int GetFaces() const;
+  void SetFaces(const unsigned int faces);
 
-  double GetSigma() const { return this->m_Sigma.second; }
-  void SetSigma(const double sigma) { this->m_Sigma.second = sigma; }
+  double GetSigma() const;
+  void SetSigma(const double sigma);
 
-  unsigned int GetLVClosingRadius() const { return this->m_LVClosingRadius.second; }
-  void SetLVClosingRadius(const unsigned int radius) { this->m_LVClosingRadius.second = radius; }
+  unsigned int GetLVClosingRadius() const;
+  void SetLVClosingRadius(const unsigned int radius);
 
-  unsigned int GetGeneralClosingRadius() const { return this->m_GeneralClosingRadius.second; }
-  void SetGeneralClosingRadius(const unsigned int radius) { this->m_GeneralClosingRadius.second = radius; }
+  unsigned int GetGeneralClosingRadius() const;
+  void SetGeneralClosingRadius(const unsigned int radius);
 
-  bool GetPreserveEdges() const { return this->m_PreserveEdges.second; }
-  void SetPreserveEdges(const bool preserve) { this->m_PreserveEdges.second = preserve; }
+  bool GetPreserveEdges() const;
+  void SetPreserveEdges(const bool preserve);
 
-  unsigned int GetFrame() const { return this->m_Frame.second; }
-  void SetFrame(const unsigned int frame) { this->m_Frame.second = frame; }
+  unsigned int GetFrame() const;
+  void SetFrame(const unsigned int frame);
 
-  CGALDecimationTechnique GetDecimationTechnique() const {
-    return static_cast<CGALDecimationTechnique>(this->m_DecimationTechnique.second);
-  }
-  void SetDecimationTechnique(const CGALDecimationTechnique technique) {
-    this->m_DecimationTechnique.second = static_cast<unsigned int>(technique);
-  }
+  CGALDecimationTechnique GetDecimationTechnique() const;
+  void SetDecimationTechnique(const CGALDecimationTechnique technique);
 
   private:
 
