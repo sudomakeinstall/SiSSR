@@ -248,8 +248,6 @@ StateMachine
 ::SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer)
 {
 
-  this->InitialModelParams.SerializeJSON(writer);
-
   writer.Key("BoundaryCandidateDilationRadius");
   writer.Uint(this->BoundaryCandidateDilationRadius);
 
@@ -318,16 +316,16 @@ void
 StateMachine
 ::DeserializeJSON(const std::string &fileName)
 {
-      std::ifstream fileStream;
-      fileStream.open(fileName);
-      std::stringstream buffer;
-      buffer << fileStream.rdbuf();
-      fileStream.close();
+  std::ifstream fileStream;
+  fileStream.open(fileName);
+  std::stringstream buffer;
+  buffer << fileStream.rdbuf();
+  fileStream.close();
 
-      rapidjson::Document d;
-      d.Parse(buffer.str().c_str());
+  rapidjson::Document d;
+  d.Parse(buffer.str().c_str());
 
-      this->DeserializeJSON(d);
+  this->DeserializeJSON(d);
 }
 
 void
@@ -337,8 +335,6 @@ StateMachine
 
   dv::check_and_set_uint(d, this->EDFrame, "EDFrame");
   if (d.HasMember("EDFrame")) { this->EDFrameHasBeenSet = true; }
-
-  this->InitialModelParams.DeserializeJSON(d);
 
   dv::check_and_set_uint(d, this->BoundaryCandidateDilationRadius, "BoundaryCandidateDilationRadius");
 

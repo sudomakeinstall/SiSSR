@@ -725,6 +725,7 @@ Controller
 
   this->State.camera.CaptureState(this->window.renderer->GetActiveCamera());
 
+  this->State.InitialModelParams.SerializeJSON(this->DirectoryStructure.InitialModelParametersJSON);
   this->State.SerializeJSON(this->DirectoryStructure.ParametersJSON);
 
     {
@@ -770,37 +771,43 @@ Controller
 ::Deserialize()
 {
 
-    {
+  {
     const auto fileName = this->DirectoryStructure.ParametersJSON;
     if (std::filesystem::exists(fileName)) {
       this->State.DeserializeJSON(fileName);
       this->State.camera.RestoreState(this->window.renderer->GetActiveCamera());
-      }
     }
+  }
+  {
+    const auto fileName = this->DirectoryStructure.InitialModelParametersJSON;
+    if (std::filesystem::exists(fileName)) {
+      this->State.InitialModelParams.DeserializeJSON(fileName);
+    }
+  }
 
+  {
+  const auto fileName
+    = this->DirectoryStructure.SurfaceAreaForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
+  if (std::filesystem::exists(fileName))
     {
-    const auto fileName
-      = this->DirectoryStructure.SurfaceAreaForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
-    if (std::filesystem::exists(fileName))
-      {
-      std::ifstream fileStream;
-      fileStream.open(fileName);
-      this->State.DeserializeSurfaceArea(fileStream);
-      fileStream.close();
-      }
+    std::ifstream fileStream;
+    fileStream.open(fileName);
+    this->State.DeserializeSurfaceArea(fileStream);
+    fileStream.close();
     }
+  }
 
+  {
+  const auto fileName
+    = this->DirectoryStructure.ResidualsForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
+  if (std::filesystem::exists(fileName))
     {
-    const auto fileName
-      = this->DirectoryStructure.ResidualsForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
-    if (std::filesystem::exists(fileName))
-      {
-      std::ifstream fileStream;
-      fileStream.open(fileName);
-      this->State.DeserializeResiduals(fileStream);
-      fileStream.close();
-      }
+    std::ifstream fileStream;
+    fileStream.open(fileName);
+    this->State.DeserializeResiduals(fileStream);
+    fileStream.close();
     }
+  }
 
 }
 
