@@ -1,6 +1,9 @@
 #ifndef sissr_InitialModelParameters_h
 #define sissr_InitialModelParameters_h
 
+// STD
+#include <iostream>
+
 // SiSSR
 #include <sissrCGALDecimationTechnique.h>
 
@@ -23,7 +26,10 @@ struct InitialModelParameters
       unsigned int        _Frame,
       CGALDecimationTechnique _DecimationTechnique);
 
+  void SerializeJSON(const std::string &fileName);
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer);
+
+  void DeserializeJSON(const std::string &fileName);
   void DeserializeJSON(const rapidjson::Document& d);
 
   unsigned int GetFaces() const;
@@ -60,5 +66,7 @@ struct InitialModelParameters
 };
 
 } // namespace sissr
+
+std::ostream& operator<<(std::ostream& os, const sissr::InitialModelParameters& obj);
 
 #endif

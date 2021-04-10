@@ -1,6 +1,12 @@
-#include <sissrInitialModelParameters.h>
+// STD
+#include <fstream>
+#include <sstream>
 
+// Utils
 #include <dvRapidJSONHelper.h>
+
+// SiSSR
+#include <sissrInitialModelParameters.h>
 
 namespace sissr {
 
@@ -13,13 +19,30 @@ InitialModelParameters
       bool                _PreserveEdges,
       unsigned int        _Frame,
       CGALDecimationTechnique _DecimationTechnique) :
-    m_Faces({"Faces", _Faces}),
-    m_Sigma({"Sigma", _Sigma}),
-    m_LVClosingRadius({"LVClosingRadius", _LVClosingRadius}),
-    m_GeneralClosingRadius({"GeneralClosingRadius", _GeneralClosingRadius}),
-    m_PreserveEdges({"PreserveEdges", _PreserveEdges}),
-    m_Frame({"Frame", _Frame}),
+    m_Faces({"InitialModelNumberOfFaces", _Faces}),
+    m_Sigma({"InitialModelSigma", _Sigma}),
+    m_LVClosingRadius({"InitialModelLVClosingRadius", _LVClosingRadius}),
+    m_GeneralClosingRadius({"InitialModelGeneralClosingRadius", _GeneralClosingRadius}),
+    m_PreserveEdges({"InitialModelPreserveEdges", _PreserveEdges}),
+    m_Frame({"InitialModelFrame", _Frame}),
     m_DecimationTechnique({"DecimationTechnique", static_cast<unsigned int>(_DecimationTechnique)}) {}
+
+void
+InitialModelParameters
+::SerializeJSON(const std::string &fileName) {
+
+  rapidjson::StringBuffer sb;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+  writer.StartObject();
+  this->SerializeJSON(writer);
+  writer.EndObject();
+
+  std::ofstream fileStream;
+  fileStream.open(fileName);
+  fileStream << sb.GetString();
+  fileStream.close();
+
+}
 
 void
 InitialModelParameters
@@ -33,6 +56,23 @@ InitialModelParameters
   dv::serialize(writer, this->m_Frame);
   dv::serialize(writer, this->m_DecimationTechnique);
 
+}
+
+void
+InitialModelParameters
+::DeserializeJSON(const std::string &fileName)
+{
+      std::ifstream fileStream;
+      fileStream.open(fileName);
+      std::stringstream buffer;
+      buffer << fileStream.rdbuf();
+      fileStream.close();
+
+      rapidjson::Document d;
+      d.Parse(buffer.str().c_str());
+
+      this->DeserializeJSON(d);
+      std::cout << (*this);
 }
 
 void
@@ -134,4 +174,16 @@ InitialModelParameters
   this->m_DecimationTechnique.second = static_cast<unsigned int>(technique);
 }
 
+
+}
+
+std::ostream& operator<<(std::ostream& os, const sissr::InitialModelParameters& obj) {
+  os << "Faces: " << obj.GetFaces();
+  os << "Sigma: " << obj.GetSigma();
+  os << "LV Closing Radius: " << obj.GetLVClosingRadius();
+  os << "General Closing Radius: " << obj.GetGeneralClosingRadius();
+  os << "Preserve Edges: " << obj.GetPreserveEdges();
+  os << "Frame: " << obj.GetFrame();
+  os << "Decimation Technique: " << obj.GetDecimationTechnique();
+  return os;
 }
