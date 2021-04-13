@@ -38,6 +38,7 @@ public:
 
   const std::string InitialModel = this->InitialModelDirectory + "initial_model" + MeshSuffix;
 
+  const std::string CameraParametersJSON = this->SerializationDirectory + "camera-parameters.json";
   const std::string InitialModelParametersJSON = this->SerializationDirectory + "initial-model-parameters.json";
   const std::string ParametersJSON = this->SerializationDirectory + "parameters.json";
 

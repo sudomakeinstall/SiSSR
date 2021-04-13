@@ -278,9 +278,6 @@ StateMachine
   writer.Key("RegistrationSamplingDensity");
   writer.Uint(this->RegistrationSamplingDensity);
 
-  // Camera
-  this->camera.SerializeJSON(writer);
-
   writer.Key("ImagePlanesAreVisible");
   writer.Bool(this->ImagePlanesAreVisible);
   writer.Key("CandidatesAreVisible");
@@ -349,8 +346,6 @@ StateMachine
   dv::check_and_set_double(d, this->RegistrationWeights.TriangleAspectRatio, "RegistrationWeights.TriangleAspectRatio");
   dv::check_and_set_double(d, this->RegistrationWeights.EdgeLength, "RegistrationWeights.EdgeLength");
   dv::check_and_set_uint(d, this->RegistrationSamplingDensity, "RegistrationSamplingDensity");
-
-  this->camera.DeserializeJSON(d);
 
   dv::check_and_set_bool(d, this->ImagePlanesAreVisible,   "ImagePlanesAreVisible");
 

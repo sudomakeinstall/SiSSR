@@ -18,8 +18,8 @@ cmake_policy(SET CMP0074 NEW)
 project("dv-sissr" LANGUAGES CXX C)
 
 set(${PROJECT_NAME}_VERSION_MAJOR "2021")
-set(${PROJECT_NAME}_VERSION_MINOR "03")
-set(${PROJECT_NAME}_VERSION_PATCH "02")
+set(${PROJECT_NAME}_VERSION_MINOR "04")
+set(${PROJECT_NAME}_VERSION_PATCH "12")
 set(${PROJECT_NAME}_VERSION
   "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
@@ -172,11 +172,11 @@ qt5_wrap_ui(UI_Srcs ${UIs})
 
 add_library(dv-sissr-dependencies INTERFACE)
 target_link_libraries(dv-sissr-dependencies INTERFACE
-  ${QT_LIBRARIES}
-  ${VTK_LIBRARIES}
-  ${ITK_LIBRARIES}
-  ceres
   dv-commandline-utils::dv-commandline-utils
+  ${ITK_LIBRARIES}
+  ${VTK_LIBRARIES}
+  ${QT_LIBRARIES}
+  ceres
   CGAL::CGAL
   Boost::program_options
   ${LAPACKE_LIBRARIES}

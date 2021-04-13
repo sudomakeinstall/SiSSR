@@ -724,7 +724,7 @@ Controller
   }
 
   this->State.camera.CaptureState(this->window.renderer->GetActiveCamera());
-
+  this->State.camera.SerializeJSON(this->DirectoryStructure.CameraParametersJSON);
   this->State.InitialModelParams.SerializeJSON(this->DirectoryStructure.InitialModelParametersJSON);
   this->State.SerializeJSON(this->DirectoryStructure.ParametersJSON);
 
@@ -775,13 +775,19 @@ Controller
     const auto fileName = this->DirectoryStructure.ParametersJSON;
     if (std::filesystem::exists(fileName)) {
       this->State.DeserializeJSON(fileName);
-      this->State.camera.RestoreState(this->window.renderer->GetActiveCamera());
     }
   }
   {
     const auto fileName = this->DirectoryStructure.InitialModelParametersJSON;
     if (std::filesystem::exists(fileName)) {
       this->State.InitialModelParams.DeserializeJSON(fileName);
+    }
+  }
+  {
+    const auto fileName = this->DirectoryStructure.CameraParametersJSON;
+    if (std::filesystem::exists(fileName)) {
+      this->State.camera.DeserializeJSON(fileName);
+      this->State.camera.RestoreState(this->window.renderer->GetActiveCamera());
     }
   }
 
