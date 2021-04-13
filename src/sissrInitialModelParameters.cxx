@@ -72,7 +72,6 @@ InitialModelParameters
       d.Parse(buffer.str().c_str());
 
       this->DeserializeJSON(d);
-      std::cout << (*this);
 }
 
 void
