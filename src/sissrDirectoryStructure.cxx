@@ -7,8 +7,6 @@
 // Custom
 #include <dvStringOperations.h>
 #include <dvGetTimeString.h>
-
-// STD
 #include <sissrDirectoryStructure.h>
 
 namespace sissr {
@@ -18,9 +16,9 @@ DirectoryStructure
                      const std::string _OptDirectory) :
   IptDirectory(dv::AppendCharacterIfAbsent(_IptDirectory, '/')),
   OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
-  SegmentationDirectory  (IptDirectory + "seg-nii-sm/"      , ".nii.gz"),
+  SegmentationDirectory  (IptDirectory + "flap-nii-sm/"      , ".nii.gz"),
   ImageDirectory         (IptDirectory + "img-nii/"         , ".nii.gz", GetNumberOfFiles()),
-  CandidateDirectory (IptDirectory + "candidates/", ".vtk"   , GetNumberOfFiles())
+  CandidateDirectory (IptDirectory + "candidates-flap/", ".vtk"   , GetNumberOfFiles())
 {
 
   // Create directories
