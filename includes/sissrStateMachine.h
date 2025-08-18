@@ -123,7 +123,7 @@ public:
   void SerializeSegmentation(std::ofstream& s, vtkFloatArray* ids) const;
   void DeserializeSegmentation(std::ifstream& s);
 
-  const std::map<CellData, ColorbarState> ColorbarState =
+  const std::map<CellData, ColorbarState> ColorbarSettings =
     {
       { CellData::NONE, {"", 0.0, 0.0} },
       { CellData::SQUEEZ, {"SQUEEZ", 0.7, 1.3} },

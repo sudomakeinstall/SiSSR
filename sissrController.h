@@ -140,7 +140,7 @@ private:
   void CalculateSurfaceAreas();
 
   // Other properties
-  DirectoryStructure DirectoryStructure;
+  DirectoryStructure DirStructure;
 
   View window;
 

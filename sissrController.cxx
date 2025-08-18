@@ -42,7 +42,7 @@ namespace sissr {
 // CONSTRUCTOR
 Controller
 ::Controller(int argc, char** argv) :
-  DirectoryStructure(argv[1], argv[2]) {
+  DirStructure(argv[1], argv[2]) {
 
   // Determine current state
   this->Deserialize();
@@ -94,7 +94,7 @@ Controller
 ::SetupSliderRanges()
 {
 
-  this->ui->frameSlider->setRange(      0,this->DirectoryStructure.GetNumberOfFiles()-1);
+  this->ui->frameSlider->setRange(      0,this->DirStructure.GetNumberOfFiles()-1);
 
 }
 
@@ -222,7 +222,7 @@ Controller
 {
 
   int val = this->GetCurrentFrame() + 1;
-  val %= this->DirectoryStructure.GetNumberOfFiles();
+  val %= this->DirStructure.GetNumberOfFiles();
   this->ui->frameSlider->setValue( val );
 
 }
@@ -233,7 +233,7 @@ Controller
 {
 
   int val = this->GetCurrentFrame() - 1;
-  if (val < 0) val += this->DirectoryStructure.GetNumberOfFiles();
+  if (val < 0) val += this->DirStructure.GetNumberOfFiles();
   this->ui->frameSlider->setValue( val );
 
 }
@@ -271,7 +271,7 @@ Controller
 
   if (this->State.ImagePlanesAreVisible)
     {
-    this->window.UpdatePlanesSource(this->DirectoryStructure.ImageDirectory.PathForFrame(value));
+    this->window.UpdatePlanesSource(this->DirStructure.ImageDirectory.PathForFrame(value));
     }
 
   /**************
@@ -280,7 +280,7 @@ Controller
 
   if (this->State.CandidatesAreVisible)
     {
-    this->window.UpdateCandidatesSource(this->DirectoryStructure.CandidateDirectory.PathForFrame(value));
+    this->window.UpdateCandidatesSource(this->DirStructure.CandidateDirectory.PathForFrame(value));
     }
 
   /*********
@@ -318,7 +318,7 @@ Controller
 ::UpdateModelTransform()
 {
 
-  if ( !(this->DirectoryStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup) )
+  if ( !(this->DirStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup) )
     {
     return;
     }
@@ -334,14 +334,14 @@ Controller
   if (this->State.ResidualsAreVisible)
     {
     const auto file
-      = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
-          this->DirectoryStructure.NumberOfRegistrationPasses(),
+      = this->DirStructure.ResidualMeshPathForPassAndFrame(
+          this->DirStructure.NumberOfRegistrationPasses(),
           this->GetCurrentFrame()
                                                   );
     this->window.UpdateResidualsSource( file );
     }
 
-  if (0 == this->DirectoryStructure.NumberOfRegistrationPasses())
+  if (0 == this->DirStructure.NumberOfRegistrationPasses())
     {
     this->window.SetModelVisible(true);
     this->window.SetColorbarVisible(false);
@@ -350,10 +350,10 @@ Controller
 
   // Model Surface File
   if (this->State.ModelSurfaceIsVisible || this->State.ModelWiresAreVisible) {
-    const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+    const auto p = this->DirStructure.NumberOfRegistrationPasses();
     const auto f = this->GetCurrentFrame();
     const auto file
-      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1,f);
+      = this->DirStructure.RegisteredModelPathForPassAndFrame(p-1,f);
     this->window.UpdateModelSource( file );
     }
 
@@ -383,7 +383,7 @@ Controller
 {
 
   std::cout << "Calculating boundary candidates..." << std::endl;
-  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
 
   itk::TimeProbe clock;
   clock.Start();
@@ -391,10 +391,10 @@ Controller
   using TClean = itk::CleanSegmentationImageFilter<TImage>;
   using TCuberille = itk::CuberilleImageToMeshFilter<TImage, TQEMesh>;
 
-  for (size_t file = 0; file < this->DirectoryStructure.GetNumberOfFiles(); ++file) {
+  for (size_t file = 0; file < this->DirStructure.GetNumberOfFiles(); ++file) {
 
-    const auto input = this->DirectoryStructure.SegmentationDirectory.PathForFrame(file);
-    const auto output = this->DirectoryStructure.CandidateDirectory.PathForFrame(file);
+    const auto input = this->DirStructure.SegmentationDirectory.PathForFrame(file);
+    const auto output = this->DirStructure.CandidateDirectory.PathForFrame(file);
 
     const auto reader = TImageReader::New();
     reader->SetFileName(input);
@@ -405,7 +405,7 @@ Controller
     const auto cuberille = TCuberille::New();
     cuberille->SetInput(clean->GetOutput());
     cuberille->GenerateTriangleFacesOff();
-    cuberille->RemoveProblematicPixelsOn();
+    // cuberille->RemoveProblematicPixelsOn(); // Method not available in current ITK version
     cuberille->SavePixelAsCellDataOn();
 
     const auto writer = TQEMeshWriter::New();
@@ -439,7 +439,7 @@ Controller
   using TWriter = itk::MeshFileWriter<TQEMesh>;
 
   const auto reader = TImageReader::New();
-  reader->SetFileName(this->DirectoryStructure.SegmentationDirectory.PathForFrame(this->State.InitialModelParams.GetFrame()));
+  reader->SetFileName(this->DirStructure.SegmentationDirectory.PathForFrame(this->State.InitialModelParams.GetFrame()));
 
   const auto model = TModel::New();
   model->SetInput(reader->GetOutput());
@@ -452,7 +452,7 @@ Controller
 
   const auto writer = TWriter::New();
   writer->SetInput(model->GetOutput());
-  writer->SetFileName(this->DirectoryStructure.InitialModel);
+  writer->SetFileName(this->DirStructure.InitialModel);
   writer->Update();
 
   clock.Stop();
@@ -468,7 +468,7 @@ Controller
 {
 
   // GUARD: Make sure data exists
-  if (!this->DirectoryStructure.ImageDirectory.DataExists())
+  if (!this->DirStructure.ImageDirectory.DataExists())
     {
     this->State.ImagePlanesAreVisible = false;
     this->State.ImagePlanesHaveBeenSetup = false;
@@ -479,7 +479,7 @@ Controller
 
   if (this->State.ImagePlanesAreVisible)
     {
-    const auto file = this->DirectoryStructure.ImageDirectory.PathForFrame( this->GetCurrentFrame() );
+    const auto file = this->DirStructure.ImageDirectory.PathForFrame( this->GetCurrentFrame() );
     this->window.UpdatePlanesSource( file );
     }
 
@@ -492,7 +492,7 @@ void
 Controller
 ::ToggleCandidates() {
 
-  if (!this->DirectoryStructure.CandidateDirectory.DataExists()) {
+  if (!this->DirStructure.CandidateDirectory.DataExists()) {
     std::cerr << "Candidate data doesn't exist." << std::endl;
     return;
     }
@@ -500,7 +500,7 @@ Controller
   this->State.CandidatesAreVisible = !this->State.CandidatesAreVisible;
 
   if (this->State.CandidatesAreVisible) {
-    const auto file = this->DirectoryStructure.CandidateDirectory.PathForFrame(this->GetCurrentFrame());
+    const auto file = this->DirStructure.CandidateDirectory.PathForFrame(this->GetCurrentFrame());
     this->window.UpdateCandidatesSource( file );
     }
 
@@ -557,8 +557,8 @@ Controller
   if (this->State.ResidualsAreVisible)
     {
     const auto file
-      = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
-          this->DirectoryStructure.NumberOfRegistrationPasses(),
+      = this->DirStructure.ResidualMeshPathForPassAndFrame(
+          this->DirStructure.NumberOfRegistrationPasses(),
           this->GetCurrentFrame()
                                                   );
     this->window.UpdateResidualsSource( file );
@@ -577,14 +577,14 @@ Controller
 ::SetupImage()
 {
   // GUARD: Make sure data exists
-  if (!this->DirectoryStructure.ImageDirectory.DataExists())
+  if (!this->DirStructure.ImageDirectory.DataExists())
     {
     this->State.ImagePlanesAreVisible = false;
     this->State.ImagePlanesHaveBeenSetup = false;
     return;
     }
 
-  const auto imageFileName = this->DirectoryStructure.ImageDirectory.PathForFrame(this->GetCurrentFrame());
+  const auto imageFileName = this->DirStructure.ImageDirectory.PathForFrame(this->GetCurrentFrame());
   const auto iren = this->ui->imageWindow->interactor();
 
   this->window.SetupImageData(imageFileName);
@@ -598,7 +598,7 @@ Controller
 {
 
 //  // GUARD: Make sure data exists
-//  if (!this->DirectoryStructure.ImageDirectory.DataExists())
+//  if (!this->DirStructure.ImageDirectory.DataExists())
 //    {
 //    this->State.ImagePlanesAreVisible = false;
 //    this->State.ImagePlanesHaveBeenSetup = false;
@@ -630,7 +630,7 @@ Controller
 ::SetupCandidates() {
 
   // GUARD: Make sure data exists.
-  if (!this->DirectoryStructure.CandidateDirectory.DataExists()) {
+  if (!this->DirStructure.CandidateDirectory.DataExists()) {
     this->State.CandidatesAreVisible = false;
     this->State.CandidatesHaveBeenSetup = false;
     return;
@@ -642,7 +642,7 @@ Controller
   }
 
   const auto frame = this->GetCurrentFrame();
-  const auto fileName = this->DirectoryStructure.CandidateDirectory.PathForFrame(frame);
+  const auto fileName = this->DirStructure.CandidateDirectory.PathForFrame(frame);
 
   this->window.SetupCandidates(fileName);
 
@@ -662,18 +662,18 @@ Controller
   if (this->State.ModelHasBeenSetup)
     return;
 
-  if (this->DirectoryStructure.NumberOfRegistrationPasses() > 0) {
+  if (this->DirStructure.NumberOfRegistrationPasses() > 0) {
 
-    const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+    const auto p = this->DirStructure.NumberOfRegistrationPasses();
     const auto f = this->GetCurrentFrame();
-    const auto file = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1,f);
+    const auto file = this->DirStructure.RegisteredModelPathForPassAndFrame(p-1,f);
     this->window.SetupModel(file);
 
     }
-  else if (this->DirectoryStructure.InitialModelDataExists()) {
+  else if (this->DirStructure.InitialModelDataExists()) {
 
     // Setup.
-    this->window.SetupModel( this->DirectoryStructure.InitialModel.c_str() );
+    this->window.SetupModel( this->DirStructure.InitialModel.c_str() );
 
   } else {
 
@@ -688,10 +688,10 @@ Controller
   // Residuals //
   ///////////////
 
-  if (this->DirectoryStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup)
+  if (this->DirStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup)
     {
-    const auto file = this->DirectoryStructure.ResidualMeshPathForPassAndFrame(
-      this->DirectoryStructure.NumberOfRegistrationPasses(),
+    const auto file = this->DirStructure.ResidualMeshPathForPassAndFrame(
+      this->DirStructure.NumberOfRegistrationPasses(),
       this->GetCurrentFrame()
                                                                  );
     this->window.SetupResiduals( file );
@@ -724,15 +724,15 @@ Controller
   }
 
   this->State.camera.CaptureState(this->window.renderer->GetActiveCamera());
-  this->State.camera.SerializeJSON(this->DirectoryStructure.CameraParametersJSON);
-  this->State.InitialModelParams.SerializeJSON(this->DirectoryStructure.InitialModelParametersJSON);
-  this->State.SerializeJSON(this->DirectoryStructure.ParametersJSON);
+  this->State.camera.SerializeJSON(this->DirStructure.CameraParametersJSON);
+  this->State.InitialModelParams.SerializeJSON(this->DirStructure.InitialModelParametersJSON);
+  this->State.SerializeJSON(this->DirStructure.ParametersJSON);
 
     {
     if (!this->State.SurfaceAreas.empty())
       {
       std::string fileName
-        = this->DirectoryStructure.SurfaceAreaForPass(this->DirectoryStructure.NumberOfRegistrationPasses() - 1);
+        = this->DirStructure.SurfaceAreaForPass(this->DirStructure.NumberOfRegistrationPasses() - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       this->State.SerializeSurfaceArea(fileStream, this->State.SurfaceAreas);
@@ -744,7 +744,7 @@ Controller
     if (!this->State.costFunctionFrames.empty())
       {
       std::string fileName
-        = this->DirectoryStructure.ResidualsForPass(this->DirectoryStructure.NumberOfRegistrationPasses() - 1);
+        = this->DirStructure.ResidualsForPass(this->DirStructure.NumberOfRegistrationPasses() - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       this->State.SerializeResiduals(fileStream);
@@ -756,7 +756,7 @@ Controller
     if (this->State.RegistrationSummary != "")
       {
       std::string fileName
-        = this->DirectoryStructure.RegistrationSummaryForPass(this->DirectoryStructure.NumberOfRegistrationPasses() - 1);
+        = this->DirStructure.RegistrationSummaryForPass(this->DirStructure.NumberOfRegistrationPasses() - 1);
       std::ofstream fileStream;
       fileStream.open(fileName);
       fileStream << this->State.RegistrationSummary;
@@ -772,19 +772,19 @@ Controller
 {
 
   {
-    const auto fileName = this->DirectoryStructure.ParametersJSON;
+    const auto fileName = this->DirStructure.ParametersJSON;
     if (std::filesystem::exists(fileName)) {
       this->State.DeserializeJSON(fileName);
     }
   }
   {
-    const auto fileName = this->DirectoryStructure.InitialModelParametersJSON;
+    const auto fileName = this->DirStructure.InitialModelParametersJSON;
     if (std::filesystem::exists(fileName)) {
       this->State.InitialModelParams.DeserializeJSON(fileName);
     }
   }
   {
-    const auto fileName = this->DirectoryStructure.CameraParametersJSON;
+    const auto fileName = this->DirStructure.CameraParametersJSON;
     if (std::filesystem::exists(fileName)) {
       this->State.camera.DeserializeJSON(fileName);
       this->State.camera.RestoreState(this->window.renderer->GetActiveCamera());
@@ -793,7 +793,7 @@ Controller
 
   {
   const auto fileName
-    = this->DirectoryStructure.SurfaceAreaForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
+    = this->DirStructure.SurfaceAreaForPass( this->DirStructure.NumberOfRegistrationPasses() - 1 );
   if (std::filesystem::exists(fileName))
     {
     std::ifstream fileStream;
@@ -805,7 +805,7 @@ Controller
 
   {
   const auto fileName
-    = this->DirectoryStructure.ResidualsForPass( this->DirectoryStructure.NumberOfRegistrationPasses() - 1 );
+    = this->DirStructure.ResidualsForPass( this->DirStructure.NumberOfRegistrationPasses() - 1 );
   if (std::filesystem::exists(fileName))
     {
     std::ifstream fileStream;
@@ -837,7 +837,7 @@ Controller
 ::CalculateResidualsForPass(const unsigned int pass) {
 
   std::cout << "Calculating residuals for pass " << pass << "..." << std::endl;
-  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
 
   // Get the vectors
   using TResidualCalculator = CalculateResidualMesh<TMesh, TLoopMesh, TMesh>;
@@ -846,26 +846,26 @@ Controller
 
   if (0 == pass) {
     const auto reader = TLoopMeshReader::New();
-    reader->SetFileName(this->DirectoryStructure.InitialModel);
+    reader->SetFileName(this->DirStructure.InitialModel);
     reader->Update();
     initial->Graft(reader->GetOutput());
     initial->Setup();
   }
 
-  for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f) {
+  for (unsigned int f = 0; f < this->DirStructure.GetNumberOfFiles(); ++f) {
 
       const auto target = TMesh::New();
 
       {
         const auto reader = TMeshReader::New();
-        reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(f));
+        reader->SetFileName(this->DirStructure.CandidateDirectory.PathForFrame(f));
         reader->Update();
         target->Graft(reader->GetOutput());
       }
 
     if (0 != pass) {
       const auto file
-        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(pass-1,f);
+        = this->DirStructure.RegisteredModelPathForPassAndFrame(pass-1,f);
       const auto reader = TLoopMeshReader::New();
       reader->SetFileName(file);
       reader->Update();
@@ -877,13 +877,13 @@ Controller
 
     const auto r = residuals.Calculate();
 
-    const std::string dir = this->DirectoryStructure.ResidualsDirectory + std::to_string(pass);
+    const std::string dir = this->DirStructure.ResidualsDirectory + std::to_string(pass);
     std::filesystem::create_directories(dir);
 
       {
       const auto writer = TMeshWriter::New();
       writer->SetInput(r);
-      writer->SetFileName(this->DirectoryStructure.ResidualMeshPathForPassAndFrame(pass, f));
+      writer->SetFileName(this->DirStructure.ResidualMeshPathForPassAndFrame(pass, f));
       writer->Update();
       }
 
@@ -897,8 +897,8 @@ void
 Controller
 ::CalculateResiduals() {
 
-  for (size_t p = 0; p <= this->DirectoryStructure.NumberOfRegistrationPasses(); ++p) {
-    if (!this->DirectoryStructure.ResidualMeshDataExistsForPass(p)) {
+  for (size_t p = 0; p <= this->DirStructure.NumberOfRegistrationPasses(); ++p) {
+    if (!this->DirStructure.ResidualMeshDataExistsForPass(p)) {
       this->CalculateResidualsForPass(p);
       }
     }
@@ -926,23 +926,23 @@ Controller
   using TMovingWriter = itk::MeshFileWriter<TLoopMesh>;
 
   std::string dirToCreate =
-    this->DirectoryStructure.RegisteredModelDirectory +
-    std::to_string(this->DirectoryStructure.NumberOfRegistrationPasses());
+    this->DirStructure.RegisteredModelDirectory +
+    std::to_string(this->DirStructure.NumberOfRegistrationPasses());
 
   std::filesystem::create_directories( dirToCreate );
 
   std::cout << "Preparing boundary candidates..." << std::endl;
 
-  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
 
   // Fixed
 
   std::vector<TMesh::Pointer> fixedVector;
 
-  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
+  for (unsigned int i = 0; i < this->DirStructure.GetNumberOfFiles(); ++i) {
 
     const auto reader = TMeshReader::New();
-    reader->SetFileName(this->DirectoryStructure.CandidateDirectory.PathForFrame(i));
+    reader->SetFileName(this->DirStructure.CandidateDirectory.PathForFrame(i));
     reader->Update();
 
     fixedVector.emplace_back(reader->GetOutput());
@@ -953,19 +953,19 @@ Controller
 
   std::vector<TLoopMesh::Pointer> movingVector;
 
-  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
+  for (unsigned int i = 0; i < this->DirStructure.GetNumberOfFiles(); ++i) {
 
-    if (0 == this->DirectoryStructure.NumberOfRegistrationPasses()) {
+    if (0 == this->DirStructure.NumberOfRegistrationPasses()) {
       const auto reader = TLoopMeshReader::New();
-      reader->SetFileName(this->DirectoryStructure.InitialModel);
+      reader->SetFileName(this->DirStructure.InitialModel);
       reader->Update();
       reader->GetOutput()->SetSurfaceSampleDensity(this->State.RegistrationSamplingDensity);
       reader->GetOutput()->Setup();
       movingVector.emplace_back(reader->GetOutput());
     } else {
-      const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+      const auto p = this->DirStructure.NumberOfRegistrationPasses();
       const auto file
-        = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1, i);
+        = this->DirStructure.RegisteredModelPathForPassAndFrame(p-1, i);
       const auto reader = TLoopMeshReader::New();
       reader->SetFileName(file);
 
@@ -992,10 +992,10 @@ Controller
 
   std::cout << "Writing registered models..." << std::endl;
 
-  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i) {
-    const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+  for (unsigned int i = 0; i < this->DirStructure.GetNumberOfFiles(); ++i) {
+    const auto p = this->DirStructure.NumberOfRegistrationPasses();
     const auto file
-      = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p, i);
+      = this->DirStructure.RegisteredModelPathForPassAndFrame(p, i);
     const auto finalWriter = TMovingWriter::New();
     finalWriter->SetInput( movingVector.at(i) );
     finalWriter->SetFileName( file );
@@ -1029,7 +1029,7 @@ Controller
   this->State.costFunctionResidualZ = residualZ;
 
   this->CalculateSurfaceAreas();
-  this->CalculateResidualsForPass(this->DirectoryStructure.NumberOfRegistrationPasses());
+  this->CalculateResidualsForPass(this->DirStructure.NumberOfRegistrationPasses());
 
   std::cout << "done." << std::endl;
 
@@ -1046,11 +1046,11 @@ Controller
 {
 
   std::cout << "Writing screenshots..." << std::endl;
-  auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
+  auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
 
-  this->DirectoryStructure.AddScreenshotDirectory();
+  this->DirStructure.AddScreenshotDirectory();
 
-  for (unsigned int i = 0; i < this->DirectoryStructure.GetNumberOfFiles(); ++i)
+  for (unsigned int i = 0; i < this->DirStructure.GetNumberOfFiles(); ++i)
     {
     this->ui->frameSlider->setValue( i );
 
@@ -1064,7 +1064,7 @@ Controller
     windowToImageFilter->Update();
 
     const auto writer = vtkSmartPointer<vtkPNGWriter>::New();
-    writer->SetFileName( this->DirectoryStructure.ScreenshotPathForFrame(i).c_str() );
+    writer->SetFileName( this->DirStructure.ScreenshotPathForFrame(i).c_str() );
     writer->SetInputConnection( windowToImageFilter->GetOutputPort() );
     writer->Write();
 
@@ -1112,7 +1112,7 @@ Controller
     case CellData::SQUEEZ:
       {
 
-      if (this->DirectoryStructure.NumberOfRegistrationPasses() < 1)
+      if (this->DirStructure.NumberOfRegistrationPasses() < 1)
         {
         std::cerr << "Warning: Surface areas cannot be calculated." << std::endl;
         this->window.modelCellData = nullptr;
@@ -1120,13 +1120,13 @@ Controller
         }
 
       if (this->State.SurfaceAreas.empty() ||
-          this->State.SurfaceAreas.cols() != this->DirectoryStructure.GetNumberOfFiles())
+          this->State.SurfaceAreas.cols() != this->DirStructure.GetNumberOfFiles())
         {
         this->CalculateSurfaceAreas();
         }
 
       this->window.modelCellData = this->State.SQUEEZ[this->GetCurrentFrame()];
-      const auto cbrange = this->State.ColorbarState.at(this->State.CellDataToDisplay);
+      const auto cbrange = this->State.ColorbarSettings.at(this->State.CellDataToDisplay);
       const auto lut = dv::LUT::SQUEEZ(cbrange.Min, cbrange.Max);
       this->window.UpdateLookupTable(lut);
 
@@ -1171,15 +1171,15 @@ Controller
 
     {
     std::cout << "Calculating surface areas..." << std::endl;
-    auto progress = dv::Progress( this->DirectoryStructure.GetNumberOfFiles() );
+    auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
   
     vnl_matrix<double> sa;
   
-    for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f) {
+    for (unsigned int f = 0; f < this->DirStructure.GetNumberOfFiles(); ++f) {
   
-      const auto p = this->DirectoryStructure.NumberOfRegistrationPasses();
+      const auto p = this->DirStructure.NumberOfRegistrationPasses();
       const auto modelReader = TVTKMeshReader::New();
-      const auto file = this->DirectoryStructure.RegisteredModelPathForPassAndFrame(p-1, f);
+      const auto file = this->DirStructure.RegisteredModelPathForPassAndFrame(p-1, f);
       modelReader->SetFileName(file.c_str());
       modelReader->Update();
   
@@ -1191,7 +1191,7 @@ Controller
       if (0 == f)
         {
         sa.set_size(modelLoop->GetOutput()->GetNumberOfCells(),
-                    this->DirectoryStructure.GetNumberOfFiles());
+                    this->DirStructure.GetNumberOfFiles());
         sa.fill(-1.0);
         }
   
@@ -1203,7 +1203,7 @@ Controller
   
     this->State.SurfaceAreas = sa;
   
-    for (unsigned int f = 0; f < this->DirectoryStructure.GetNumberOfFiles(); ++f)
+    for (unsigned int f = 0; f < this->DirStructure.GetNumberOfFiles(); ++f)
       {
       this->State.SQUEEZ[f] = this->State.CalculateSQUEEZ(f);
       }

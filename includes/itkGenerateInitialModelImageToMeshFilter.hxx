@@ -14,7 +14,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_cost.h>
@@ -123,7 +123,7 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   const auto cuberille = TCuberille::New();
   cuberille->SetInput(closing_lv->GetOutput());
   cuberille->GenerateTriangleFacesOn();
-  cuberille->RemoveProblematicPixelsOn();
+  // cuberille->RemoveProblematicPixelsOn(); // Method not available in current ITK version
   cuberille->ProjectVerticesToIsoSurfaceOff();
   cuberille->SavePixelAsCellDataOn();
   cuberille->Update();
@@ -132,9 +132,9 @@ GenerateInitialModelImageToMeshFilter<TInputImage, TOutputMesh>
   auto surface_mesh = sissr::ITKMeshToCGALSurfaceMesh<TOutputMesh, TCGALMesh>( cuberille->GetOutput() );
 
   // VERIFY AND DECIMATE
-  itkAssertOrThrowMacro(CGAL::is_triangle_mesh(surface_mesh), "Input geometry is not triangulated.")
+  itkAssertOrThrowMacro(CGAL::is_triangle_mesh(surface_mesh), "Input geometry is not triangulated.");
 
-  SMS::Count_stop_predicate<TCGALMesh> stop(this->GetNumberOfCellsInDecimatedMesh());
+  SMS::Edge_count_stop_predicate<TCGALMesh> stop(this->GetNumberOfCellsInDecimatedMesh());
 
   if (m_PreserveEdges) {
 
