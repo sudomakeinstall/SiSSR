@@ -19,7 +19,7 @@
 
 // VTK
 #include <vtkSmartPointer.h>
-#include <vtkPolyDataReader.h>
+#include <vtkOBJReader.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkPNGWriter.h>
 
@@ -77,7 +77,7 @@ public slots:
 
 private:
 
-  using TVTKMeshReader = vtkSmartPointer<vtkPolyDataReader>;
+  using TVTKMeshReader = vtkSmartPointer<vtkOBJReader>;
 
   void UpdateAnnotations();
 

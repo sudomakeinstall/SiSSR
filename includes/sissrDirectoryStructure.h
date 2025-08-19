@@ -17,7 +17,7 @@ public:
   // Constructor
   DirectoryStructure(const std::string _IptDirectory,
                      const std::string _OptDirectory);
- 
+
   const std::string IptDirectory;
   const std::string OptDirectory;
 
@@ -31,7 +31,7 @@ public:
   const std::string ScreenshotDirectory      = this->OptDirectory + "screenshots/";
 
   const std::string ImageSuffix = ".nii.gz";
-  const std::string MeshSuffix = ".vtk";
+  const std::string MeshSuffix = ".obj";
   const std::string PointSuffix = ".txt";
   const std::string ScreenshotSuffix = ".png";
 

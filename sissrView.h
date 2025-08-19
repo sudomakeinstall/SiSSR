@@ -30,7 +30,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyDataMapper2D.h>
 #include <vtkActor.h>
-#include <vtkPolyDataReader.h>
+#include <vtkOBJReader.h>
 #include <vtkExtractEdges.h>
 #include <vtkTubeFilter.h>
 #include <vtkLoopSubdivisionFilter.h>
@@ -68,7 +68,7 @@ public:
   // Typedefs
   //
 
-  using TVTKMeshReader      = vtkSmartPointer<vtkPolyDataReader>;
+  using TVTKMeshReader      = vtkSmartPointer<vtkOBJReader>;
   using TImage              = itk::Image<short,3>;
   using TImageReader        = itk::ImageFileReader<TImage>;
   using TITK2VTK            = itk::ImageToVTKImageFilter<TImage>;

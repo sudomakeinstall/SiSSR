@@ -16,9 +16,9 @@ DirectoryStructure
                      const std::string _OptDirectory) :
   IptDirectory(dv::AppendCharacterIfAbsent(_IptDirectory, '/')),
   OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
-  SegmentationDirectory  (IptDirectory + "seg-nii/"      , ".nii.gz"),
-  ImageDirectory         (IptDirectory + "img-nii/"         , ".nii.gz", GetNumberOfFiles()),
-  CandidateDirectory (IptDirectory + "msh-vtk/", ".vtk"   , GetNumberOfFiles())
+  SegmentationDirectory(IptDirectory + "seg-nii/", ".nii.gz"),
+  ImageDirectory(IptDirectory + "img-nii/", ".nii.gz", GetNumberOfFiles()),
+  CandidateDirectory(IptDirectory + "candidates/", ".obj", GetNumberOfFiles())
 {
 
   // Create directories

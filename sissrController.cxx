@@ -820,10 +820,26 @@ Controller
     const auto reader = TMeshReader::New();
     const auto filename = this->DirStructure.CandidateDirectory.PathForFrame(i);
     reader->SetFileName(filename);
-    
+
     try {
       reader->Update();
-      fixedVector.emplace_back(reader->GetOutput());
+      auto mesh = reader->GetOutput();
+
+      // Check if cell data exists, if not create it with all cells labeled as 1
+      if (!mesh->GetCellData() || mesh->GetCellData()->Size() == 0) {
+        auto cellData = TMesh::CellDataContainer::New();
+        cellData->Reserve(mesh->GetNumberOfCells());
+
+        // Assign label 1 to all cells
+        for (auto cellIt = mesh->GetCells()->Begin(); cellIt != mesh->GetCells()->End(); ++cellIt) {
+          cellData->SetElement(cellIt.Index(), 1.0f);
+        }
+
+        mesh->SetCellData(cellData);
+        std::cout << "Added default cell data (label=1) to " << mesh->GetNumberOfCells() << " cells in " << filename << std::endl;
+      }
+
+      fixedVector.emplace_back(mesh);
     } catch (const itk::ExceptionObject& e) {
       std::cerr << "ERROR: Failed to read mesh file: " << filename << std::endl;
       std::cerr << "ITK Exception: " << e.GetDescription() << std::endl;
@@ -858,6 +874,21 @@ Controller
       loop->GetOutput()->Setup();
       movingVector.emplace_back(loop->GetOutput());
       }
+
+    // Ensure the last added moving mesh has cell data
+    auto& mesh = movingVector.back();
+    if (!mesh->GetCellData() || mesh->GetCellData()->Size() == 0) {
+      auto cellData = TLoopMesh::CellDataContainer::New();
+      cellData->Reserve(mesh->GetNumberOfCells());
+
+      // Assign label 1 to all cells
+      for (auto cellIt = mesh->GetCells()->Begin(); cellIt != mesh->GetCells()->End(); ++cellIt) {
+        cellData->SetElement(cellIt.Index(), 1.0f);
+      }
+
+      mesh->SetCellData(cellData);
+      std::cout << "Added default cell data (label=1) to " << mesh->GetNumberOfCells() << " cells in moving mesh" << std::endl;
+    }
 
     progress.UnitCompleted();
 
