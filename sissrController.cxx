@@ -910,8 +910,15 @@ Controller
     const auto p = this->DirStructure.NumberOfRegistrationPasses();
     const auto file
       = this->DirStructure.RegisteredModelPathForPassAndFrame(p, i);
+    // Remove point data (normals) to avoid OBJ writer error
+    auto mesh = movingVector.at(i);
+    if (mesh->GetPointData() && mesh->GetPointData()->Size() > 0) {
+      mesh->GetPointData()->Initialize();
+      std::cout << "Cleared point data (normals) from mesh before writing to " << file << std::endl;
+    }
+
     const auto finalWriter = TMovingWriter::New();
-    finalWriter->SetInput( movingVector.at(i) );
+    finalWriter->SetInput( mesh );
     finalWriter->SetFileName( file );
     finalWriter->Update();
     }
