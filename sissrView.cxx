@@ -284,7 +284,7 @@ View
   this->phaseAnnotation->SetPosition2( 40, 40 );
   this->phaseAnnotation->GetTextProperty()->SetFontSize( 24 );
   this->phaseAnnotation->GetTextProperty()->SetColor( 0.0, 0.0, 0.0 );
-  this->renderer->AddActor2D( this->phaseAnnotation );
+  this->renderer->AddViewProp( this->phaseAnnotation );
 
   this->modelColorbarMapper = vtkSmartPointer<vtkPolyDataMapper2D>::New();
   this->modelColorbarActor = vtkSmartPointer<vtkScalarBarActor>::New();
@@ -428,11 +428,11 @@ View
 
   if (visible)
     {
-    this->renderer->AddActor2D( this->modelColorbarActor );
+    this->renderer->AddViewProp( this->modelColorbarActor );
     }
   else
     {
-    this->renderer->RemoveActor2D( this->modelColorbarActor );
+    this->renderer->RemoveViewProp( this->modelColorbarActor );
     }
 
 }
