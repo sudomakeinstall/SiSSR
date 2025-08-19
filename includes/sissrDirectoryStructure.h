@@ -25,7 +25,7 @@ public:
   const sissr::SequentialDirectory ImageDirectory;
   const sissr::SequentialDirectory CandidateDirectory;
 
-  const std::string InitialModelDirectory    = this->OptDirectory + "initial_models/";
+  const std::string InitialModelDirectory    = this->IptDirectory + "initial_model/";
   const std::string RegisteredModelDirectory = this->OptDirectory + "registered_models/";
   const std::string SerializationDirectory   = this->OptDirectory + "serialization/";
   const std::string ScreenshotDirectory      = this->OptDirectory + "screenshots/";
