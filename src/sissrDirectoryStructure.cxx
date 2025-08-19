@@ -16,9 +16,9 @@ DirectoryStructure
                      const std::string _OptDirectory) :
   IptDirectory(dv::AppendCharacterIfAbsent(_IptDirectory, '/')),
   OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
-  SegmentationDirectory  (IptDirectory + "flap-nii-sm/"      , ".nii.gz"),
+  SegmentationDirectory  (IptDirectory + "seg-nii/"      , ".nii.gz"),
   ImageDirectory         (IptDirectory + "img-nii/"         , ".nii.gz", GetNumberOfFiles()),
-  CandidateDirectory (IptDirectory + "candidates-flap/", ".vtk"   , GetNumberOfFiles())
+  CandidateDirectory (IptDirectory + "msh-vtk/", ".vtk"   , GetNumberOfFiles())
 {
 
   // Create directories
@@ -30,7 +30,7 @@ DirectoryStructure
   fs::create_directories(this->ScreenshotDirectory);
 
 };
-  
+
 size_t
 DirectoryStructure
 ::GetNumberOfFiles() const
