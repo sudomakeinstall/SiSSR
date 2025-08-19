@@ -303,65 +303,6 @@ View
 
 }
 
-void
-View
-::SetupResiduals(const std::string fileName)
-{
-
-  // Error Checking
-
-  if (this->ResidualsHaveBeenSetup)
-    {
-    std::cerr << "WARNING: SetupResiduals() has already been called.\n"
-              << "Returning." << std::endl;
-    return;
-    }
-
-  // Logic
-
-  this->modelResidualsReader = TVTKResidualsReader::New();
-  this->modelResidualsTubes  = vtkSmartPointer<vtkTubeFilter>::New();
-  this->modelResidualsMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-  this->modelResidualsActor  = vtkSmartPointer<vtkActor>::New();
-
-  this->modelResidualsReader->SetFileName( fileName.c_str() );
-  this->modelResidualsTubes->SetRadius( this->ResidualsEdgeRadius );
-  this->modelResidualsTubes->SetNumberOfSides( this->ResidualsNumberOfSides );
-  this->modelResidualsTubes->CappingOn();
-  this->modelResidualsTubes->SetInputConnection( this->modelResidualsReader->GetOutputPort() );
-  this->modelResidualsMapper->SetInputConnection( this->modelResidualsTubes->GetOutputPort() );
-  this->modelResidualsActor->SetMapper( this->modelResidualsMapper );
-  this->modelResidualsActor->GetProperty()->SetColor( this->ResidualsColor );
-  this->modelResidualsActor->GetMapper()->ScalarVisibilityOff();
-  this->modelResidualsReader->Update();
-
-  this->modelResidualsVertices    = vtkSmartPointer<vtkGlyph3D>::New();
-  this->modelResidualsVertexGlyph = vtkSmartPointer<vtkSphereSource>::New();
-
-  this->modelResidualsVertexGlyph->SetRadius(
-    this->ResidualsVertexRadius );
-
-  this->modelResidualsVertices->SetSourceConnection(
-    this->modelResidualsVertexGlyph->GetOutputPort() );
-
-  this->modelResidualsVerticesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-  this->modelResidualsVerticesActor  = vtkSmartPointer<vtkActor>::New();
-
-  this->modelResidualsVertices->SetInputConnection(
-    this->modelResidualsReader->GetOutputPort() );
-  this->modelResidualsVerticesMapper->SetInputConnection(
-    this->modelResidualsVertices->GetOutputPort() );
-  this->modelResidualsVerticesActor->SetMapper( this->modelResidualsVerticesMapper );
-  this->modelResidualsVerticesActor->GetProperty()->SetColor( this->ResidualsColor );
-
-  this->modelAssembly->AddPart( this->modelResidualsActor );
-  this->modelAssembly->AddPart( this->modelResidualsVerticesActor );
-
-  // Set Flag
-
-  this->ResidualsHaveBeenSetup = true;
-
-}
 
 /**************
  * VISIBILITY *
@@ -496,28 +437,6 @@ View
 
 }
 
-void
-View
-::SetResidualsVisible(const bool &visible)
-{
-
-  if (nullptr == this->modelAssembly ||
-      nullptr == this->modelResidualsActor)
-    {
-    return;
-    }
-
-  if (visible)
-    {
-    this->modelAssembly->AddPart( this->modelResidualsActor );
-    this->modelAssembly->AddPart( this->modelResidualsVerticesActor );
-    }
-  else
-    {
-    this->modelAssembly->RemovePart( this->modelResidualsActor );
-    this->modelAssembly->RemovePart( this->modelResidualsVerticesActor );
-    }
-}
 
 // FIXME
 void
@@ -583,21 +502,6 @@ View
 
 }
 
-void
-View
-::UpdateResidualsSource(const std::string &fileName)
-{
-
-  if (nullptr == this->modelResidualsReader)
-    {
-    std::cerr << "WARNING: Model residuals reader is null." << std::endl;
-    return;
-    }
-
-  this->modelResidualsReader->SetFileName( fileName.c_str() );
-  this->modelResidualsReader->Update();
-
-}
 
 /*************
  * Utilities *

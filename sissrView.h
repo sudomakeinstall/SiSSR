@@ -69,7 +69,6 @@ public:
   //
 
   using TVTKMeshReader      = vtkSmartPointer<vtkPolyDataReader>;
-  using TVTKResidualsReader = vtkSmartPointer<vtkPolyDataReader>;
   using TImage              = itk::Image<short,3>;
   using TImageReader        = itk::ImageFileReader<TImage>;
   using TITK2VTK            = itk::ImageToVTKImageFilter<TImage>;
@@ -83,14 +82,12 @@ public:
   void SetupImagePlane(vtkRenderWindowInteractor*);
   void SetupCandidates(std::string);
   void SetupModel(const std::string);
-  void SetupResiduals(const std::string fileName);
 
   bool ImageDataHasBeenSetup        = false;
   bool ImageInformationHasBeenSetup = false;
   bool ImagePlaneHasBeenSetup       = false;
   bool CandidatesHaveBeenSetup      = false;
   bool ModelHasBeenSetup            = false;
-  bool ResidualsHaveBeenSetup       = false;
 
   //
   // Visibility
@@ -102,7 +99,6 @@ public:
   void SetModelWiresVisible(const bool &);
   void SetModelSurfaceVisible(const bool &);
   void SetColorbarVisible(const bool &);
-  void SetResidualsVisible(const bool &);
 
   //
   // Update
@@ -112,7 +108,6 @@ public:
   void UpdatePlanesSource(const std::string &);
   void UpdateCandidatesSource(const std::string &);
   void UpdateModelSource(const std::string &);
-  void UpdateResidualsSource(const std::string &);
 
   unsigned int PlaneSourceResolution = 256;
 
@@ -173,11 +168,6 @@ public:
   vtkSmartPointer<vtkAssembly>              modelAssembly = nullptr;
   vtkSmartPointer<vtkFloatArray>            modelCellData = nullptr;
 
-  TVTKResidualsReader                       modelResidualsReader = nullptr;
-  vtkSmartPointer<vtkPolyDataMapper>        modelResidualsMapper = nullptr;
-  vtkSmartPointer<vtkActor>                 modelResidualsActor = nullptr;
-
-  vtkSmartPointer<vtkTubeFilter>            modelResidualsTubes = nullptr;
   vtkSmartPointer<vtkSphereSource>          modelResidualsVertexGlyph = nullptr;
   vtkSmartPointer<vtkGlyph3D>               modelResidualsVertices = nullptr;
   vtkSmartPointer<vtkPolyDataMapper>        modelResidualsVerticesMapper = nullptr;

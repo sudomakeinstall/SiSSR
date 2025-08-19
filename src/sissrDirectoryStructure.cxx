@@ -25,7 +25,6 @@ DirectoryStructure
   namespace fs = std::filesystem;
   fs::create_directories(this->InitialModelDirectory);
   fs::create_directories(this->RegisteredModelDirectory);
-  fs::create_directories(this->ResidualsDirectory);
   fs::create_directories(this->SerializationDirectory);
   fs::create_directories(this->ScreenshotDirectory);
 
@@ -70,13 +69,6 @@ DirectoryStructure
 ::RegistrationSummaryForPass(const size_t p) const
 {
   return this->SerializationDirectory + "summary_" + std::to_string(p) + ".txt";
-}
-
-std::string
-DirectoryStructure
-::ResidualMeshPathForPassAndFrame(const size_t p, const size_t f) const
-{
-  return this->ResidualsDirectory + std::to_string(p) + "/" + std::to_string(f) + this->MeshSuffix;
 }
 
 void
@@ -126,16 +118,5 @@ DirectoryStructure
   return NumberOfRegistrationPasses;
 }
 
-bool
-DirectoryStructure
-::ResidualMeshDataExistsForPass(const size_t p) const {
-  for (size_t f = 0; f < this->GetNumberOfFiles(); ++f) {
-    const auto file = this->ResidualMeshPathForPassAndFrame(p, f);
-    if (!std::filesystem::exists(file)) {
-      return false;
-    }
-  }
-  return true;
-}
 
 } // namespace sissr

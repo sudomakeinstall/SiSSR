@@ -48,7 +48,6 @@ enum class CellData : std::int8_t
 {
   NONE = 0,
   SQUEEZ = 1,
-  RESIDUALS = 2,
 };
 
 class StateMachine
@@ -83,7 +82,6 @@ public:
   bool ModelWiresAreVisible    = true;
   bool ModelSurfaceIsVisible   = true;
   bool ColorbarIsVisible       = true;
-  bool ResidualsAreVisible     = true;
 
   void SerializeJSON(const std::string &fileName);
   void SerializeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer);
@@ -127,7 +125,6 @@ public:
     {
       { CellData::NONE, {"", 0.0, 0.0} },
       { CellData::SQUEEZ, {"SQUEEZ", 0.7, 1.3} },
-      { CellData::RESIDUALS, {"Residuals", 0.0, 10.0} },
     };
 
   std::string RegistrationSummary;

@@ -27,7 +27,6 @@ public:
 
   const std::string InitialModelDirectory    = this->OptDirectory + "initial_models/";
   const std::string RegisteredModelDirectory = this->OptDirectory + "registered_models/";
-  const std::string ResidualsDirectory       = this->OptDirectory + "residuals_models/";
   const std::string SerializationDirectory   = this->OptDirectory + "serialization/";
   const std::string ScreenshotDirectory      = this->OptDirectory + "screenshots/";
 
@@ -52,11 +51,9 @@ public:
   std::string ScreenshotPathForFrame(const size_t f);
 
   std::string RegisteredModelPathForPassAndFrame(const size_t p, const size_t f) const;
-  std::string ResidualMeshPathForPassAndFrame(const size_t p, const size_t f) const;
   size_t GetNumberOfFiles() const;
 
   size_t NumberOfRegistrationPasses() const;
-  bool ResidualMeshDataExistsForPass(const size_t p) const;
   bool InitialModelDataExists() {
     return std::filesystem::exists(this->InitialModel);
   }

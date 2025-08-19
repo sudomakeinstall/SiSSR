@@ -51,7 +51,6 @@ main(int argc, char** argv)
     ("candidates", "Calculate boundary candidates.")
     ("model", "Calculate initial model.")
     ("register", "Register mesh to candidates.")
-    ("residuals", "Calculate residuals.")
     ("reset-camera", "Reset the camera based on visible actors.")
     ("quit", "Quit the application.");
 
@@ -155,9 +154,6 @@ main(int argc, char** argv)
   }
   if (vm.count("register")) {
     controller.Register();
-  }
-  if (vm.count("residuals")) {
-    controller.CalculateResiduals();
   }
   if (vm.count("reset-camera")) {
     controller.ResetCamera();

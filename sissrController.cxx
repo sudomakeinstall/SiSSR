@@ -35,7 +35,6 @@
 
 // SiSSR
 #include <sissrRegisterMeshToPointSet.h>
-#include <sissrCalculateResidualMesh.h>
 
 namespace sissr {
 
@@ -63,7 +62,6 @@ Controller
   // Setup radio buttons
   this->ui->cellDataButtonNone->setChecked(false);
   this->ui->cellDataButtonSQUEEZ->setChecked(false);
-  this->ui->cellDataButtonResidual->setChecked(false);
   switch (this->State.CellDataToDisplay)
     {
     case CellData::NONE:
@@ -71,9 +69,6 @@ Controller
       break;
     case CellData::SQUEEZ:
       this->ui->cellDataButtonSQUEEZ->setChecked(true);
-      break;
-    case CellData::RESIDUALS:
-      this->ui->cellDataButtonResidual->setChecked(true);
       break;
     }
 
@@ -149,8 +144,6 @@ Controller
   connect(this->ui->toggleColorbarButton,
           SIGNAL(pressed()), this, SLOT(ToggleColorbar()));
 
-  connect(this->ui->toggleResidualsButton,
-          SIGNAL(pressed()), this, SLOT(ToggleResiduals()));
 
   connect(this->ui->toolBox,
           SIGNAL(currentChanged(int)), this, SLOT(CurrentPageChanged(int)));
@@ -173,8 +166,6 @@ Controller
   connect(this->ui->cellDataButtonSQUEEZ,
           SIGNAL(clicked()), this, SLOT(UpdateCellData()));
 
-  connect(this->ui->cellDataButtonResidual,
-          SIGNAL(clicked()), this, SLOT(UpdateCellData()));
 
 }
 
@@ -330,16 +321,6 @@ Controller
     return;
     }
 
-  // Residual File
-  if (this->State.ResidualsAreVisible)
-    {
-    const auto file
-      = this->DirStructure.ResidualMeshPathForPassAndFrame(
-          this->DirStructure.NumberOfRegistrationPasses(),
-          this->GetCurrentFrame()
-                                                  );
-    this->window.UpdateResidualsSource( file );
-    }
 
   if (0 == this->DirStructure.NumberOfRegistrationPasses())
     {
@@ -548,25 +529,6 @@ Controller
   this->Render();
 }
 
-void
-Controller
-::ToggleResiduals()
-{
-  this->State.ResidualsAreVisible = !this->State.ResidualsAreVisible;
-
-  if (this->State.ResidualsAreVisible)
-    {
-    const auto file
-      = this->DirStructure.ResidualMeshPathForPassAndFrame(
-          this->DirStructure.NumberOfRegistrationPasses(),
-          this->GetCurrentFrame()
-                                                  );
-    this->window.UpdateResidualsSource( file );
-    }
-
-  this->window.SetResidualsVisible(this->State.ResidualsAreVisible);
-  this->Render();
-}
 
 //
 // Setup
@@ -684,21 +646,7 @@ Controller
 
   this->State.ModelHasBeenSetup = this->window.ModelHasBeenSetup;
 
-  ///////////////
-  // Residuals //
-  ///////////////
 
-  if (this->DirStructure.InitialModelDataExists() && this->State.ModelHasBeenSetup)
-    {
-    const auto file = this->DirStructure.ResidualMeshPathForPassAndFrame(
-      this->DirStructure.NumberOfRegistrationPasses(),
-      this->GetCurrentFrame()
-                                                                 );
-    this->window.SetupResiduals( file );
-
-    this->State.ResidualsAreVisible = true;
-    }
-    
   ////////////
   // Render //
   ////////////
@@ -706,7 +654,7 @@ Controller
   if (this->State.ModelHasBeenSetup)
     {
     this->State.ModelIsVisible = true;
-    
+
     // Ensure visibility.
     this->UpdateModelTransform();
     this->Render();
@@ -832,78 +780,6 @@ Controller
   return static_cast<unsigned int>(this->ui->frameSlider->value());
 }
 
-void
-Controller
-::CalculateResidualsForPass(const unsigned int pass) {
-
-  std::cout << "Calculating residuals for pass " << pass << "..." << std::endl;
-  auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
-
-  // Get the vectors
-  using TResidualCalculator = CalculateResidualMesh<TMesh, TLoopMesh, TMesh>;
-
-  const auto initial = TLoopMesh::New();
-
-  if (0 == pass) {
-    const auto reader = TLoopMeshReader::New();
-    reader->SetFileName(this->DirStructure.InitialModel);
-    reader->Update();
-    initial->Graft(reader->GetOutput());
-    initial->Setup();
-  }
-
-  for (unsigned int f = 0; f < this->DirStructure.GetNumberOfFiles(); ++f) {
-
-      const auto target = TMesh::New();
-
-      {
-        const auto reader = TMeshReader::New();
-        reader->SetFileName(this->DirStructure.CandidateDirectory.PathForFrame(f));
-        reader->Update();
-        target->Graft(reader->GetOutput());
-      }
-
-    if (0 != pass) {
-      const auto file
-        = this->DirStructure.RegisteredModelPathForPassAndFrame(pass-1,f);
-      const auto reader = TLoopMeshReader::New();
-      reader->SetFileName(file);
-      reader->Update();
-      initial->Graft(reader->GetOutput());
-      initial->Setup();
-    }
-
-    TResidualCalculator residuals(target, initial);
-
-    const auto r = residuals.Calculate();
-
-    const std::string dir = this->DirStructure.ResidualsDirectory + std::to_string(pass);
-    std::filesystem::create_directories(dir);
-
-      {
-      const auto writer = TMeshWriter::New();
-      writer->SetInput(r);
-      writer->SetFileName(this->DirStructure.ResidualMeshPathForPassAndFrame(pass, f));
-      writer->Update();
-      }
-
-      progress.UnitCompleted();
-
-    }
-
-}
-
-void
-Controller
-::CalculateResiduals() {
-
-  for (size_t p = 0; p <= this->DirStructure.NumberOfRegistrationPasses(); ++p) {
-    if (!this->DirStructure.ResidualMeshDataExistsForPass(p)) {
-      this->CalculateResidualsForPass(p);
-      }
-    }
-
-}
 
 void
 Controller
@@ -942,10 +818,17 @@ Controller
   for (unsigned int i = 0; i < this->DirStructure.GetNumberOfFiles(); ++i) {
 
     const auto reader = TMeshReader::New();
-    reader->SetFileName(this->DirStructure.CandidateDirectory.PathForFrame(i));
-    reader->Update();
-
-    fixedVector.emplace_back(reader->GetOutput());
+    const auto filename = this->DirStructure.CandidateDirectory.PathForFrame(i);
+    reader->SetFileName(filename);
+    
+    try {
+      reader->Update();
+      fixedVector.emplace_back(reader->GetOutput());
+    } catch (const itk::ExceptionObject& e) {
+      std::cerr << "ERROR: Failed to read mesh file: " << filename << std::endl;
+      std::cerr << "ITK Exception: " << e.GetDescription() << std::endl;
+      throw;
+    }
 
   }
 
@@ -1029,7 +912,6 @@ Controller
   this->State.costFunctionResidualZ = residualZ;
 
   this->CalculateSurfaceAreas();
-  this->CalculateResidualsForPass(this->DirStructure.NumberOfRegistrationPasses());
 
   std::cout << "done." << std::endl;
 
@@ -1090,10 +972,6 @@ Controller
     {
     this->State.CellDataToDisplay = CellData::SQUEEZ;
     }
-  else if (this->ui->cellDataButtonResidual->isChecked())
-    {
-    this->State.CellDataToDisplay = CellData::RESIDUALS;
-    }
   else
     {
     std::cerr << "Selection not recognized." << std::endl;
@@ -1132,25 +1010,6 @@ Controller
 
       break;
       }
-    case CellData::RESIDUALS:
-      {
-
-      if (
-          this->State.costFunctionResidualX.empty() ||
-          this->State.costFunctionResidualX.size() != this->State.costFunctionResidualY.size() ||
-          this->State.costFunctionResidualX.size() != this->State.costFunctionResidualZ.size()
-         )
-        {
-        std::cout << "Residual block is not the correct size." << std::endl;
-        this->window.modelCellData = nullptr;
-        return;
-        }
-
-      this->window.modelCellData
-        = this->State.CalculateResidualsForFrame(this->GetCurrentFrame());
-
-      break;
-      }
     default:
       {
       std::cout << "Cell Data type not recognized." << std::endl;
@@ -1172,37 +1031,37 @@ Controller
     {
     std::cout << "Calculating surface areas..." << std::endl;
     auto progress = dv::Progress( this->DirStructure.GetNumberOfFiles() );
-  
+
     vnl_matrix<double> sa;
-  
+
     for (unsigned int f = 0; f < this->DirStructure.GetNumberOfFiles(); ++f) {
-  
+
       const auto p = this->DirStructure.NumberOfRegistrationPasses();
       const auto modelReader = TVTKMeshReader::New();
       const auto file = this->DirStructure.RegisteredModelPathForPassAndFrame(p-1, f);
       modelReader->SetFileName(file.c_str());
       modelReader->Update();
-  
+
       const auto modelLoop = vtkSmartPointer<vtkLoopSubdivisionFilter>::New();
       modelLoop->SetInputData( modelReader->GetOutput() );
       modelLoop->SetNumberOfSubdivisions( this->State.NumberOfSubdivisions );
       modelLoop->Update();
-  
+
       if (0 == f)
         {
         sa.set_size(modelLoop->GetOutput()->GetNumberOfCells(),
                     this->DirStructure.GetNumberOfFiles());
         sa.fill(-1.0);
         }
-  
+
       sa.set_column(f, dv::CalculateSurfaceAreas(modelLoop->GetOutput()).data());
-  
+
       progress.UnitCompleted();
-  
+
       }
-  
+
     this->State.SurfaceAreas = sa;
-  
+
     for (unsigned int f = 0; f < this->DirStructure.GetNumberOfFiles(); ++f)
       {
       this->State.SQUEEZ[f] = this->State.CalculateSQUEEZ(f);

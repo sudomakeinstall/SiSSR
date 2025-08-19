@@ -49,7 +49,6 @@ public:
   ~Controller();
 
   void ResetCamera();
-  void CalculateResiduals();
   StateMachine State;
 
 public slots:
@@ -68,13 +67,11 @@ public slots:
   void ToggleModelWires();
   void ToggleModelSurface();
   void ToggleColorbar();
-  void ToggleResiduals();
 
   void CurrentPageChanged(int);
   void IncrementFrame();
   void DecrementFrame();
   void SetupModel();
-  void CalculateResidualsForPass(const unsigned int pass);
   void WriteScreenshots();
   void UpdateCellData();
 
