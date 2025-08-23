@@ -124,7 +124,7 @@ public:
   const std::map<CellData, ColorbarState> ColorbarSettings =
     {
       { CellData::NONE, {"", 0.0, 0.0} },
-      { CellData::SQUEEZ, {"SQUEEZ", 0.7, 1.3} },
+      { CellData::SQUEEZ, {"SQUEEZ", 0.7, 1.2} },
     };
 
   std::string RegistrationSummary;

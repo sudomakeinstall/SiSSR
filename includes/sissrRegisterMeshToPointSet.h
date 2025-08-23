@@ -30,10 +30,10 @@ class RegisterMeshToPointSet
 
 public:
 
-  int MaximumNumberOfIterations = 15; // Default is 50
+  int MaximumNumberOfIterations = 500; // Ceres default is 50
   int MaximumSolverTimeInSeconds = 60 * 60; // Default is 1e6
-  double FunctionTolerance = 1e-2;
-  double ParameterTolerance = 1e-2;
+  double FunctionTolerance = 1e-6; // Default is 1e-6
+  double ParameterTolerance = 1e-8; // Default is 1e-8
   bool DynamicSparsity = false;
   const bool UseLabels;
 
