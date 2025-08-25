@@ -32,7 +32,7 @@ main(int argc, char** argv)
     ("function-tolerance", po::value<double>(), "Function tolerance for convergence.")
     ("parameter-tolerance", po::value<double>(), "Parameter tolerance for convergence.")
     ("dynamic-sparsity", "Enable dynamic sparsity in solver.")
-    ("register", "Register model to candidates.");
+    ("register", po::value<int>(), "Register model to candidates.");
 
   po::positional_options_description positional;
   positional.add("candidate-dir", 1).add("initial-model", 1).add("output-dir", 1);
@@ -108,9 +108,16 @@ main(int argc, char** argv)
     algorithm.GetParameters().DynamicSparsity = true;
   }
 
+
   // Misc
   if (vm.count("register")) {
-    algorithm.Register();
+
+    const auto requested_passes = vm["register"].as<int>();
+
+    while (algorithm.GetDirectoryStructure().NumberOfRegistrationPasses() < requested_passes) {
+      algorithm.Register();
+    }
+
   }
 
   return EXIT_SUCCESS;
