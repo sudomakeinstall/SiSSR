@@ -15,17 +15,15 @@
 #include <sissrMeshToKdTree.h>
 
 // dv-cli
-#include <dvCalculateBorderCells.h>
+#include <sissrCalculateBorderCells.h>
 
 namespace sissr {
 
 template < typename TFixedMesh, typename TMovingMesh >
 RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
-::RegisterMeshToPointSet(const unsigned int& _EDFrame,
-                         const TFixedVector &_fixedVector,
+::RegisterMeshToPointSet(const TFixedVector &_fixedVector,
                          const TMovingVector &_movingVector,
                          const bool &_UseLabels) :
-  EDFrame(_EDFrame),
   movingVector(_movingVector),
   UseLabels(_UseLabels),
   NumberOfFrames(this->CalculateNumberOfFrames()),
@@ -276,7 +274,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding labeled primary residual to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* cost_loss_body = new ceres::ScaledLoss(
       nullptr,
@@ -290,7 +287,7 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
       ceres::DO_NOT_TAKE_OWNERSHIP
       );
 
-  const auto border_cells = dv::CalculateBorderCells<TMovingMesh>(this->movingVector.at(0));
+  const auto border_cells = sissr::CalculateBorderCells<TMovingMesh>(this->movingVector.at(0));
 
   for (unsigned int frame = 0; frame < this->NumberOfFrames; ++frame)
     {
@@ -337,7 +334,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
       costFunctionCellIDs.emplace_back(cellID);
       }
 
-    progress.UnitCompleted();
 
     }
 
@@ -351,7 +347,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding unlabeled primary residual to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* cost_loss = new ceres::ScaledLoss(nullptr,
                                          this->RegistrationWeights.Primary,
@@ -392,7 +387,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
       costFunctionCellIDs.emplace_back(cellID);
       }
 
-    progress.UnitCompleted();
 
     }
 
@@ -406,7 +400,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding velocity regularizer to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* velocity_loss = new ceres::ScaledLoss(nullptr,
                                              this->RegistrationWeights.Velocity,
@@ -437,7 +430,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
       }
 
-    progress.UnitCompleted();
 
     }
 
@@ -451,7 +443,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding acceleration regularizer to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* acceleration_loss = new ceres::ScaledLoss(nullptr,
                                                  this->RegistrationWeights.Acceleration,
@@ -485,7 +476,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
       }
 
-    progress.UnitCompleted();
 
     }
 
@@ -499,7 +489,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding thin plate regularizer to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* thin_plate_loss = new ceres::ScaledLoss(nullptr,
                                                this->RegistrationWeights.ThinPlate,
@@ -530,7 +519,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
       }
 
-    progress.UnitCompleted();
 
     }
 
@@ -544,7 +532,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding triangle aspect ratio regularizer to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* aspect_ratio_loss = new ceres::ScaledLoss(nullptr,
                                                  this->RegistrationWeights.TriangleAspectRatio,
@@ -576,7 +563,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
       }
 
-    progress.UnitCompleted();
 
     }
 
@@ -590,7 +576,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
   std::cout << "Adding edge length regularizer to problem..." << std::endl;
 
-  auto progress = dv::Progress(this->NumberOfFrames);
 
   ceres::LossFunction* edge_length_loss = new ceres::ScaledLoss(nullptr,
                                                  this->RegistrationWeights.EdgeLength,
@@ -626,7 +611,6 @@ RegisterMeshToPointSet< TFixedMesh, TMovingMesh >
 
       }
 
-    progress.UnitCompleted();
 
     }
 

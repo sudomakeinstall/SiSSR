@@ -1,41 +1,23 @@
-// STL
+// System
 #include <iostream>
 
-// Boost
+// Third Party
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-// Qt
-#include <QApplication>
-#include <QSurfaceFormat>
-#include <QVTKOpenGLStereoWidget.h>
-
-// VTK
-#include <vtkOpenGLRenderWindow.h>
-
-// SiSSR
-#include <sissrController.h>
+// Internal
+#include <sissrAlgorithm.h>
 
 int
 main(int argc, char** argv)
 {
 
-  // Declare the supported options.
   po::options_description description("Allowed options");
   description.add_options()
     ("help", "Print usage information.")
-    ("input-dir", po::value<std::string>()->required(), "Input directory.")
+    ("candidate-dir", po::value<std::string>()->required(), "Candidate directory. Should be named 0.obj, 1.obj, etc.")
+    ("initial-model", po::value<std::string>()->required(), "Path to initial watertight mesh model.")
     ("output-dir", po::value<std::string>()->required(), "Output directory.")
-
-    // Initial Model
-    ("model-frame", po::value<unsigned int>(), "Frame from which to generate the template mesh.")
-    ("model-num-faces", po::value<unsigned int>(), "Model initial number of faces.")
-    ("model-use-labels", "Use labels in initial model (should not be used with --model-ignore-labels).")
-    ("model-ignore-labels", "Ignore labels in initial model (should not be used with --model-use-labels).")
-    ("model-midpoint", "Use the midpoint decimation algorithm (should not be used with --model-lindstromturk).")
-    ("model-lindstromturk", "Use the Lindstrom Turk decimation algorithm (should not be used with --model-midpoint).")
-
-    // SiSSR Registration
     ("weight-ew", po::value<double>(), "Edge weight multipler.")
     ("weight-tp", po::value<double>(), "Thin plate energy weight.")
     ("weight-ac", po::value<double>(), "Acceleration weight.")
@@ -44,18 +26,16 @@ main(int argc, char** argv)
     ("weight-ar", po::value<double>(), "Aspect ratio weight.")
     ("registration-use-labels", "Use labels in registration.")
     ("registration-ignore-labels", "Ignore labels in registration.")
-    ("registration-sampling-density", po::value<unsigned int>(), "Sampling density for points on the template mesh.")
-
-    // Misc
-    ("ed-frame", po::value<unsigned int>(), "ED frame.")
-    ("candidates", "Calculate boundary candidates.")
-    ("model", "Calculate initial model.")
-    ("register", "Register mesh to candidates.")
-    ("reset-camera", "Reset the camera based on visible actors.")
-    ("quit", "Quit the application.");
+    ("registration-sampling-density", po::value<unsigned int>(), "Samples per triangle.")
+    ("max-iterations", po::value<int>(), "Maximum number of solver iterations.")
+    ("max-time", po::value<int>(), "Maximum solver time in seconds.")
+    ("function-tolerance", po::value<double>(), "Function tolerance for convergence.")
+    ("parameter-tolerance", po::value<double>(), "Parameter tolerance for convergence.")
+    ("dynamic-sparsity", "Enable dynamic sparsity in solver.")
+    ("register", "Register model to candidates.");
 
   po::positional_options_description positional;
-  positional.add("input-dir", 1).add("output-dir", 1);
+  positional.add("candidate-dir", 1).add("initial-model", 1).add("output-dir", 1);
 
   po::variables_map vm;
   po::store(po::command_line_parser(argc, argv).options(description).positional(positional).run(), vm);
@@ -67,104 +47,71 @@ main(int argc, char** argv)
 
   po::notify(vm);
 
-  const std::string IDir(vm["input-dir"].as<std::string>());
+  const std::string CandidateDir(vm["candidate-dir"].as<std::string>());
+  const std::string InitialModel(vm["initial-model"].as<std::string>());
   const std::string ODir(vm["output-dir"].as<std::string>());
 
-  std::cout << "Input directory: " << IDir << std::endl;
+  std::cout << "Candidate directory: " << CandidateDir << std::endl;
+  std::cout << "Initial model: " << InitialModel << std::endl;
   std::cout << "Output directory: " << ODir << std::endl;
 
-  // Qt Stuff
-  vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
-  QSurfaceFormat::setDefaultFormat(QVTKOpenGLStereoWidget::defaultFormat());
-
-  QApplication application(argc,argv);
-
-  sissr::Controller controller(argc, argv);
-
-  // Model
-  if (vm.count("model-num-faces")) {
-    controller.State.InitialModelParams.SetFaces(vm["model-num-faces"].as<unsigned int>());
-  }
-  if (vm.count("model-use-labels") && vm.count("model-ignore-labels")) {
-    std::cerr << "Setting both 'model-use-labels' and 'model-ignore-labels' is disallowed." << std::endl;
-    return EXIT_FAILURE;
-  }
-  if (vm.count("model-use-labels")) {
-    controller.State.InitialModelParams.SetPreserveEdges(true);
-  }
-  if (vm.count("model-ignore-labels")) {
-    controller.State.InitialModelParams.SetPreserveEdges(false);
-  }
-  if (vm.count("model-midpoint") && vm.count("model-lindstromturk")) {
-    std::cerr << "Setting both 'model-midpoint' and 'model-lindstromturk' is disallowed." << std::endl;
-    return EXIT_FAILURE;
-  }
-  if (vm.count("model-frame")) {
-    controller.State.InitialModelParams.SetFrame(vm["model-frame"].as<unsigned int>());
-  }
-  if (vm.count("model-midpoint")) {
-    controller.State.InitialModelParams.SetDecimationTechnique(sissr::CGALDecimationTechnique::Midpoint);
-  }
-  if (vm.count("model-lindstromturk")) {
-    controller.State.InitialModelParams.SetDecimationTechnique(sissr::CGALDecimationTechnique::LindstromTurk);
-  }
+  // Initialize algorithm
+  sissr::Algorithm algorithm(CandidateDir, InitialModel, ODir);
 
   // SiSSR Registration
   if (vm.count("weight-ew")) {
-    controller.State.RegistrationWeights.EdgeWeight = vm["weight-ew"].as<double>();
+    algorithm.GetParameters().RegistrationWeights.EdgeWeight = vm["weight-ew"].as<double>();
   }
   if (vm.count("weight-tp")) {
-    controller.State.RegistrationWeights.ThinPlate = vm["weight-tp"].as<double>();
+    algorithm.GetParameters().RegistrationWeights.ThinPlate = vm["weight-tp"].as<double>();
   }
   if (vm.count("weight-ac")) {
-    controller.State.RegistrationWeights.Acceleration = vm["weight-ac"].as<double>();
+    algorithm.GetParameters().RegistrationWeights.Acceleration = vm["weight-ac"].as<double>();
   }
   if (vm.count("weight-vc")) {
-    controller.State.RegistrationWeights.Velocity = vm["weight-vc"].as<double>();
+    algorithm.GetParameters().RegistrationWeights.Velocity = vm["weight-vc"].as<double>();
   }
   if (vm.count("weight-el")) {
-    controller.State.RegistrationWeights.EdgeLength = vm["weight-el"].as<double>();
+    algorithm.GetParameters().RegistrationWeights.EdgeLength = vm["weight-el"].as<double>();
   }
   if (vm.count("weight-ar")) {
-    controller.State.RegistrationWeights.TriangleAspectRatio = vm["weight-ar"].as<double>();
+    algorithm.GetParameters().RegistrationWeights.TriangleAspectRatio = vm["weight-ar"].as<double>();
   }
   if (vm.count("registration-use-labels") && vm.count("registration-ignore-labels")) {
     std::cerr << "Setting both 'registration-use-labels' and 'registration-ignore-labels' is disallowed." << std::endl;
     return EXIT_FAILURE;
   }
   if (vm.count("registration-use-labels")) {
-    controller.State.RegistrationUseLabels = true;
+    algorithm.GetParameters().RegistrationUseLabels = true;
   }
   if (vm.count("registration-ignore-labels")) {
-    controller.State.RegistrationUseLabels = false;
+    algorithm.GetParameters().RegistrationUseLabels = false;
   }
   if (vm.count("registration-sampling-density")) {
-    controller.State.RegistrationSamplingDensity = vm["registration-sampling-density"].as<unsigned int>();
+    algorithm.GetParameters().RegistrationSamplingDensity = vm["registration-sampling-density"].as<unsigned int>();
+  }
+
+  // Solver parameters
+  if (vm.count("max-iterations")) {
+    algorithm.GetParameters().MaximumNumberOfIterations = vm["max-iterations"].as<int>();
+  }
+  if (vm.count("max-time")) {
+    algorithm.GetParameters().MaximumSolverTimeInSeconds = vm["max-time"].as<int>();
+  }
+  if (vm.count("function-tolerance")) {
+    algorithm.GetParameters().FunctionTolerance = vm["function-tolerance"].as<double>();
+  }
+  if (vm.count("parameter-tolerance")) {
+    algorithm.GetParameters().ParameterTolerance = vm["parameter-tolerance"].as<double>();
+  }
+  if (vm.count("dynamic-sparsity")) {
+    algorithm.GetParameters().DynamicSparsity = true;
   }
 
   // Misc
-  if (vm.count("ed-frame")) {
-    controller.State.EDFrame = vm["ed-frame"].as<unsigned int>();
-  }
-  if (vm.count("candidates")) {
-    controller.CalculateBoundaryCandidates();
-  }
-  if (vm.count("model")) {
-    controller.GenerateInitialModel();
-  }
   if (vm.count("register")) {
-    controller.Register();
-  }
-  if (vm.count("reset-camera")) {
-    controller.ResetCamera();
-  }
-  if (vm.count("quit")) {
-      application.quit();
-      return EXIT_SUCCESS;
+    algorithm.Register();
   }
 
-  controller.show();
-
-  return application.exec();
-
+  return EXIT_SUCCESS;
 }

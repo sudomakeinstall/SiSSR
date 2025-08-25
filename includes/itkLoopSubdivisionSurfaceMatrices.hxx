@@ -19,7 +19,7 @@
 #include "itkMacro.h"
 
 // Custom
-#include "dvMath.h"
+#include "sissrUtils.h"
 #include "dv_sylvester.h"
 
 namespace itk
@@ -108,18 +108,18 @@ LoopSubdivisionSurfaceMatrices<TReal,MinN,MaxN>
   const TReal MiddleBound = pow(2,-n);
   const TReal UpperBound = pow(2,1-n);
 
-  if (   dv::IsBetween(p.first,MiddleBound,UpperBound)
-      && dv::IsBetween(p.second,LowerBound,UpperBound-p.first))
+  if (   sissr::isBetween(p.first,MiddleBound,UpperBound)
+      && sissr::isBetween(p.second,LowerBound,UpperBound-p.first))
     {
     return 0;
     }
-  else if (dv::IsBetween(p.first,LowerBound,MiddleBound))
+  else if (sissr::isBetween(p.first,LowerBound,MiddleBound))
     {
-    if (dv::IsBetween(p.second,MiddleBound-p.first,MiddleBound))
+    if (sissr::isBetween(p.second,MiddleBound-p.first,MiddleBound))
       {
       return 1;
       }
-    else if (dv::IsBetween(p.second,MiddleBound,UpperBound-p.first))
+    else if (sissr::isBetween(p.second,MiddleBound,UpperBound-p.first))
       {
       return 2;
       }

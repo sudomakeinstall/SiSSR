@@ -5,8 +5,8 @@
 // Ceres
 #include <ceres/loss_function.h>
 
-// DV
-#include <dvMath.h>
+// SiSSR Utils
+#include <sissrUtils.h>
 
 // SiSSR
 #include <sissrTriangleAspectRatioRegularizer.h>
@@ -29,9 +29,9 @@ main(int, char**)
   p2[0] = +0.5, p2[1] = 0.0, p2[2] = 0.0;
 
   // All edge lengths should be 1.  (Aspect ratios also 1.)
-  assert(dv::Close(p0.EuclideanDistanceTo(p1), 1.0));
-  assert(dv::Close(p1.EuclideanDistanceTo(p2), 1.0));
-  assert(dv::Close(p2.EuclideanDistanceTo(p0), 1.0));
+  assert(sissr::close(p0.EuclideanDistanceTo(p1), 1.0));
+  assert(sissr::close(p1.EuclideanDistanceTo(p2), 1.0));
+  assert(sissr::close(p2.EuclideanDistanceTo(p0), 1.0));
 
   const auto mesh = TMesh::New();
   mesh->SetPoint(0, p0);
@@ -84,7 +84,7 @@ main(int, char**)
   ///////////////////////////////////////////////////
 
   reg->Evaluate(parameters.data(), residuals, nullptr);
-  assert(dv::Close(residuals[0], 0.0));
+  assert(sissr::close(residuals[0], 0.0));
 
   ///////////
   // p0, x //
@@ -103,7 +103,7 @@ main(int, char**)
       {
         const auto observed = (residuals_eps[0] - residuals[0]) / eps;
         const auto calculated = jacobians[p][d];
-        assert(dv::Close(observed, calculated, 0.01));
+        assert(sissr::close(observed, calculated, 0.01));
       }
     }
   }

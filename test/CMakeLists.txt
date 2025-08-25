@@ -10,11 +10,6 @@ foreach(MYTEST ${MYTESTS})
     dv-sissr-dependencies
   )
 
-  vtk_module_autoinit(
-    TARGETS ${EXNAME}
-    MODULES ${VTK_LIBRARIES}
-  )
-
   add_test(NAME ${EXNAME} COMMAND ${EXNAME} ${CMAKE_SOURCE_DIR}/test/testdata/ false)
 
 endforeach()

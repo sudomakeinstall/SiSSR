@@ -9,8 +9,6 @@
 #include <itkLoopSubdivisionSurfaceMesh.h>
 #include <itkPointsLocator.h>
 
-// Custom
-#include <dvProgress.h>
 
 // SiSSR
 #include <sissrAccelerationRegularizer.h>
@@ -59,12 +57,10 @@ public:
   using TEdgeLengthRegularizer = EdgeLengthRegularizer<TMoving>;
   using TParameterVector = std::vector<std::vector<double*>>;
 
-  RegisterMeshToPointSet(const unsigned int& _EDFrame,
-                         const TFixedVector &_fixedVector,
+  RegisterMeshToPointSet(const TFixedVector &_fixedVector,
                          const TMovingVector &_movingVector,
                          const bool &_UseLabels);
 
-  const unsigned int EDFrame;
   TLocatorVector locatorVector;
   TLocatorMapVector locatorMapVector;
   const TMovingVector movingVector;

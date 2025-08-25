@@ -1,9 +1,5 @@
-#ifndef sissr_Controller_h
-#define sissr_Controller_h
-
-// Qt
-#include <ui_QtVTKRenderWindows.h>
-#include <QMainWindow>
+#ifndef sissr_Algorithm_h
+#define sissr_Algorithm_h
 
 // ITK
 #include <itkMesh.h>
@@ -11,75 +7,39 @@
 #include <itkImage.h>
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
-#include <itkImageToVTKImageFilter.h>
 #include <itkMeshFileReader.h>
 #include <itkMeshFileWriter.h>
 #include <itkVertexCell.h>
 #include <itkPointsLocator.h>
-
-// VTK
-#include <vtkSmartPointer.h>
-#include <vtkOBJReader.h>
-#include <vtkWindowToImageFilter.h>
-#include <vtkPNGWriter.h>
-
-// RapidJSON
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/stringbuffer.h>
 
 // Custom
 #include <itkLoopSubdivisionSurfaceMesh.h>
 
 // SiSSR
 #include <sissrDirectoryStructure.h>
-#include <sissrStateMachine.h>
-#include <sissrView.h>
+#include <sissrParameters.h>
 
 namespace sissr {
 
-class Controller
-: public QMainWindow
+class Algorithm
 {
-  Q_OBJECT
 public:
 
   // Constructor/Destructor
-  Controller(int argc, char** argv);
-  ~Controller();
+  Algorithm(const std::string& candidateDir, const std::string& initialModel, const std::string& outputDir);
+  ~Algorithm();
 
-  void ResetCamera();
-  StateMachine State;
-
-public slots:
-
-  void CalculateBoundaryCandidates();
-  void GenerateInitialModel();
+  // Core algorithm functions
   void Register();
 
-  void FrameValueChanged(int);
-  void EDButtonPressed();
-  void JumpToEDButtonPressed();
+  // Parameters access
+  Parameters& GetParameters() { return parameters; }
+  const Parameters& GetParameters() const { return parameters; }
 
-  void ToggleImagePlanes();
-  void ToggleCandidates();
-  void ToggleModel();
-  void ToggleModelWires();
-  void ToggleModelSurface();
-  void ToggleColorbar();
-
-  void CurrentPageChanged(int);
-  void IncrementFrame();
-  void DecrementFrame();
-  void SetupModel();
-  void WriteScreenshots();
-  void UpdateCellData();
+  // Directory access
+  const DirectoryStructure& GetDirectoryStructure() const { return dirStructure; }
 
 private:
-
-  using TVTKMeshReader = vtkSmartPointer<vtkOBJReader>;
-
-  void UpdateAnnotations();
 
   using TIntegral = unsigned char;
   using TReal = float;
@@ -89,7 +49,6 @@ private:
   using TImage = itk::Image<TIntegral,Dimension>;
   using TImageReader = itk::ImageFileReader<TImage>;
   using TImageWriter = itk::ImageFileWriter<TImage>;
-  using TITK2VTK = itk::ImageToVTKImageFilter<TImage>;
 
   using TMeshTraits = itk::DefaultStaticMeshTraits<
     TReal,     // Pixel Type
@@ -117,31 +76,13 @@ private:
   using TMeshWriter = itk::MeshFileWriter<TMesh>;
   using TLocator = itk::PointsLocator< TMesh::PointsContainer >;
 
-  // Qt Properties
-  Ui_QtVTKRenderWindows *ui;
+  // Helper functions (none currently)
 
-  // Setup
-  void SetupImage();
-  void SetupImagePlanes();
-  void SetupCandidates();
-  void SetupValueLabels();
-  void SetupSliderRanges();
-  void SetupSlots();
+  // Data members
+  DirectoryStructure dirStructure;
+  Parameters parameters;
 
-  void Render();
-  void UpdateCurrentIndex();
-  void Serialize();
-  void Deserialize();
-  unsigned int GetCurrentFrame();
-  void UpdateModelTransform();
-  void CalculateSurfaceAreas();
-
-  // Other properties
-  DirectoryStructure DirStructure;
-
-  View window;
-
-};
+}; // End class
 
 } // namespace sissr
 

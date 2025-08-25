@@ -5,28 +5,24 @@
 #include <itkMacro.h>
 
 // Custom
-#include <dvStringOperations.h>
-#include <dvGetTimeString.h>
+#include <sissrUtils.h>
 #include <sissrDirectoryStructure.h>
 
 namespace sissr {
 
 DirectoryStructure
-::DirectoryStructure(const std::string _IptDirectory,
+::DirectoryStructure(const std::string _CandidateDirectory,
+                     const std::string _InitialModelPath,
                      const std::string _OptDirectory) :
-  IptDirectory(dv::AppendCharacterIfAbsent(_IptDirectory, '/')),
-  OptDirectory(dv::AppendCharacterIfAbsent(_OptDirectory, '/')),
-  SegmentationDirectory(IptDirectory + "seg-nii/", ".nii.gz"),
-  ImageDirectory(IptDirectory + "img-nii/", ".nii.gz", GetNumberOfFiles()),
-  CandidateDirectory(IptDirectory + "candidates/", ".obj", GetNumberOfFiles())
+  OptDirectory(sissr::ensureTrailingSlash(_OptDirectory)),
+  CandidateDirectory(sissr::ensureTrailingSlash(_CandidateDirectory), ".obj"),
+  InitialModel(_InitialModelPath)
 {
 
   // Create directories
   namespace fs = std::filesystem;
-  fs::create_directories(this->InitialModelDirectory);
   fs::create_directories(this->RegisteredModelDirectory);
   fs::create_directories(this->SerializationDirectory);
-  fs::create_directories(this->ScreenshotDirectory);
 
 };
 
@@ -34,7 +30,7 @@ size_t
 DirectoryStructure
 ::GetNumberOfFiles() const
 {
-  return this->SegmentationDirectory.NumberOfFiles;
+  return this->CandidateDirectory.NumberOfFiles;
 }
 
 std::string
@@ -69,29 +65,6 @@ DirectoryStructure
 ::RegistrationSummaryForPass(const size_t p) const
 {
   return this->SerializationDirectory + "summary_" + std::to_string(p) + ".txt";
-}
-
-void
-DirectoryStructure
-::AddScreenshotDirectory() {
-  const auto dirname = dv::GetTimeString() + "/";
-  this->ScreenshotDirectories.push_back(dirname);
-  namespace fs = std::filesystem;
-  const auto full = this->ScreenshotDirectory
-    + this->ScreenshotDirectories.back();
-  fs::create_directories(full);
-}
-
-std::string
-DirectoryStructure
-::ScreenshotPathForFrame(const size_t f) {
-  if (this->ScreenshotDirectories.empty()) {
-    this->AddScreenshotDirectory();
-  }
-  const auto p = this->ScreenshotDirectory
-    + this->ScreenshotDirectories.back()
-    + std::to_string(f) + this->ScreenshotSuffix;
-  return p;
 }
 
 size_t

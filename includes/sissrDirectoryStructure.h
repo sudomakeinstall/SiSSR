@@ -15,27 +15,22 @@ class DirectoryStructure
 public:
 
   // Constructor
-  DirectoryStructure(const std::string _IptDirectory,
+  DirectoryStructure(const std::string _CandidateDirectory,
+                     const std::string _InitialModelPath,
                      const std::string _OptDirectory);
 
-  const std::string IptDirectory;
   const std::string OptDirectory;
 
-  const sissr::SequentialDirectory SegmentationDirectory;
-  const sissr::SequentialDirectory ImageDirectory;
   const sissr::SequentialDirectory CandidateDirectory;
 
-  const std::string InitialModelDirectory    = this->IptDirectory + "initial_model/";
   const std::string RegisteredModelDirectory = this->OptDirectory + "registered_models/";
   const std::string SerializationDirectory   = this->OptDirectory + "serialization/";
-  const std::string ScreenshotDirectory      = this->OptDirectory + "screenshots/";
 
   const std::string ImageSuffix = ".nii.gz";
   const std::string MeshSuffix = ".obj";
   const std::string PointSuffix = ".txt";
-  const std::string ScreenshotSuffix = ".png";
 
-  const std::string InitialModel = this->InitialModelDirectory + "initial_model" + MeshSuffix;
+  const std::string InitialModel;
 
   const std::string CameraParametersJSON = this->SerializationDirectory + "camera-parameters.json";
   const std::string InitialModelParametersJSON = this->SerializationDirectory + "initial-model-parameters.json";
@@ -45,10 +40,6 @@ public:
 
   std::string ResidualsForPass(const size_t p) const;
   std::string RegistrationSummaryForPass(const size_t p) const;
-
-  std::vector<std::string> ScreenshotDirectories;
-  void AddScreenshotDirectory();
-  std::string ScreenshotPathForFrame(const size_t f);
 
   std::string RegisteredModelPathForPassAndFrame(const size_t p, const size_t f) const;
   size_t GetNumberOfFiles() const;
