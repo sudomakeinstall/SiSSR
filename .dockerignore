@@ -1,0 +1,48 @@
+# Build directories
+build/
+build-*/
+*build*/
+
+# Backup directories
+gui-backup/
+
+# Documentation
+README-*.md
+*.md
+
+# Git
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+
+# Test data
+test/testdata/
+
+# CMake files (will be regenerated)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Compiled binaries
+*.o
+*.so
+*.a
+dv-sissr
+dv-sissr-commandline
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
