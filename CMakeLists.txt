@@ -68,6 +68,7 @@ find_package(ITK REQUIRED COMPONENTS
   ITKTestKernel
   SubdivisionQuadEdgeMeshFilter
   IOMeshSTL
+  ITKVNL
 )
 
 include(${ITK_USE_FILE})

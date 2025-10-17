@@ -11,7 +11,7 @@
 #include <ceres/ceres.h>
 
 // VNL
-#include <vnl_matrix_fixed.h>
+#include <vnl/vnl_matrix_fixed.h>
 
 namespace sissr {
 
