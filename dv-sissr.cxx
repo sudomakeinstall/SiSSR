@@ -15,9 +15,9 @@ main(int argc, char** argv)
   po::options_description description("Allowed options");
   description.add_options()
     ("help", "Print usage information.")
-    ("candidate-dir", po::value<std::string>()->required(), "Candidate directory. Should be named 0.obj, 1.obj, etc.")
-    ("initial-model", po::value<std::string>()->required(), "Path to initial watertight mesh model.")
-    ("output-dir", po::value<std::string>()->required(), "Output directory.")
+    ("candidate-dir", po::value<std::string>()->required(), "Candidate directory. Should be named 0.obj, 1.obj, etc. [required]")
+    ("initial-model", po::value<std::string>()->required(), "Path to initial watertight mesh model. [required]")
+    ("output-dir", po::value<std::string>()->required(), "Output directory. [required]")
     ("weight-ew", po::value<double>(), "Edge weight multipler.")
     ("weight-tp", po::value<double>(), "Thin plate energy weight.")
     ("weight-ac", po::value<double>(), "Acceleration weight.")
@@ -34,11 +34,8 @@ main(int argc, char** argv)
     ("dynamic-sparsity", "Enable dynamic sparsity in solver.")
     ("register", po::value<int>(), "Register model to candidates.");
 
-  po::positional_options_description positional;
-  positional.add("candidate-dir", 1).add("initial-model", 1).add("output-dir", 1);
-
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(description).positional(positional).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
 
   if (vm.count("help") || 1 == argc) {
     std::cout << description << '\n';
