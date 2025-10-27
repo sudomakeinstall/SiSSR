@@ -1,0 +1,42 @@
+[[meshes]]
+label = "Candidates"
+directory="/home/davis/datasets/HCT/10001_HCT1/seg-obj/"
+pattern="seg_{frame:03}.obj"
+frame_interval=5
+
+[meshes.properties]
+color = [0.5, 0.0, 0.8]
+
+[[meshes]]
+label = "Model_Surface"
+directory="/home/davis/datasets/HCT/10001_HCT1/"
+file_paths = ["model_loop.obj"]
+loop_subdivision_iterations = 2
+
+[meshes.properties]
+color = [1.0, 0.8, 0.8]
+
+[[meshes]]
+label = "Model_Edges"
+directory="/home/davis/datasets/HCT/10001_HCT1/"
+file_paths = ["model_loop.obj"]
+
+[meshes.properties]
+representation = 1
+shading = false
+interpolation = 0
+
+[[meshes]]
+label = "Registered_Surface"
+directory="/home/davis/datasets/HCT/10001_HCT1/sissr/registered_models/0/"
+loop_subdivision_iterations = 2
+surface_type="squeez"
+
+[[meshes]]
+label = "Registered_Edges"
+directory="/home/davis/datasets/HCT/10001_HCT1/sissr/registered_models/0/"
+
+[meshes.properties]
+representation = 1
+shading = false
+interpolation = 0

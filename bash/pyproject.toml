@@ -1,0 +1,13 @@
+[project]
+name = "dv-sissr"
+version = "0.1.0"
+description = "Example preprocessing scripts for dv-sissr."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cardio>=2025.10.1",
+    "itk>=5.4.4.post1",
+    "open3d>=0.19.0",
+    "scipy>=1.16.2",
+    "vtk>=9.5.2",
+]

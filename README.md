@@ -2,21 +2,27 @@
 
 ## Background
 
-This repository provides the reference implementation of the [Simultaneous Subdivision Surface Registration (SiSSR)](https://www.ncbi.nlm.nih.gov/pubmed/29627686) algorithm by Vigneault, et al.:
+This repository provides the reference implementation for the [Simultaneous Subdivision Surface Registration (SiSSR)](https://www.ncbi.nlm.nih.gov/pubmed/29627686) algorithm by Vigneault, et al.:
 
 > Vigneault DM, Pourmorteza A, Thomas ML, Bluemke DA, Noble JA. SiSSR: Simultaneous subdivision surface registration for the quantification of cardiac function from computed tomography in canines. Med Image Anal. 2018 May;46:215-228. doi: 10.1016/j.media.2018.03.009. Epub 2018 Mar 29. PMID: 29627686; PMCID: PMC5942600.
 
 SiSSR is a mesh to point-set registration algorithm which is designed to work with time series data.
 The inputs to the algorithm are (a) a sequence of "candidate" meshes describing the surface of interest at successive time points and (b) an "initial model" in the form of a Loop subdivision surface, approximating the same surface of interest.
 SiSSR registers the initial model (or, more correctly, registers a sequence of initial models equal in length to the number of time points) to the sequence of candidate meshes.
-The candidate meshes are in fact treated as point clouds, so there are no specific requirements on their connectivity.
 
+The candidate meshes are treated as point clouds, so there are no requirements on their connectivity.
 The template mesh is treated as a Loop subdivision surface and so has several requirements:
 
 1. Must be watertight and manifold. In most cases, this can be achieved using a meshing algorithm such as Poisson Surface Reconstruction on one of the candidate meshes.
 2. The total number of triangles should be relatively small (usually <1000 triangles) in order to fit into memory and keep the registration process relatively fast. This can generally be achieved by decimating the result of your meshing algorithm.
 2. All vertices must have valence >3. This can generally be achieved by iteratively replacing the three triangles surrounding a valence three vertex with a single triangle until all have been removed.
 3. Any edge can be connected to at most one "extraordinary" vertex (where an "ordinary" vertex has valence 6). This can generally be achieved by applying a single Loop subdivision surface iteration to your input mesh.
+
+The purpose of this repository is only to perform the SiSSR algorithm; we assume that the user has an appropriate sequence of candidate meshes and initial model.
+However, as an aid to the user, we have provided example python scripts in `./bash/` for extracting candidate meshes from nifti segmentation files and for deriving an initial model from one of those candidate meshes.
+We hope that this will be helpful in getting started.
+
+An example output is provided below; mesh visualizations were performed using [cardio](https://github.com/sudomakeinstall/cardio).
 
 | Candidates | Initial Model | Registered |
 |:----------:|:-------------:|:----------:|
@@ -106,7 +112,9 @@ For example:
     ~/datasets/candidates \
     ~/datasets/initial-model.obj \
     ~/output \
-    --max-iterations 100
+    --weight-ac 0.1 \
+    --weight-tp 0.1 \
+    --register 1
 ```
 
 The helper script automatically handles volume mounting and ensures files in the output directory are owned by your user. Any additional arguments are passed directly to `dv-sissr`.
