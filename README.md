@@ -72,7 +72,7 @@ dv-sissr \
 
 Additional options are documented in `dv-sissr --help`:
 
-```bash
+```
 Allowed options:
   --help                              Print usage information.
   --candidate-dir arg                 Candidate directory. Should be named 
