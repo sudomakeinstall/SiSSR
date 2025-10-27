@@ -10,12 +10,17 @@ SiSSR is a mesh to point-set registration algorithm which is designed to work wi
 The inputs to the algorithm are (a) a sequence of "candidate" meshes describing the surface of interest at successive time points and (b) an "initial model" in the form of a Loop subdivision surface, approximating the same surface of interest.
 SiSSR registers the initial model (or, more correctly, registers a sequence of initial models equal in length to the number of time points) to the sequence of candidate meshes.
 The candidate meshes are in fact treated as point clouds, so there are no specific requirements on their connectivity.
+
 The template mesh is treated as a Loop subdivision surface and so has several requirements:
 
 1. Must be watertight and manifold. In most cases, this can be achieved using a meshing algorithm such as Poisson Surface Reconstruction on one of the candidate meshes.
 2. The total number of triangles should be relatively small (usually <1000 triangles) in order to fit into memory and keep the registration process relatively fast. This can generally be achieved by decimating the result of your meshing algorithm.
 2. All vertices must have valence >3. This can generally be achieved by iteratively replacing the three triangles surrounding a valence three vertex with a single triangle until all have been removed.
 3. Any edge can be connected to at most one "extraordinary" vertex (where an "ordinary" vertex has valence 6). This can generally be achieved by applying a single Loop subdivision surface iteration to your input mesh.
+
+| Candidates | Initial Model | Registered |
+|:----------:|:-------------:|:----------:|
+| <img src="assets/candidates.gif" width="100%"> | <img src="assets/model.png" width="100%"> | <img src="assets/registered.gif" width="100%"> |
 
 ## Installation
 
