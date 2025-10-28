@@ -80,10 +80,6 @@ COPY --from=builder /usr/local/lib/ /usr/local/lib/
 # Set up library path
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-# Create a non-root user
-RUN useradd -m -u 1001 sissr
-USER sissr
-
 # Set working directory for data
 WORKDIR /data
 

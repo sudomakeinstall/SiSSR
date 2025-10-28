@@ -22,12 +22,21 @@ case "$1" in
     INITIAL_MODEL_DIR="$(dirname "$INITIAL_MODEL")"
     INITIAL_MODEL_FILE="$(basename "$INITIAL_MODEL")"
     mkdir -p "$OUTPUT_DIR"
+
+    # Detect if using podman (rootless by default) or docker
+    if docker --version 2>&1 | grep -q podman; then
+      # Podman: use userns=keep-id for proper uid mapping, skip --user
+      USER_OPTS="--userns=keep-id"
+    else
+      # Docker: use --user flag
+      USER_OPTS="--user $(id -u):$(id -g)"
+    fi
+
     docker run --rm \
-      --userns=keep-id \
-      --user "$(id -u):$(id -g)" \
-      -v "$CANDIDATE_DIR:/candidate:ro,z" \
-      -v "$INITIAL_MODEL_DIR:/initial-model-dir:ro,z" \
-      -v "$OUTPUT_DIR:/output:z" \
+      $USER_OPTS \
+      -v "$CANDIDATE_DIR:/candidate:ro" \
+      -v "$INITIAL_MODEL_DIR:/initial-model-dir:ro" \
+      -v "$OUTPUT_DIR:/output" \
       dv-sissr:latest \
       --candidate-dir /candidate \
       --initial-model "/initial-model-dir/$INITIAL_MODEL_FILE" \
